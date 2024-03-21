@@ -1,10 +1,8 @@
-FROM	
+FROM dpage/pgadmin4:latest
 
-RUN 
-		
-COPY 
+COPY entrypoint.sh /entrypoint.sh
+RUN ls -la /
 
+RUN chmod +x /entrypoint.sh
 
-EXPOSE 3306
-
-ENTRYPOINT []
+ENTRYPOINT ["/entrypoint.sh"]

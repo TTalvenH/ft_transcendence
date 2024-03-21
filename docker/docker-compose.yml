@@ -1,29 +1,53 @@
-version: '1'
+version: '3.8'
 
 volumes:
-  web-data:
-    name: web-data
-    driver: local
-    driver_opts:
-      type: none
-      device: /Users/ttalvenh/data/web-data
-      o: bind
+  data:
 
 networks:
   mynetwork:
-    name: mynetwork
 
+#   nginx:
+#     build:
+#       context: ./nginx
+#       dockerfile: Dockerfile
+#     image: nginx-img:release
+#     container_name: nginx-cont
+#     ports:
+#       - "443:443"
+#     networks:
+#       - mynetwork
+#     restart: always
+#     volumes:
+#       - data:/var/www/html
 services:
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    image: nginx-img:release
-    container_name: nginx-cont
-    ports:
-      - "443:443"
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres-cont
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pw
+      POSTGRES_DB: pg
+    volumes:
+      - data:/var/lib/postgresql/data
     networks:
       - mynetwork
     restart: always
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    build:
+      context: ./postgreSQL
+      dockerfile: Dockerfile
+    container_name: pgadmin-cont
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "user@example.com"
+      PGADMIN_DEFAULT_PASSWORD: "pw"
     volumes:
-      - web-data:/var/www/html
+      - data:/var/lib/pgadmin
+    networks:
+      - mynetwork
+    restart: always
+    ports:
+      - "8080:80"
