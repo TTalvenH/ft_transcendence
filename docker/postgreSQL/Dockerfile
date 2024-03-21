@@ -1,0 +1,10 @@
+FROM	
+
+RUN 
+		
+COPY 
+
+
+EXPOSE 3306
+
+ENTRYPOINT []

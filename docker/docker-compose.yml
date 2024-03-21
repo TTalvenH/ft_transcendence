@@ -1,0 +1,29 @@
+version: '1'
+
+volumes:
+  web-data:
+    name: web-data
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/ttalvenh/data/web-data
+      o: bind
+
+networks:
+  mynetwork:
+    name: mynetwork
+
+services:
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: nginx-img:release
+    container_name: nginx-cont
+    ports:
+      - "443:443"
+    networks:
+      - mynetwork
+    restart: always
+    volumes:
+      - web-data:/var/www/html
