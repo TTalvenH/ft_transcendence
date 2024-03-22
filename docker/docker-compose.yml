@@ -1,35 +1,23 @@
 version: '3.8'
 
 volumes:
-  data:
+  postgres_data:
+  pgadmin_data:
 
 networks:
   mynetwork:
 
-#   nginx:
-#     build:
-#       context: ./nginx
-#       dockerfile: Dockerfile
-#     image: nginx-img:release
-#     container_name: nginx-cont
-#     ports:
-#       - "443:443"
-#     networks:
-#       - mynetwork
-#     restart: always
-#     volumes:
-#       - data:/var/www/html
 services:
 
   postgres:
     image: postgres:latest
     container_name: postgres-cont
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pw
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
       POSTGRES_DB: pg
     volumes:
-      - data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - mynetwork
     restart: always
@@ -37,17 +25,16 @@ services:
       - "5432:5432"
 
   pgadmin:
-    build:
-      context: ./postgreSQL
-      dockerfile: Dockerfile
+    image: dpage/pgadmin4
     container_name: pgadmin-cont
     environment:
-      PGADMIN_DEFAULT_EMAIL: "user@example.com"
-      PGADMIN_DEFAULT_PASSWORD: "pw"
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "root"
+    user: "5050:5050"
     volumes:
-      - data:/var/lib/pgadmin
+      - pgadmin_data:/var/lib/pgadmin
     networks:
       - mynetwork
     restart: always
     ports:
-      - "8080:80"
+      - "5050:80"
