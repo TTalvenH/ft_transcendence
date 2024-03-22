@@ -1,17 +1,10 @@
-version: '1'
+version: '3.8'
 
 volumes:
   web-data:
-    name: web-data
-    driver: local
-    driver_opts:
-      type: none
-      device: /Users/ttalvenh/data/web-data
-      o: bind
 
 networks:
   mynetwork:
-    name: mynetwork
 
 services:
   nginx:
@@ -21,7 +14,7 @@ services:
     image: nginx-img:release
     container_name: nginx-cont
     ports:
-      - "443:443"
+      - "80:80"
     networks:
       - mynetwork
     restart: always
