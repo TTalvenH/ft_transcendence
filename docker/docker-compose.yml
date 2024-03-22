@@ -1,6 +1,7 @@
 version: '3.8'
 
 volumes:
+  web-data:
   postgres_data:
   pgadmin_data:
 
@@ -8,6 +9,17 @@ networks:
   mynetwork:
 
 services:
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    image: nginx-img:release
+    container_name: nginx-cont
+    ports:
+      - "80:80"
+    networks:
+      - mynetwork
+    restart: always
 
   postgres:
     image: postgres:latest
