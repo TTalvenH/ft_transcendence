@@ -1,22 +1,24 @@
 version: '3.8'
 
-volumes:
-  web-data:
-
-networks:
-  mynetwork:
-
 services:
+  django:
+    volumes:
+      - static:/static
+    env_file:
+      - .env
+    build:
+      context: ./django
+    expose:
+      - 8000
   nginx:
+    volumes:
+      - static:/static
     build:
       context: ./nginx
-      dockerfile: Dockerfile
-    image: nginx-img:release
-    container_name: nginx-cont
     ports:
       - "80:80"
-    networks:
-      - mynetwork
-    restart: always
-    volumes:
-      - web-data:/var/www/html
+    depends_on:
+      - django
+
+volumes:
+  static:

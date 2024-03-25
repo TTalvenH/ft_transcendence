@@ -1,9 +1,4 @@
-FROM nginx:latest
+FROM nginx:1.25-alpine
 
-COPY conf/nginx.conf /etc/nginx/nginx.conf
-
-RUN mkdir -p /var/www/html
-
-COPY tools/index.html /var/www/html
-
-EXPOSE 80
+RUN rm /etc/nginx/conf.d/default.conf
+COPY conf/nginx.conf /etc/nginx/conf.d
