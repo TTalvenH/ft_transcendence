@@ -1,1 +1,2 @@
-django
+Django==4.2.3
+gunicorn==20.0.4
