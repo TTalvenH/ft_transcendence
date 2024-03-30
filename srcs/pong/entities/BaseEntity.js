@@ -1,4 +1,4 @@
-export class Entity
+export class BaseEntity
 {
 	constructor()
 	{
@@ -12,7 +12,18 @@ export class Entity
 	
 	getComponent(componentName)
 	{
-		console.log(this.components[componentName]);
 		return this.components[componentName];
 	}
+
+	getMesh()
+	{
+		const meshComponent = this.getComponent("MeshComponent");
+		if (meshComponent)
+		{
+			return meshComponent.mesh;
+		}
+		return null;
+	}
+
+	update(deltaTime){};
 }

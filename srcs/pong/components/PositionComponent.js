@@ -1,12 +1,13 @@
-import { Component } from './BaseComponent'
+import { BaseComponent } from './BaseComponent'
+import * as THREE from 'three'
 
-export class PositionComponent extends Component
+export class PositionComponent extends BaseComponent
 {
 	constructor(x, y, z)
 	{
 		super();
-		this.x = x;
-		this.y = y;
-		this.z = z;
+
+		// Attributes
+		this.position = new THREE.Vector3(0, 0, 0);
 	}
 }
