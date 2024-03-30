@@ -1,7 +1,7 @@
-import { Component } from './BaseComponent'
+import { BaseComponent } from './BaseComponent'
 import * as THREE from 'three'
 
-export class MeshComponent extends Component
+export class MeshComponent extends BaseComponent
 {
 	constructor(geometry, material)
 	{
