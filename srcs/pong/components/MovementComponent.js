@@ -1,13 +1,12 @@
-import { BaseComponent } from './BaseComponent'
+import * as THREE from 'three'
 
-export class MovementComponent extends BaseComponent
+export class MovementComponent
 {
 	constructor()
 	{
-		super();
-
 		// Attributes
-		this.velocity = 0;
+		this.velocity = new THREE.Vector3(0, 0, 0,);
 		this.acceleration = 0;
+		this.friction = 0;
 	}
 }
