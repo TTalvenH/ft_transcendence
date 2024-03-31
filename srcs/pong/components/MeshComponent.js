@@ -1,11 +1,9 @@
-import { BaseComponent } from './BaseComponent'
 import * as THREE from 'three'
 
-export class MeshComponent extends BaseComponent
+export class MeshComponent
 {
 	constructor(geometry, material)
 	{
-		super();
 		this.geometry = geometry;
 		this.material = material;
 		this.mesh = new THREE.Mesh(this.geometry, this.material);
