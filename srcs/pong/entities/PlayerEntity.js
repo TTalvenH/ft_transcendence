@@ -47,6 +47,10 @@ export class PlayerEntity
 		this.positionComponent.position.add(this.movementComponent.velocity.clone().multiplyScalar(deltaTime));
 		this.meshComponent.mesh.position.copy(this.positionComponent.position);
 		console.log(this.positionComponent.position);
-		
 	}
+
+	render(scene)
+	{	
+		scene.add(this.meshComponent.mesh);
+	}	
 }
