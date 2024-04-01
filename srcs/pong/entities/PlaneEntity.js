@@ -6,6 +6,7 @@ export class PlaneEntity
 {
 	constructor(Position, ...args)
 	{
+		// Geometry and material
 		const position = Position;
 		const geometry = new THREE.PlaneGeometry(...args)
 		const material = new THREE.MeshStandardMaterial();
@@ -15,5 +16,15 @@ export class PlaneEntity
 
 		this.meshComponent.material.color.set(0x3F37C9);
 		this.meshComponent.mesh.position.copy(this.positionComponent.position);
+	}
+
+	render(scene)
+	{	
+		scene.add(this.meshComponent.mesh);
+	}	
+
+	update(deltaTime)
+	{
+
 	}
 }
