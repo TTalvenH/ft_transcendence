@@ -10,7 +10,7 @@ export class NeonBoxEntity
 		const position = Position;
 		
 		// Neon Light around the box
-		const lightColor = 0xff0000; // Red color
+		const lightColor = 0xB5179E; // Red color
         const lightIntensity = 100;
 
         this.rectLights = [
@@ -41,7 +41,8 @@ export class NeonBoxEntity
 		this.positionComponent = new PositionComponent(position);
 		this.meshComponent = new MeshComponent(geometry, material);
 		this.meshComponent.mesh.position.copy(this.positionComponent.position);
-		this.meshComponent.material.color.set(0xF72585);
+		this.meshComponent.material.color.set(0xB5179E);
+		this.meshComponent.material.emissive.set(0xB5179E);
 	}
 
 

@@ -19,7 +19,8 @@ export class PlayerEntity
 		this.meshComponent = new MeshComponent(geometry, material);
 
 		// init component data
-		this.meshComponent.material.color.set(0xB5179E);
+		this.meshComponent.material.color.set(0xF72585);
+		this.meshComponent.material.emissive.set(0xF72585);
 		this.movementComponent.acceleration = 0.1;
 		this.movementComponent.friction = 0.1;
 		
@@ -46,7 +47,6 @@ export class PlayerEntity
 
 		this.positionComponent.position.add(this.movementComponent.velocity.clone().multiplyScalar(deltaTime));
 		this.meshComponent.mesh.position.copy(this.positionComponent.position);
-		console.log(this.positionComponent.position);
 	}
 
 	render(scene)
