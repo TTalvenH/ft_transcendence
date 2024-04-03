@@ -14,7 +14,7 @@ export class PlaneEntity
 		this.positionComponent = new PositionComponent(position);
 		this.meshComponent = new MeshComponent(geometry, material);
 
-		this.meshComponent.material.color.set(0x3F37C9);
+		this.meshComponent.material.color.set(0x3A0CA3);
 		this.meshComponent.mesh.position.copy(this.positionComponent.position);
 	}
 
