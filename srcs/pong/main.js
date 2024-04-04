@@ -16,7 +16,7 @@ const	composer = initPostProcessing(scene, camera, renderer);
 
 const controls = new OrbitControls( camera, renderer.domElement );
 
-const	entities = [];
+const	entities = [];	
 
 entities.push(new PlayerEntity());
 entities.push(new PlayerEntity());
