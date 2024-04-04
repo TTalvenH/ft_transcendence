@@ -12,9 +12,9 @@ export function initPostProcessing(scene, camera, renderer)
 	const	renderScene = new RenderPass( scene, camera );
 
 	const	bloomPass = new UnrealBloomPass(new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 );
-	// bloomPass.threshold = params.threshold;
-	// bloomPass.strength = params.strength;
-	// bloomPass.radius = params.radius;
+	bloomPass.threshold = 0;
+	bloomPass.strength = 0.6;
+	bloomPass.radius = -1;
 	const	smaaPass = new SMAAPass( window.innerWidth * renderer.getPixelRatio(), window.innerHeight * renderer.getPixelRatio() );
 	const	outputPass =  new OutputPass();
 	
