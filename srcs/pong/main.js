@@ -19,7 +19,6 @@ const	composer = initPostProcessing(scene, camera, renderer);
 const controls = new OrbitControls( camera, renderer.domElement );
 
 const entities = {};
-
 entities['Player1'] = new PlayerEntity(new THREE.Vector3(-2, 0, 0));
 entities['Player2'] = new PlayerEntity(new THREE.Vector3(2, 0, 0));
 entities['Ball'] = new BallEntity();
