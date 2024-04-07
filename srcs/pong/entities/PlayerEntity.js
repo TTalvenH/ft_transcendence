@@ -6,24 +6,26 @@ import { MovementComponent } from '../components/MovementComponent.js'
 
 export class PlayerEntity
 {
-	constructor()
+	constructor(initPosition)
 	{
-		const position = new THREE.Vector3(0, 0, 0);
+		const position = initPosition;
 		const geometry = new THREE.BoxGeometry(0.1, 0.8, 0.1);
 		const material = new THREE.MeshStandardMaterial();
-
+		
 		// Components
 		this.positionComponent = new PositionComponent(position);
 		this.movementComponent = new MovementComponent();
 		this.controlComponent = new ControlComponent(true);
 		this.meshComponent = new MeshComponent(geometry, material);
+		this.collisionBox = new THREE.Box3();
 
 		// init component data
 		this.meshComponent.material.color.set(0xF72585);
 		this.meshComponent.material.emissive.set(0xF72585);
+		this.meshComponent.mesh.geometry.computeBoundingBox();
+
 		this.movementComponent.acceleration = 0.1;
 		this.movementComponent.friction = 0.1;
-		
 	}	
 
 	update(deltaTime)
@@ -41,12 +43,14 @@ export class PlayerEntity
 
 		// Movement update
 		if (targetVelocity.x !== 0 || targetVelocity.y !== 0 || targetVelocity.z !== 0)
-			this.movementComponent.velocity.lerp(targetVelocity, this.movementComponent.acceleration * deltaTime);
+			this.movementComponent.velocity.lerp( targetVelocity, this.movementComponent.acceleration * deltaTime );
 		else
-			this.movementComponent.velocity.lerp(new THREE.Vector3(0, 0, 0), this.movementComponent.friction * deltaTime);
+			this.movementComponent.velocity.lerp( new THREE.Vector3(0, 0, 0), this.movementComponent.friction * deltaTime );
 
-		this.positionComponent.position.add(this.movementComponent.velocity.clone().multiplyScalar(deltaTime));
-		this.meshComponent.mesh.position.copy(this.positionComponent.position);
+		this.positionComponent.position.add( this.movementComponent.velocity.clone().multiplyScalar(deltaTime) );
+		this.meshComponent.mesh.position.copy( this.positionComponent.position );
+		this.meshComponent.mesh.position.copy( this.positionComponent.position );
+		this.collisionBox.copy( this.meshComponent.mesh.geometry.boundingBox ).applyMatrix4( this.meshComponent.mesh.matrixWorld );
 	}
 
 	render(scene)

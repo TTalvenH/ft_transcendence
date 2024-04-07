@@ -1,7 +1,7 @@
-export function initEventListener(entities)
+export function initEventListener(entities, gameState)
 {
-	const player1 = entities[0];
-	const player2 = entities[1];
+	const player1 = entities["Player1"];
+	const player2 = entities["Player2"];
 	document.addEventListener('keydown', (event) =>
 	{
 		switch (event.key)
@@ -18,8 +18,10 @@ export function initEventListener(entities)
 			case "ArrowDown":
 				player1.controlComponent.keyDown = true;
 				break;
+			case "p":
+				gameState.state = !gameState.state;
+				break;
 		}
-		console.log(event);
 	});
 	
 	document.addEventListener('keyup', (event) =>

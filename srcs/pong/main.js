@@ -8,6 +8,8 @@ import { initRenderer } from './Init/initRenderer.js';
 import { initCamera } from './Init/initCamera.js';
 import { initScene } from './Init/initScene.js';
 import { initPostProcessing } from './Init/initPostProcessing.js';
+import { BallEntity } from './entities/BallEntity.js';
+import { collisionSystem } from './collisionSystem.js';
 
 const	scene = initScene();
 const	camera = initCamera();
@@ -16,23 +18,28 @@ const	composer = initPostProcessing(scene, camera, renderer);
 
 const controls = new OrbitControls( camera, renderer.domElement );
 
-const	entities = [];
+const entities = {};
 
-entities.push(new PlayerEntity());
-entities.push(new PlayerEntity());
-entities.push(new NeonBoxEntity(new THREE.Vector3(0, -3, 0), 15, 0.1, 0.5));
-entities.push(new NeonBoxEntity(new THREE.Vector3(0, 3, 0), 15, 0.1, 0.5));
-entities.push(new PlaneEntity(new THREE.Vector3(0, 0, -0.25), window.innerWidth, window.innerHeight));
+entities['Player1'] = new PlayerEntity(new THREE.Vector3(-2, 0, 0));
+entities['Player2'] = new PlayerEntity(new THREE.Vector3(2, 0, 0));
+entities['Ball'] = new BallEntity();
+entities['NeonBox1'] = new NeonBoxEntity(new THREE.Vector3(0, -3, 0), 15, 0.1, 0.5);
+entities['NeonBox2'] = new NeonBoxEntity(new THREE.Vector3(0, 3, 0), 15, 0.1, 0.5);
+entities['Plane'] = new PlaneEntity(new THREE.Vector3(0, 0, -0.25), window.innerWidth, window.innerHeight);
 
-entities.forEach(entity => {
-	entity.render(scene);
-})
+for (const key in entities) {
+    if (entities.hasOwnProperty(key)) {
+        const entity = entities[key];
+        entity.render(scene);
+    }
+}
 
 camera.position.set(0, 0, 5);
 
 const	clock = new THREE.Clock();
 const	clockDelta = new THREE.Clock();
 const	interval = 1 / 60;
+const	gameState = { state: false };
 
 function gameLoop()
 {
@@ -43,11 +50,19 @@ function gameLoop()
 
 	clock.start();
 	const deltaTime = clockDelta.getDelta() * 100;
+
 	composer.render(scene, camera);
-	entities.forEach(entity => {
-		entity.update(deltaTime);
-	})
+	if (gameState.state === true)
+	{
+		for (const key in entities) {
+			if (entities.hasOwnProperty(key)) {
+				const entity = entities[key];
+				entity.update(deltaTime);
+			}
+		}
+		collisionSystem(entities);
+	}	
 }
 
-initEventListener(entities);
+initEventListener(entities, gameState);
 gameLoop();
