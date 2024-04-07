@@ -43,6 +43,10 @@ export class NeonBoxEntity
 		this.meshComponent.mesh.position.copy(this.positionComponent.position);
 		this.meshComponent.material.color.set(0xB5179E);
 		this.meshComponent.material.emissive.set(0xB5179E);
+		this.meshComponent.mesh.geometry.computeBoundingBox();
+
+		this.collisionBox = new THREE.Box3();
+		this.collisionBox.copy( this.meshComponent.mesh.geometry.boundingBox ).applyMatrix4( this.meshComponent.mesh.matrixWorld );
 	}
 
 
@@ -56,6 +60,6 @@ export class NeonBoxEntity
 
 	update(deltaTime)
 	{
-
+		this.collisionBox.copy( this.meshComponent.mesh.geometry.boundingBox ).applyMatrix4( this.meshComponent.mesh.matrixWorld );
 	}
 }
