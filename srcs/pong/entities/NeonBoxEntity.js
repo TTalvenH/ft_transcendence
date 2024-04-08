@@ -9,7 +9,6 @@ export class NeonBoxEntity
         const lightIntensity = 100;
 
 		this.position = position;
-
 		// Mesh
 		this.geometry = new THREE.BoxGeometry(width, height, depth);
 		this.material = new THREE.MeshStandardMaterial();
@@ -52,6 +51,8 @@ export class NeonBoxEntity
 
 		this.collisionBox = new THREE.Box3();
 		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
+		this.mesh.geometry.computeVertexNormals();
+
 	}
 
 	render(scene)
