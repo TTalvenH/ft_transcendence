@@ -11,7 +11,8 @@ RUN apt-get update && \
     apt-get clean
 
 # Install ModSecurity
-RUN git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity && \
+RUN rm -rf ModSecurity && \
+    git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLabs/ModSecurity && \
     cd ModSecurity && \
     git submodule init && \
     git submodule update && \
@@ -20,8 +21,10 @@ RUN git clone --depth 1 -b v3/master --single-branch https://github.com/SpiderLa
     make && \
     make install
 
+
 # Install Nginx connector for ModSecurity
-RUN git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git && \
+RUN rm -rf ModSecurity-nginx && \
+	git clone --depth 1 https://github.com/SpiderLabs/ModSecurity-nginx.git && \
     wget http://nginx.org/download/nginx-$(nginx -v 2>&1 | cut -d "/" -f2).tar.gz && \
     tar zxvf nginx-$(nginx -v 2>&1 | cut -d "/" -f2).tar.gz && \
     cd nginx-$(nginx -v 2>&1 | cut -d "/" -f2) && \
@@ -37,21 +40,23 @@ RUN apt-get remove --purge -y build-essential libpcre3-dev libssl-dev zlib1g-dev
     rm -rf /var/lib/apt/lists/* /ModSecurity /ModSecurity-nginx nginx-$(nginx -v 2>&1 | cut -d "/" -f2) nginx-$(nginx -v 2>&1 | cut -d "/" -f2).tar.gz
 
 RUN cd /etc/nginx && \
+	rm -rf coreruleset && \
     git clone https://github.com/coreruleset/coreruleset.git && \
     cd coreruleset && \
     cp crs-setup.conf.example crs-setup.conf && \
+	mv rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf && \
 	cat /etc/nginx/coreruleset/rules/*.conf > /etc/nginx/coreruleset/crs-rules.conf
 
 
+COPY modsecurity.conf /etc/nginx/modsec/modsecurity.conf
 
+RUN  mv /etc/nginx/coreruleset/ /usr/local && \
+	mkdir -p /etc/nginxx/modsec && \
+	mv /usr/src/app/ModSecurity/unicode.mapping /etc/nginx/modsec/
 
-# COPY modsecurity.conf /etc/modsecurity.d/modsecurity.conf
-
-# Copy your Nginx configuration files
+# Copy configuration files
 COPY conf/nginx.conf /etc/nginx/nginx.conf
-
-# RUN chmod 644 /etc/modsecurity.d/modsecurity.conf
-
+COPY conf/main.conf /etc/nginx/modsec/main.conf
 
 # Expose the port Nginx is reachable on
 EXPOSE 80
