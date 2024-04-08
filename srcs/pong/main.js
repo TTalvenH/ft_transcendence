@@ -24,6 +24,8 @@ entities['Player2'] = new PlayerEntity(new THREE.Vector3(2, 0, 0));
 entities['Ball'] = new BallEntity();
 entities['NeonBox1'] = new NeonBoxEntity(new THREE.Vector3(0, -3, 0), 15, 0.1, 0.5);
 entities['NeonBox2'] = new NeonBoxEntity(new THREE.Vector3(0, 3, 0), 15, 0.1, 0.5);
+entities['NeonBox3'] = new NeonBoxEntity(new THREE.Vector3(-5, 0, 0), 0.1, 15, 0.5);
+entities['NeonBox4'] = new NeonBoxEntity(new THREE.Vector3(5, 0, 0), 0.1, 15, 0.5);
 entities['Plane'] = new PlaneEntity(new THREE.Vector3(0, 0, -0.25), window.innerWidth, window.innerHeight);
 
 for (const key in entities) {
