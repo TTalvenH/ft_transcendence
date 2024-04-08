@@ -7,16 +7,28 @@ export function initEventListener(entities, gameState)
 		switch (event.key)
 		{
 			case "ArrowRight":
-				player1.controlComponent.keyRight = true;
+				player1.keyRight = true;
 				break;
 			case "ArrowLeft":
-				player1.controlComponent.keyLeft = true;
+				player1.keyLeft = true;
 				break;
 			case "ArrowUp":
-				player1.controlComponent.keyUp = true;
+				player1.keyUp = true;
 				break;
 			case "ArrowDown":
-				player1.controlComponent.keyDown = true;
+				player1.keyDown = true;
+				break;
+			case "d":
+				player2.keyRight = true;
+				break;
+			case "a":
+				player2.keyLeft = true;
+				break;
+			case "w":
+				player2.keyUp = true;
+				break;
+			case "s":
+				player2.keyDown = true;
 				break;
 			case "p":
 				gameState.state = !gameState.state;
@@ -29,54 +41,28 @@ export function initEventListener(entities, gameState)
 		switch (event.key)
 		{
 			case "ArrowRight":
-				player1.controlComponent.keyRight = false;
+				player1.keyRight = false;
 				break;
 			case "ArrowLeft":
-				player1.controlComponent.keyLeft = false;
+				player1.keyLeft = false;
 				break;
 			case "ArrowUp":
-				player1.controlComponent.keyUp = false;
+				player1.keyUp = false;
 				break;
 			case "ArrowDown":
-				player1.controlComponent.keyDown = false;
+				player1.keyDown = false;
 				break;
-		}
-	});
-
-	document.addEventListener('keydown', (event) =>
-	{
-		switch (event.key)
-		{
 			case "d":
-				player2.controlComponent.keyRight = true;
+				player2.keyRight = false;
 				break;
 			case "a":
-				player2.controlComponent.keyLeft = true;
+				player2.keyLeft = false;
 				break;
 			case "w":
-				player2.controlComponent.keyUp = true;
+				player2.keyUp = false;
 				break;
 			case "s":
-				player2.controlComponent.keyDown = true;
-				break;
-		}
-	});
-	
-	document.addEventListener('keyup', (event) =>
-	{
-		switch (event.key)
-		{
-			case "d":
-				player2.controlComponent.keyRight = false;
-				break;
-			case "a":
-				player2.controlComponent.keyLeft = false;
-				break;
-			case "w":
-				player2.controlComponent.keyUp = false;
-				break;
-			case "s":
-				player2.controlComponent.keyDown = false;
+				player2.keyDown = false;
 				break;
 		}
 	});

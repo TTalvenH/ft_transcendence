@@ -1,60 +1,65 @@
 import * as THREE from 'three'
-import { PositionComponent } from '../components/PositionComponent.js';
-import { MeshComponent } from '../components/MeshComponent.js'
-import { ControlComponent } from '../components/ControlComponent.js'
-import { MovementComponent } from '../components/MovementComponent.js'
 
 export class PlayerEntity
 {
 	constructor(initPosition)
 	{
 		const position = initPosition;
-		const geometry = new THREE.BoxGeometry(0.1, 0.8, 0.1);
-		const material = new THREE.MeshStandardMaterial();
 		
-		// Components
-		this.positionComponent = new PositionComponent(position);
-		this.movementComponent = new MovementComponent();
-		this.controlComponent = new ControlComponent(true);
-		this.meshComponent = new MeshComponent(geometry, material);
+		// Movement
+		this.position = initPosition;
+		this.velocity = new THREE.Vector3(0, 0, 0,);
+		this.acceleration = 0;
+		this.friction = 0;
+
+		// Input keys
+		this.keyRight = false;
+		this.keyLeft = false;
+		this.keyUp = false;
+		this.keyDown = false;
+
+		// Mesh
+		this.geometry = new THREE.BoxGeometry(0.1, 0.8, 0.1);
+		this.material = new THREE.MeshStandardMaterial();;
+		this.mesh = new THREE.Mesh(this.geometry, this.material);
 		this.collisionBox = new THREE.Box3();
 
-		// init component data
-		this.meshComponent.material.color.set(0xF72585);
-		this.meshComponent.material.emissive.set(0xF72585);
-		this.meshComponent.mesh.geometry.computeBoundingBox();
+		// init object data
+		this.material.color.set(0xF72585);
+		this.material.emissive.set(0xF72585);
+		this.mesh.geometry.computeBoundingBox();
 
-		this.movementComponent.acceleration = 0.1;
-		this.movementComponent.friction = 0.1;
+		this.acceleration = 0.1;
+		this.friction = 0.1;
 	}	
 
 	update(deltaTime)
 	{
 		// Input
 		let targetVelocity = new THREE.Vector3(0, 0, 0);
-		if (this.controlComponent.keyRight === true)
+		if (this.keyRight === true)
 			targetVelocity.x += 0.1;
-		if (this.controlComponent.keyLeft === true)
+		if (this.keyLeft === true)
 			targetVelocity.x -= 0.1;
-		if (this.controlComponent.keyUp === true)
+		if (this.keyUp === true)
 			targetVelocity.y += 0.1;
-		if (this.controlComponent.keyDown === true)
+		if (this.keyDown === true)
 			targetVelocity.y -= 0.1;
 
 		// Movement update
 		if (targetVelocity.x !== 0 || targetVelocity.y !== 0 || targetVelocity.z !== 0)
-			this.movementComponent.velocity.lerp( targetVelocity, this.movementComponent.acceleration * deltaTime );
+			this.velocity.lerp( targetVelocity, this.acceleration * deltaTime );
 		else
-			this.movementComponent.velocity.lerp( new THREE.Vector3(0, 0, 0), this.movementComponent.friction * deltaTime );
+			this.velocity.lerp( new THREE.Vector3(0, 0, 0), this.friction * deltaTime );
 
-		this.positionComponent.position.add( this.movementComponent.velocity.clone().multiplyScalar(deltaTime) );
-		this.meshComponent.mesh.position.copy( this.positionComponent.position );
-		this.meshComponent.mesh.position.copy( this.positionComponent.position );
-		this.collisionBox.copy( this.meshComponent.mesh.geometry.boundingBox ).applyMatrix4( this.meshComponent.mesh.matrixWorld );
+		this.position.add( this.velocity.clone().multiplyScalar(deltaTime) );
+		this.mesh.position.copy( this.position );
+		this.mesh.position.copy( this.position );
+		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
 	}
 
 	render(scene)
 	{	
-		scene.add(this.meshComponent.mesh);
+		scene.add(this.mesh);
 	}	
 }

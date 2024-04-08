@@ -1,26 +1,24 @@
 import * as THREE from 'three'
-import { PositionComponent } from '../components/PositionComponent.js';
-import { MeshComponent } from '../components/MeshComponent.js'
 
 export class PlaneEntity
 {
-	constructor(Position, ...args)
+	constructor(position, ...args)
 	{
-		// Geometry and material
-		const position = Position;
-		const geometry = new THREE.PlaneGeometry(...args)
-		const material = new THREE.MeshStandardMaterial();
+		// Position
+		this.position = position;
 
-		this.positionComponent = new PositionComponent(position);
-		this.meshComponent = new MeshComponent(geometry, material);
+		// Mesh
+		this.geometry = new THREE.PlaneGeometry(...args);
+		this.material = new THREE.MeshStandardMaterial();
+		this.mesh = new THREE.Mesh(this.geometry, this.material);
 
-		this.meshComponent.material.color.set(0x3A0CA3);
-		this.meshComponent.mesh.position.copy(this.positionComponent.position);
+		this.material.color.set(0x3A0CA3);
+		this.mesh.position.copy(this.position);
 	}
 
 	render(scene)
 	{	
-		scene.add(this.meshComponent.mesh);
+		scene.add(this.mesh);
 	}	
 
 	update(deltaTime)
