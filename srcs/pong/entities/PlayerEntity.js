@@ -31,6 +31,7 @@ export class PlayerEntity
 
 		this.acceleration = 0.1;
 		this.friction = 0.1;
+		this.mesh.position.copy( this.position );
 	}	
 
 	update(deltaTime)
@@ -38,13 +39,13 @@ export class PlayerEntity
 		// Input
 		let targetVelocity = new THREE.Vector3(0, 0, 0);
 		if (this.keyRight === true)
-			targetVelocity.x += 0.1;
+			targetVelocity.x += 0.05;
 		if (this.keyLeft === true)
-			targetVelocity.x -= 0.1;
+			targetVelocity.x -= 0.05;
 		if (this.keyUp === true)
-			targetVelocity.y += 0.1;
+			targetVelocity.y += 0.05;
 		if (this.keyDown === true)
-			targetVelocity.y -= 0.1;
+			targetVelocity.y -= 0.05;
 
 		// Movement update
 		if (targetVelocity.x !== 0 || targetVelocity.y !== 0 || targetVelocity.z !== 0)
@@ -53,7 +54,6 @@ export class PlayerEntity
 			this.velocity.lerp( new THREE.Vector3(0, 0, 0), this.friction * deltaTime );
 
 		this.position.add( this.velocity.clone().multiplyScalar(deltaTime) );
-		this.mesh.position.copy( this.position );
 		this.mesh.position.copy( this.position );
 		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
 	}
