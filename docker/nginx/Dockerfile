@@ -47,16 +47,30 @@ RUN cd /etc/nginx && \
 	mv rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf.example rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf && \
 	cat /etc/nginx/coreruleset/rules/*.conf > /etc/nginx/coreruleset/crs-rules.conf
 
-
 COPY modsecurity.conf /etc/nginx/modsec/modsecurity.conf
 
-RUN  mv /etc/nginx/coreruleset/ /usr/local && \
-	mkdir -p /etc/nginxx/modsec && \
-	mv /usr/src/app/ModSecurity/unicode.mapping /etc/nginx/modsec/
+RUN if [ -d "/usr/local/coreruleset" ]; then rm -rf /usr/local/coreruleset; fi && \
+    mv /etc/nginx/coreruleset /usr/local/ && \
+    mkdir -p /etc/nginx/modsec && \
+    mv /usr/src/app/ModSecurity/unicode.mapping /etc/nginx/modsec/
+
 
 # Copy configuration files
 COPY conf/nginx.conf /etc/nginx/nginx.conf
 COPY conf/main.conf /etc/nginx/modsec/main.conf
+
+# Create directories for ModSecurity
+RUN mkdir -p /tmp/modsecurity/data \
+    && mkdir -p /etc/modsecurity.d \
+    && chown -R www-data:www-data /tmp/modsecurity \
+    && chmod -R 755 /tmp/modsecurity
+
+# Copy ModSecurity configuration files and rules into the container
+COPY modsecurity.conf /etc/nginx/modsec/modsecurity.conf
+
+
+# (Other Dockerfile instructions)
+
 
 # Expose the port Nginx is reachable on
 EXPOSE 80
