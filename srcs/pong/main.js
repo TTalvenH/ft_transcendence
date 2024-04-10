@@ -19,8 +19,8 @@ const	composer = initPostProcessing(scene, camera, renderer);
 const controls = new OrbitControls( camera, renderer.domElement );
 
 const entities = {};
-entities['Player1'] = new PlayerEntity(new THREE.Vector3(-2, 0, 0));
-entities['Player2'] = new PlayerEntity(new THREE.Vector3(2, 0, 0));
+entities['Player1'] = new PlayerEntity(new THREE.Vector3(-4, 0, 0));
+entities['Player2'] = new PlayerEntity(new THREE.Vector3(4, 0, 0));
 entities['NeonBox1'] = new NeonBoxEntity(new THREE.Vector3(0, -3, 0), 10, 0.1, 0.5);
 entities['NeonBox2'] = new NeonBoxEntity(new THREE.Vector3(0, 3, 0), 10, 0.1, 0.5);
 entities['NeonBox3'] = new NeonBoxEntity(new THREE.Vector3(-5, 0, 0), 0.1, 6, 0.5);
@@ -55,7 +55,7 @@ function gameLoop()
 	composer.render(scene, camera);
 	if (gameState.state === true)
 	{
-		collisionSystem(entities);
+		collisionSystem(entities, deltaTime);
 		for (const key in entities) {
 			if (entities.hasOwnProperty(key)) {
 				const entity = entities[key];

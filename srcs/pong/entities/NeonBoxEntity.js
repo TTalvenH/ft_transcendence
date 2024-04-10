@@ -13,7 +13,6 @@ export class NeonBoxEntity
 		this.geometry = new THREE.BoxGeometry(width, height, depth);
 		this.material = new THREE.MeshStandardMaterial();
 		this.mesh = new THREE.Mesh(this.geometry, this.material);
-		this.collisionSphere = new THREE.Sphere();
 
         this.rectLights = [
             new THREE.RectAreaLight(lightColor, lightIntensity, width, height), // Front
@@ -48,21 +47,24 @@ export class NeonBoxEntity
 		this.material.color.set(0xB5179E);
 		this.material.emissive.set(0xB5179E);
 		this.mesh.geometry.computeBoundingBox();
-
+		
+		this.mesh.geometry.computeVertexNormals();
 		this.collisionBox = new THREE.Box3();
 		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
-		this.mesh.geometry.computeVertexNormals();
-
+		this.boxHelper = new THREE.Box3Helper(this.collisionBox, 0xffff00);
+		this.boxHelper.update = true;
+		
 	}
-
+	
 	render(scene)
 	{
 		scene.add(this.mesh);
 		this.rectLights.forEach(light => {
 			scene.add(light);
 		})
+		scene.add(this.boxHelper);
 	}
-
+	
 	update(deltaTime)
 	{
 		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );

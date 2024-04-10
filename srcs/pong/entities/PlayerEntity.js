@@ -11,6 +11,7 @@ export class PlayerEntity
 		this.velocity = new THREE.Vector3(0, 0, 0,);
 		this.acceleration = 0;
 		this.friction = 0;
+		this.speed = 0.03
 
 		// Input keys
 		this.keyRight = false;
@@ -20,6 +21,7 @@ export class PlayerEntity
 
 		// Mesh
 		this.geometry = new THREE.BoxGeometry(0.1, 0.8, 0.1);
+		this.height = 0.8;
 		this.material = new THREE.MeshStandardMaterial();;
 		this.mesh = new THREE.Mesh(this.geometry, this.material);
 		this.collisionBox = new THREE.Box3();
@@ -32,6 +34,7 @@ export class PlayerEntity
 		this.acceleration = 0.1;
 		this.friction = 0.1;
 		this.mesh.position.copy( this.position );
+		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
 	}	
 
 	update(deltaTime)
@@ -39,13 +42,13 @@ export class PlayerEntity
 		// Input
 		let targetVelocity = new THREE.Vector3(0, 0, 0);
 		if (this.keyRight === true)
-			targetVelocity.x += 0.05;
+			targetVelocity.x += this.speed;
 		if (this.keyLeft === true)
-			targetVelocity.x -= 0.05;
+			targetVelocity.x -= this.speed;
 		if (this.keyUp === true)
-			targetVelocity.y += 0.05;
+			targetVelocity.y += this.speed;
 		if (this.keyDown === true)
-			targetVelocity.y -= 0.05;
+			targetVelocity.y -= this.speed;
 
 		// Movement update
 		if (targetVelocity.x !== 0 || targetVelocity.y !== 0 || targetVelocity.z !== 0)
