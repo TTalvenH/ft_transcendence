@@ -7,8 +7,19 @@ export class BallEntity
 		// Position
 		this.position = new THREE.Vector3(0, 0, 0);;
 		this.radius = 0.05;
+
+		// Generate random angles for x and y components within the specified range
+		const minRandomAngle = -Math.PI / 4; // -45 degrees
+		const maxRandomAngle = Math.PI / 4; // 45 degrees
+		const randomAngleX = Math.random() * (maxRandomAngle - minRandomAngle) + minRandomAngle;
+		const randomAngleY = Math.random() * (maxRandomAngle - minRandomAngle) + minRandomAngle;
+		const maxXComponent = Math.cos(randomAngleX);
+		const randomXComponent = Math.random() < 0.5 ? maxXComponent : -maxXComponent;
+
 		// Movement
 		this.velocity = new THREE.Vector3(0, 0, 0,);
+		this.direction = new THREE.Vector3(randomXComponent, Math.sin(randomAngleY), 0);;
+		this.speed = 0.03;
 		this.acceleration = 0;
 		this.friction = 0;
 		
@@ -24,8 +35,6 @@ export class BallEntity
 		this.material.color.set(0xF72585);
 		this.material.emissive.set(0xF72585);
 		this.mesh.geometry.computeBoundingSphere();
-		this.velocity.x = 0.02;
-		this.velocity.y = 0.00;
 		this.acceleration = 0.1;
 		this.friction = 0.1;
 	}
@@ -36,7 +45,8 @@ export class BallEntity
 		// 	this.velocity.lerp(targetVelocity, this.acceleration * deltaTime);
 		// else
 		// 	this.velocity.lerp(new THREE.Vector3(0, 0, 0), this.friction * deltaTime);
-
+		console.log(this.speed);
+		this.velocity = this.direction.clone().multiplyScalar(this.speed);
 		this.position.add(this.velocity.clone().multiplyScalar(deltaTime));
 		this.pointLight.position.copy(this.position);
 		this.mesh.position.copy(this.position);
