@@ -1,9 +1,10 @@
 version: '3.8'
 
 volumes:
-  web-data:
   postgres_data:
   pgadmin_data:
+  ssl-certs:
+  vault-agent:
 
 networks:
   mynetwork:
@@ -13,40 +14,66 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile
-    image: nginx-img:release
     container_name: nginx-cont
     ports:
       - "80:80"
     networks:
       - mynetwork
+    volumes:
+      - ssl-certs:/etc/vault/certs
     restart: always
 
-  postgres:
-    image: postgres:latest
-    container_name: postgres-cont
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: pg
+  vault:
+    build:
+      context: ./vault
+    container_name: vault-cont
+    ports:
+      - "8200:8200"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - vault-agent:/etc/vault
     networks:
       - mynetwork
     restart: always
-    ports:
-      - "5432:5432"
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin-cont
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
-      PGADMIN_DEFAULT_PASSWORD: "root"
-    user: "5050:5050"
+  
+  vault-agent:
+    build:
+      context: ./vault-agent
+      dockerfile: Dockerfile  
+    container_name: vault-agent-cont
+    depends_on:
+      - vault
     volumes:
-      - pgadmin_data:/var/lib/pgadmin
+      - vault-agent:/etc/vault
     networks:
       - mynetwork
     restart: always
-    ports:
-      - "5050:80"
+
+  # postgres:
+  #   image: postgres:latest
+  #   container_name: postgres-cont
+  #   environment:
+  #     POSTGRES_USER: root
+  #     POSTGRES_PASSWORD: root
+  #     POSTGRES_DB: pg
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - mynetwork
+  #   restart: always
+  #   ports:
+  #     - "5432:5432"
+
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   container_name: pgadmin-cont
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+  #     PGADMIN_DEFAULT_PASSWORD: "root"
+  #   user: "5050:5050"
+  #   volumes:
+  #     - pgadmin_data:/var/lib/pgadmin
+  #   networks:
+  #     - mynetwork
+  #   restart: always
+  #   ports:
+  #     - "5050:80"

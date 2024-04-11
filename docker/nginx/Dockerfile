@@ -54,10 +54,11 @@ RUN if [ -d "/usr/local/coreruleset" ]; then rm -rf /usr/local/coreruleset; fi &
     mkdir -p /etc/nginx/modsec && \
     mv /usr/src/app/ModSecurity/unicode.mapping /etc/nginx/modsec/
 
-
 # Copy configuration files
 COPY conf/nginx.conf /etc/nginx/nginx.conf
 COPY conf/main.conf /etc/nginx/modsec/main.conf
+# MOVE TO CONF DIR
+COPY modsecurity.conf /etc/nginx/modsec/modsecurity.conf
 
 # Create directories for ModSecurity
 RUN mkdir -p /tmp/modsecurity/data \
@@ -65,15 +66,6 @@ RUN mkdir -p /tmp/modsecurity/data \
     && chown -R www-data:www-data /tmp/modsecurity \
     && chmod -R 755 /tmp/modsecurity
 
-# Copy ModSecurity configuration files and rules into the container
-COPY modsecurity.conf /etc/nginx/modsec/modsecurity.conf
-
-
-# (Other Dockerfile instructions)
-
-
-# Expose the port Nginx is reachable on
 EXPOSE 80
 
-# Start Nginx when the container launches
 CMD ["nginx", "-g", "daemon off;"]
