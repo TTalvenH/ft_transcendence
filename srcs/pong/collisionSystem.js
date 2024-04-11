@@ -1,12 +1,26 @@
 import * as THREE from 'three';
 
-function handleWallCollision(ball, wall)
+
+function handleDamage(wall, players)
+{
+    if (wall.isGoal === false)
+        return;
+
+    const player1DistanceFromWall = players[0].position.clone().sub(wall.position).length();
+    const player2DistanceFromWall = players[1].position.clone().sub(wall.position).length();
+    if (player1DistanceFromWall < player2DistanceFromWall)
+        players[0].hitPoints --;
+    else
+        players[1].hitPoints --;
+}
+
+function handleWallCollision(ball, wall, players)
 {
     const raycaster = new THREE.Raycaster(ball.position, ball.direction);
     const intersects = raycaster.intersectObject(wall.mesh);
     if (intersects.length > 0)
     {
-		console.log("test");
+        handleDamage(wall, players);
         const normal = intersects[0].normal.clone();
         const velocityPerpendicular = ball.direction.dot(normal);
 		ball.direction.sub(normal.clone().multiplyScalar(2 * velocityPerpendicular));
@@ -34,10 +48,10 @@ export function collisionSystem(entities, deltaTime)
     const players = [entities["Player1"], entities["Player2"]];
     
 	// CCD steps
-    const numSteps = 10;
-    const stepSize = deltaTime / numSteps;
+    const numberOfSteps = 10;
+    const stepSize = deltaTime / numberOfSteps;
 
-    for (let step = 0; step < numSteps; step++)
+    for (let step = 0; step < numberOfSteps; step++)
 	{
         const nextPosition = ball.position.clone().add(ball.velocity.clone().multiplyScalar((step + 1) * stepSize));
 
@@ -46,7 +60,7 @@ export function collisionSystem(entities, deltaTime)
         {
             if (wall.collisionBox.intersectsSphere(new THREE.Sphere(nextPosition, ball.radius)))
             {
-                handleWallCollision(ball, wall);
+                handleWallCollision(ball, wall, players);
             }
         }
         // Check for collisions with players
