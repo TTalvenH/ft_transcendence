@@ -2,13 +2,14 @@ import * as THREE from 'three'
 
 export class NeonBoxEntity
 {
-	constructor(position, width, height, depth)
+	constructor(position, width, height, depth, isGoal)
 	{
 		// Neon Light around the box
-		const lightColor = 0xB5179E; // Red color
-        const lightIntensity = 100;
+		const lightColor = 0xffffff; // Red color
+        const lightIntensity = 1;
 
 		this.position = position;
+		this.isGoal = isGoal;
 		// Mesh
 		this.geometry = new THREE.BoxGeometry(width, height, depth);
 		this.material = new THREE.MeshStandardMaterial();
@@ -47,13 +48,11 @@ export class NeonBoxEntity
 		this.material.color.set(0xB5179E);
 		this.material.emissive.set(0xB5179E);
 		this.mesh.geometry.computeBoundingBox();
-		
-		this.mesh.geometry.computeVertexNormals();
+
 		this.collisionBox = new THREE.Box3();
-		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
-		this.boxHelper = new THREE.Box3Helper(this.collisionBox, 0xffff00);
-		this.boxHelper.update = true;
-		
+		this.collisionBox.copy( this.mesh.geometry.boundingBox );
+		this.mesh.updateMatrixWorld ( true );
+		this.collisionBox.applyMatrix4( this.mesh.matrixWorld)
 	}
 	
 	render(scene)
@@ -62,11 +61,9 @@ export class NeonBoxEntity
 		this.rectLights.forEach(light => {
 			scene.add(light);
 		})
-		scene.add(this.boxHelper);
 	}
 	
 	update(deltaTime)
 	{
-		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
 	}
 }

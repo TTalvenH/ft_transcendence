@@ -45,7 +45,6 @@ export class BallEntity
 		// 	this.velocity.lerp(targetVelocity, this.acceleration * deltaTime);
 		// else
 		// 	this.velocity.lerp(new THREE.Vector3(0, 0, 0), this.friction * deltaTime);
-		console.log(this.speed);
 		this.velocity = this.direction.clone().multiplyScalar(this.speed);
 		this.position.add(this.velocity.clone().multiplyScalar(deltaTime));
 		this.pointLight.position.copy(this.position);

@@ -6,8 +6,10 @@ export class PlayerEntity
 	{
 		const position = initPosition;
 		
-		// Movement
+		this.hitPoints = 5;
 		this.position = initPosition;
+
+		// Movement
 		this.velocity = new THREE.Vector3(0, 0, 0,);
 		this.acceleration = 0;
 		this.friction = 0;
@@ -55,7 +57,6 @@ export class PlayerEntity
 			this.velocity.lerp( targetVelocity, this.acceleration * deltaTime );
 		else
 			this.velocity.lerp( new THREE.Vector3(0, 0, 0), this.friction * deltaTime );
-
 		this.position.add( this.velocity.clone().multiplyScalar(deltaTime) );
 		this.mesh.position.copy( this.position );
 		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );

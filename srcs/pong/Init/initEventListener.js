@@ -1,4 +1,6 @@
-export function initEventListener(entities, gameState)
+import { GameStates } from "../pong.js";
+
+export function initEventListener(entities, gameStateWrapper)
 {
 	const player1 = entities["Player1"];
 	const player2 = entities["Player2"];
@@ -31,7 +33,14 @@ export function initEventListener(entities, gameState)
 				player2.keyDown = true;
 				break;
 			case "p":
-				gameState.state = !gameState.state;
+				if (gameStateWrapper.gameState === GameStates.PAUSED)
+				{
+					gameStateWrapper.gameState = GameStates.PLAYING;
+				}
+				else if (gameStateWrapper.gameState === GameStates.PLAYING)
+				{
+					gameStateWrapper.gameState = GameStates.PAUSED;
+				}
 				break;
 		}
 	});
