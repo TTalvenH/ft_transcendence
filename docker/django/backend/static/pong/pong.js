@@ -65,6 +65,7 @@ export class Pong
 
 	gameLoop()
 	{
+		console.log("pong");
 		requestAnimationFrame(() => this.gameLoop());
 		if (this.clock.getElapsedTime() < this.interval) 
 			return;

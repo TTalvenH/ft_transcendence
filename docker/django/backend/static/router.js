@@ -1,4 +1,4 @@
-import {Pong} from '/Users/ekoljone/Desktop/ft_transcendence/srcs/pong'
+import {Pong} from './pong/pong.js'
 
 const route = (event) => {
 	event = event || window.event;
@@ -6,6 +6,10 @@ const route = (event) => {
 	window.history.pushState({}, "", event.target.href);
 	handleLocation();
 	console.log("testi");
+	console.log("123");
+	// const pong = new Pong();
+
+	// pong.gameLoop();
 };
 
 const routes = {
@@ -21,7 +25,18 @@ const handleLocation = async () => {
 	document.getElementById("main-page").innerHTML = html;
 };
 
+console.log('jjjjjjj');
+
 window.onpopstate = handleLocation;
 window.route = route;
 
+console.log('WWWWWWWW');
+
 handleLocation();
+
+console.log('aaaaSSSSAA');
+
+const pong = new Pong();
+
+pong.gameLoop();
+
