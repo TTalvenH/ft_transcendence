@@ -10,18 +10,28 @@ networks:
   mynetwork:
 
 services:
-  nginx:
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
-    container_name: nginx-cont
-    ports:
-      - "80:80"
-    networks:
-      - mynetwork
+#   nginx:
+#     build:
+#       context: ./nginx
+#       dockerfile: Dockerfile
+#     container_name: nginx-cont
+#     ports:
+#       - "80:80"
+#     networks:
+#       - mynetwork
+#     volumes:
+#       - ssl-certs:/etc/vault/certs
+#     restart: always
+
+  web:
+    build: ./myproject
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - ssl-certs:/etc/vault/certs
-    restart: always
+      - ./myproject:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - vault
 
   vault:
     build:
@@ -30,7 +40,7 @@ services:
     ports:
       - "8200:8200"
     volumes:
-      - vault-agent:/etc/vault
+      - vault-agent:/etc/vault/volume
     networks:
       - mynetwork
     restart: always
@@ -43,7 +53,7 @@ services:
     depends_on:
       - vault
     volumes:
-      - vault-agent:/etc/vault
+      - vault-agent:/etc/vault/volume
     networks:
       - mynetwork
     restart: always

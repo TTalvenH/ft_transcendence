@@ -9,7 +9,9 @@ WORKDIR /etc/vault
 ENV VAULT_ADDR=http://vault-cont:8200
 
 # Copy your Vault Agent configuration file into the container
+RUN mkdir /etc/vault/agent/
 COPY config.hcl /etc/vault/agent/config.hcl
+RUN chmod 777 /etc/vault/agent/config.hcl
 COPY docker-entry.sh /usr/local/bin/docker-entry.sh
 RUN chmod +x /usr/local/bin/docker-entry.sh
 

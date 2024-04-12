@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Start Vault in the background
 vault server -dev -dev-root-token-id=myroot -dev-listen-address=0.0.0.0:8200 &
@@ -23,16 +23,10 @@ vault write auth/approle/role/my-role \
     token_max_ttl=4h
 
 # Retrieve and save the Role ID
-vault read -field=role_id auth/approle/role/my-role/role-id > /etc/vault/role_id
+vault read -field=role_id auth/approle/role/my-role/role-id > /etc/vault/volume/role_id
 
 # Retrieve and save the Secret ID
-vault write -f -field=secret_id auth/approle/role/my-role/secret-id > /etc/vault/secret_id
-
-# Print Role ID and Secret ID (Optional, for verification purposes)
-echo "Role ID:"
-cat /etc/vault/role_id
-echo "Secret ID:"
-cat /etc/vault/secret_id
+vault write -f -field=secret_id auth/approle/role/my-role/secret-id > /etc/vault/volume/secret_id
 
 # Keep the container running
 wait

@@ -1,8 +1,8 @@
 auto_auth {
   method "approle" {
     config = {
-      role_id_file_path   = "/etc/vault/role_id"
-      secret_id_file_path = "/etc/vault/secret_id"
+      role_id_file_path   = "/etc/vault/volume/role_id"
+      secret_id_file_path = "/etc/vault/volume/secret_id"
     }
   }
 
