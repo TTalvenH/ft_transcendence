@@ -22,3 +22,8 @@ services:
 
 volumes:
   static:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/ekoljone/Desktop/ft_transcendence/docker/django/backend/static
+      o: bind
