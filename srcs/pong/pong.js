@@ -29,8 +29,8 @@ export class Pong
 		this.controls = new OrbitControls( this.camera, this.renderer.domElement );
 		
 		this.entities = {};
-		this.entities['Player1'] = new PlayerEntity(new THREE.Vector3(-4, 0, 0));
-		this.entities['Player2'] = new PlayerEntity(new THREE.Vector3(4, 0, 0));
+		this.entities['Player1'] = new PlayerEntity(new THREE.Vector3(4, 0, 0));
+		this.entities['Player2'] = new PlayerEntity(new THREE.Vector3(-4, 0, 0));
 		this.entities['NeonBox1'] = new NeonBoxEntity(new THREE.Vector3(0, -3, 0), 10, 0.1, 0.5, false);
 		this.entities['NeonBox2'] = new NeonBoxEntity(new THREE.Vector3(0, 3, 0), 10, 0.1, 0.5, false);
 		this.entities['NeonBox3'] = new NeonBoxEntity(new THREE.Vector3(-5, 0, 0), 0.1, 6, 0.5, true);
@@ -51,7 +51,7 @@ export class Pong
 		
 		this.clock = new THREE.Clock();
 		this.clockDelta = new THREE.Clock();
-		this.interval = 1 / 60;
+		this.interval = 1 / 300;
 
 		initEventListener(this.entities, this.gameStateWrapper);
 	}
@@ -63,12 +63,27 @@ export class Pong
 		})
 	}
 
+	checkGameOver()
+	{
+		const player1 = this.entities["Player1"];
+		const player2 = this.entities["Player2"];
+		const winner = {};
+
+		if (player1.hitPoints <= 0)
+			console.log("Player2 WINS!");
+		else if (player2.hitPoints <= 0)
+			console.log("Player1 WINS!");
+		else
+			return;
+		this.gameStateWrapper.gameState = GameStates.GAMEOVER;
+	}
+
 	gameLoop()
 	{
 		requestAnimationFrame(() => this.gameLoop());
 		if (this.clock.getElapsedTime() < this.interval) 
 			return;
-	
+
 		this.clock.start();
 		const deltaTime = this.clockDelta.getDelta() * 100;
 		
@@ -80,6 +95,7 @@ export class Pong
 				return;
 			case GameStates.PLAYING:
 				collisionSystem(this.entities, deltaTime);
+				this.checkGameOver()
 				for (const key in this.entities)
 				{
 					if (this.entities.hasOwnProperty(key))

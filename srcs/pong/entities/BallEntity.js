@@ -6,7 +6,7 @@ export class BallEntity
 	{
 		// Position
 		this.position = new THREE.Vector3(0, 0, 0);;
-		this.radius = 0.05;
+		this.radius = 0.08;
 
 		// Generate random angles for x and y components within the specified range
 		const minRandomAngle = -Math.PI / 4; // -45 degrees
@@ -19,7 +19,7 @@ export class BallEntity
 		// Movement
 		this.velocity = new THREE.Vector3(0, 0, 0,);
 		this.direction = new THREE.Vector3(randomXComponent, Math.sin(randomAngleY), 0);;
-		this.speed = 0.03;
+		this.speed = 0.05;
 		this.acceleration = 0;
 		this.friction = 0;
 		

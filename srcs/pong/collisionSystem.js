@@ -48,7 +48,7 @@ export function collisionSystem(entities, deltaTime)
     const players = [entities["Player1"], entities["Player2"]];
     
 	// CCD steps
-    const numberOfSteps = 10;
+    const numberOfSteps = 20;
     const stepSize = deltaTime / numberOfSteps;
 
     for (let step = 0; step < numberOfSteps; step++)
