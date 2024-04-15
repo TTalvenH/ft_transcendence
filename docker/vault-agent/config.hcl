@@ -12,3 +12,12 @@ auto_auth {
     }
   }
 }
+
+cache {
+    use_auto_auth_token = true
+}
+
+listener "tcp" {
+    address = "0.0.0.0:8200"
+    tls_disable = true
+}
