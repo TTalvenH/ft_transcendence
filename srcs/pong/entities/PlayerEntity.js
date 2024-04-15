@@ -60,6 +60,7 @@ export class PlayerEntity
 		this.position.add( this.velocity.clone().multiplyScalar(deltaTime) );
 		this.mesh.position.copy( this.position );
 		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
+
 	}
 
 	render(scene)
