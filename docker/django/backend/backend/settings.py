@@ -28,6 +28,7 @@ SECRET_KEY = 'django-insecure-1jiq0+@)-o_pq%o77)2=f0xlm30u9#t%k06yuc96x!08jnk&yl
 DEBUG = True
 # DEBUG =  os.getenv('DEBUG')
 
+
 ALLOWED_HOSTS = ['*']
 
 
@@ -124,7 +125,7 @@ USE_TZ = True
 # STATIC_ROOT = '/static/'
 # STATIC_URL = '/static/'
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 MEDIA_URL = 'media/'
 
 STATIC_ROOT = BASE_DIR / 'assets'

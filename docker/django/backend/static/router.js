@@ -1,4 +1,5 @@
-// import {Pong} from './pong/pong.js'
+import {Pong} from './pong/pong.js'
+
 
 const route = (event) => {
 	event = event || window.event;
@@ -24,7 +25,10 @@ window.onpopstate = handleLocation;
 window.route = route;
 handleLocation();
 
-// const pong = new Pong();
+const startGame = () => {
+    // Start your Pong game
+    const pongGame = new Pong(); // Assuming Pong() is the constructor for your Pong game
+    pongGame.gameLoop(); // Call the start method of your Pong game
+};
 
-// pong.gameLoop();
-
+document.getElementById('startButton').addEventListener('click', startGame);
