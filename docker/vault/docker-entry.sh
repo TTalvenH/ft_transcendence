@@ -28,7 +28,5 @@ vault read -field=role_id auth/approle/role/my-role/role-id > /etc/vault/volume/
 # Retrieve and save the Secret ID
 vault write -f -field=secret_id auth/approle/role/my-role/secret-id > /etc/vault/volume/secret_id
 
-vault secrets enable -path=/etc/vault/secret kv-v2
-
 # Keep the container running
 wait

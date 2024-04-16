@@ -2,7 +2,6 @@
 import hvac
 from django.http import HttpResponse
 
-
 def get_vault_client():
     """Create and return a Vault client using the HVAC library."""
     client = hvac.Client(url='http://vault-cont:8200')
@@ -16,11 +15,10 @@ def fetch_secret(secret_path):
 
 def write_secret(request):
 	"""Write a secret to Vault at the given path."""
-	print('hiyyyy')
 	secret_data = {'password': 'testpass123'}
 	client = get_vault_client()
 	client.secrets.kv.v2.create_or_update_secret(
-		path='/etc/vault/secret/',
+		path='password',
 		secret=secret_data,
     )
 	return HttpResponse("Secret written successfully.")

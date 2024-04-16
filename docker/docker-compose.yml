@@ -10,18 +10,17 @@ networks:
   mynetwork:
 
 services:
-#   nginx:
-#     build:
-#       context: ./nginx
-#       dockerfile: Dockerfile
-#     container_name: nginx-cont
-#     ports:
-#       - "80:80"
-#     networks:
-#       - mynetwork
-#     volumes:
-#       - ssl-certs:/etc/vault/certs
-#     restart: always
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx-cont
+    ports:
+      - "80:80"
+      - "433:433"
+    networks:
+      - mynetwork
+    restart: always
 
   web:
     build: ./myproject
@@ -46,19 +45,7 @@ services:
     networks:
       - mynetwork
     restart: always
-  
-  vault-agent:
-    build:
-      context: ./vault-agent
-      dockerfile: Dockerfile  
-    container_name: vault-agent-cont
-    depends_on:
-      - vault
-    volumes:
-      - vault-agent:/etc/vault/volume
-    networks:
-      - mynetwork
-    restart: always
+
 
   # postgres:
   #   image: postgres:latest
