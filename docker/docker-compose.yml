@@ -3,8 +3,8 @@ version: '3.8'
 volumes:
   postgres_data:
   pgadmin_data:
-  ssl-certs:
-  vault-agent:
+  certs:
+  vault-id:
 
 networks:
   mynetwork:
@@ -17,9 +17,11 @@ services:
     container_name: nginx-cont
     ports:
       - "80:80"
-      - "433:433"
+      - "443:443"
     networks:
       - mynetwork
+    volumes:
+      - vault-id:/etc/vault/vault-id
     restart: always
 
   web:
@@ -41,10 +43,12 @@ services:
     ports:
       - "8200:8200"
     volumes:
-      - vault-agent:/etc/vault/volume
+      - vault-id:/etc/vault/vault-id
     networks:
       - mynetwork
     restart: always
+
+
 
 
   # postgres:
