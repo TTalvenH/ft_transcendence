@@ -10,6 +10,7 @@ import { initScene } from './Init/initScene.js';
 import { initPostProcessing } from './Init/initPostProcessing.js';
 import { BallEntity } from './entities/BallEntity.js';
 import { collisionSystem } from './collisionSystem.js';
+import { HealthBarEntity } from './entities/HealthBarEntity.js';
 
 export const	GameStates = Object.freeze({
 	PAUSED: 0,
@@ -30,7 +31,9 @@ export class Pong
 		
 		this.entities = {};
 		this.entities['Player1'] = new PlayerEntity(new THREE.Vector3(4, 0, 0));
+		this.entities['Player1Health'] = new HealthBarEntity(new THREE.Vector3(5, 5.5, 0), this.entities["Player1"]);
 		this.entities['Player2'] = new PlayerEntity(new THREE.Vector3(-4, 0, 0));
+		this.entities['Player2Health'] = new HealthBarEntity(new THREE.Vector3(-5, 5.5, 0), this.entities["Player2"]);
 		this.entities['NeonBox1'] = new NeonBoxEntity(new THREE.Vector3(0, -3, 0), 10, 0.1, 0.5, false);
 		this.entities['NeonBox2'] = new NeonBoxEntity(new THREE.Vector3(0, 3, 0), 10, 0.1, 0.5, false);
 		this.entities['NeonBox3'] = new NeonBoxEntity(new THREE.Vector3(-5, 0, 0), 0.1, 6, 0.5, true);
@@ -47,7 +50,7 @@ export class Pong
 			}
 		}
 		
-		this.camera.position.set(0, 0, 5);
+
 		
 		this.clock = new THREE.Clock();
 		this.clockDelta = new THREE.Clock();

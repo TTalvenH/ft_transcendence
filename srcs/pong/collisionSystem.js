@@ -29,15 +29,21 @@ function handleWallCollision(ball, wall, players)
 
 function handlePlayerCollision(ball, player)
 {
-	const raycaster = new THREE.Raycaster(ball.position, ball.direction);
+    const raycaster = new THREE.Raycaster(ball.position, ball.direction);
     const intersects = raycaster.intersectObject(player.mesh);
-    let sign = 0;
+    
     if (intersects.length > 0)
     {
-		const normal = intersects[0].normal.clone();
-        const velocityPerpendicular = ball.direction.dot(normal);
-		ball.direction.sub(normal.clone().multiplyScalar(2 * velocityPerpendicular));
-		ball.speed += 0.005
+        const normal = intersects[0].normal.clone();
+        let relativeCollisionPoint = intersects[0].point.y - player.position.y;
+        relativeCollisionPoint = 2 * (relativeCollisionPoint / player.height);
+        const angleInDegrees = relativeCollisionPoint * 45;
+        const angleInRadians = THREE.MathUtils.degToRad(angleInDegrees);
+        if (normal.x > 0)
+            ball.direction = new THREE.Vector3(Math.cos(angleInRadians), Math.sin(angleInRadians), 0);
+        else
+            ball.direction = new THREE.Vector3(Math.cos(angleInRadians) * -1, Math.sin(angleInRadians), 0);
+		ball.speed += 0.003
     }
 }
 

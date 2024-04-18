@@ -6,14 +6,13 @@ export class PlayerEntity
 	{
 		const position = initPosition;
 		
-		this.hitPoints = 5;
+		this.hitPoints = 10;
 		this.position = initPosition;
-
 		// Movement
 		this.velocity = new THREE.Vector3(0, 0, 0,);
 		this.acceleration = 0;
 		this.friction = 0;
-		this.speed = 0.03
+		this.speed = 0.05
 
 		// Input keys
 		this.keyRight = false;
@@ -24,7 +23,7 @@ export class PlayerEntity
 		// Mesh
 		this.geometry = new THREE.BoxGeometry(0.1, 0.8, 0.1);
 		this.height = 0.8;
-		this.material = new THREE.MeshStandardMaterial();;
+		this.material = new THREE.MeshStandardMaterial();
 		this.mesh = new THREE.Mesh(this.geometry, this.material);
 		this.collisionBox = new THREE.Box3();
 
@@ -43,6 +42,7 @@ export class PlayerEntity
 	{
 		// Input
 		let targetVelocity = new THREE.Vector3(0, 0, 0);
+
 		if (this.keyRight === true)
 			targetVelocity.x += this.speed;
 		if (this.keyLeft === true)

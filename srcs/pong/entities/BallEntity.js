@@ -19,7 +19,7 @@ export class BallEntity
 		// Movement
 		this.velocity = new THREE.Vector3(0, 0, 0,);
 		this.direction = new THREE.Vector3(randomXComponent, Math.sin(randomAngleY), 0);;
-		this.speed = 0.05;
+		this.speed = 0.03;
 		this.acceleration = 0;
 		this.friction = 0;
 		
@@ -47,6 +47,7 @@ export class BallEntity
 		// 	this.velocity.lerp(new THREE.Vector3(0, 0, 0), this.friction * deltaTime);
 		this.velocity = this.direction.clone().multiplyScalar(this.speed);
 		this.position.add(this.velocity.clone().multiplyScalar(deltaTime));
+		this.position.z = 0;
 		this.pointLight.position.copy(this.position);
 		this.mesh.position.copy(this.position);
 		this.mesh.position.copy(this.position);
