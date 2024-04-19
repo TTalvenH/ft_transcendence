@@ -1,2 +1,0 @@
-DEBUG=1
-SECRET_KEY=foo
