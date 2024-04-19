@@ -37,18 +37,25 @@ vault write pki/root/generate/internal \
     ttl=87600h
 
 vault write pki/config/urls \
-issuing_certificates="http://vault.example.com:8200/v1/pki/ca" \
-crl_distribution_points="http://vault.example.com:8200/v1/pki/crl"
+issuing_certificates="localhost:8200/v1/pki/ca" \
+crl_distribution_points="localhost:8200/v1/pki/crl"
 
 vault write pki/roles/client-cert \
-    allowed_domains="client.example.com" \
+    allowed_domains="localhost" \
     allow_subdomains=true \
     max_ttl="72h"
 
-vault write pki/issue/client-cert \
-    common_name="client1.client.example.com"
+mkdir vault/certs
 
+vault write -format=json pki/issue/client-cert common_name="localhost" | jq -r '.data.issuing_ca' > vault/certs/issuing-ca.pem
 
+vault write -format=json pki/issue/client-cert \
+    common_name="localhost" \
+    format="pem" \
+    private_key_format="pem" \
+    exclude_cn_from_sans=true \
+    ttl="72h" \
+    | jq -r '.data.private_key, .data.certificate' > vault/certs/client-cert-and-key.pem
 
 
 

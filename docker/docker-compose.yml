@@ -21,6 +21,7 @@ services:
     networks:
       - mynetwork
     volumes:
+      - certs:/etc/nginx/ssl/
       - vault-id:/etc/vault/vault-id
     restart: always
 
@@ -43,6 +44,7 @@ services:
     ports:
       - "8200:8200"
     volumes:
+      - certs:/vault/certs/
       - vault-id:/etc/vault/vault-id
     networks:
       - mynetwork
