@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  django:
+    volumes:
+      - static:/static
+    env_file:
+      - .env
+    build:
+      context: ./django
+    expose:
+      - 8000
+  nginx:
+    volumes:
+      - static:/static
+    build:
+      context: ./nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - django
+
+volumes:
+  static:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/ekoljone/Desktop/ft_transcendence/docker/django/backend/static
+      o: bind
