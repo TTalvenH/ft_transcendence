@@ -11,16 +11,22 @@ const routes = {
     404: "/404",
     "/": "api/data/home.html",
     "/login": "api/data/login.html",
+	"/pong123": "/pong"
 };
 
 const handleLocation = async () => {
-    const path = window.location.pathname;
-    const route = routes[path] || routes[404];
-    const html = await fetch(route).then((data) => data.text());
-    document.getElementById("game").innerHTML = html;
-    
-    // Add event listener when the page is loaded
-    addEventListenerToPlayButton();
+	const path = window.location.pathname;
+	const route = routes[path] || routes[404];
+	console.log(route);
+	const html = await fetch(route).then((data) => data.text());
+	if (html === '"it works"')
+		startPongGame()
+	else
+		document.getElementById("main-page").innerHTML = html;
+	
+	// Add event listener when the page is loaded
+	addEventListenerToPlayButton();
+
 };
 
 const addEventListenerToPlayButton = () => {
@@ -29,7 +35,7 @@ const addEventListenerToPlayButton = () => {
 };
 
 const startPongGame = () => {
-	document.getElementById("game").innerHTML = ""; //tyhjennetää cardi, tämä on purkkakikka
+	document.getElementById("main-page").innerHTML = ""; //tyhjennetää cardi, tämä on purkkakikka
     const pongGame = new Pong(); // Assuming Pong() is the constructor for your Pong game
 	pongGame.gameLoop();
 };
