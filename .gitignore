@@ -1,3 +1,6 @@
 /ft_transcendence/static/pong/node_modules/
 .DS_Store
 .venv
+/ft_transcendence/ft_transcendence/__pycache__
+/ft_transcendence/pong/__pycache__
+/ft_transcendence/users/__pycache__
