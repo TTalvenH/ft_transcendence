@@ -8,23 +8,11 @@ export function initEventListener(entities, gameStateWrapper)
 	{
 		switch (event.key)
 		{
-			case "ArrowRight":
-				player1.keyRight = true;
-				break;
-			case "ArrowLeft":
-				player1.keyLeft = true;
-				break;
 			case "ArrowUp":
 				player1.keyUp = true;
 				break;
 			case "ArrowDown":
 				player1.keyDown = true;
-				break;
-			case "d":
-				player2.keyRight = true;
-				break;
-			case "a":
-				player2.keyLeft = true;
 				break;
 			case "w":
 				player2.keyUp = true;
@@ -33,7 +21,7 @@ export function initEventListener(entities, gameStateWrapper)
 				player2.keyDown = true;
 				break;
 			case "p":
-				if (gameStateWrapper.gameState === GameStates.PAUSED)
+				if (gameStateWrapper.gameState === GameStates.PAUSED || gameStateWrapper.gameState === GameStates.MENU)
 				{
 					gameStateWrapper.gameState = GameStates.PLAYING;
 				}
