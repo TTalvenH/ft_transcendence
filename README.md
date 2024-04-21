@@ -1,4 +1,4 @@
-# ft_transcendence WIP
+# ft_transcendence WORK IN PROGRESS
 
 Welcome to **ft_transcendence**, a single-page application where the classic game of Pong is reimagined. Dive into the nostalgia of arcade gaming with modern twists and features.
 
@@ -28,4 +28,4 @@ Welcome to **ft_transcendence**, a single-page application where the classic gam
 Launch the project with ease using Docker:
 
 ```bash
-WIP
+WORK IN PROGRESS
