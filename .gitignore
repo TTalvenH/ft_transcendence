@@ -1,3 +1,7 @@
-/ft_transcendence/static/pong/node_modules/
+node_modules/
+__pycache__/
 .DS_Store
 .venv
+*.pyc
+*.pyo
+*.pyd
