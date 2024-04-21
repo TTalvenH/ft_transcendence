@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import * as COLORS from '../colors.js';
 
 export class BallEntity
 {
@@ -29,11 +30,11 @@ export class BallEntity
 		this.mesh = new THREE.Mesh(this.geometry, this.material);
 
 		// Effects
-		this.pointLight = new THREE.PointLight( 0xB5179E, 0.5, 10);
+		this.pointLight = new THREE.PointLight( COLORS.SAFFRON, 0.5, 10);
 
 		// init object data
-		this.material.color.set(0xF72585);
-		this.material.emissive.set(0xF72585);
+		this.material.color.set(COLORS.SAFFRON);
+		this.material.emissive.set(COLORS.SAFFRON);
 		this.mesh.geometry.computeBoundingSphere();
 		this.acceleration = 0.1;
 		this.friction = 0.1;

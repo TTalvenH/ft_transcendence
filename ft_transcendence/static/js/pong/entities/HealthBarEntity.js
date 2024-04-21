@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import * as COLORS from '../colors.js';
 
 export class HealthBarEntity
 {
@@ -9,8 +10,8 @@ export class HealthBarEntity
 		this.geometry = new THREE.CapsuleGeometry(0.2, 0.5, 3, 10);
 		this.material = new THREE.MeshStandardMaterial();
 
-		this.material.color.set(0xF72585);
-		this.material.emissive.set(0xF72585);
+		this.material.color.set(COLORS.AQUAMARINE);
+		this.material.emissive.set(COLORS.AQUAMARINE);
 
 		this.currentHealth = this.playerRef.hitPoints;
 		this.healthBars = [];
