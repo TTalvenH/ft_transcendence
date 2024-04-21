@@ -1,2 +1,3 @@
 /ft_transcendence/static/pong/node_modules/
 .DS_Store
+.venv
