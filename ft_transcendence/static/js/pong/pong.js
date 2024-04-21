@@ -5,7 +5,6 @@ import { PlayerEntity } from './entities/PlayerEntity.js';
 import { PlaneEntity } from './entities/PlaneEntity.js';
 import { NeonBoxEntity } from './entities/NeonBoxEntity.js';
 import { initRenderer } from './Init/initRenderer.js';
-import { initCamera } from './Init/initCamera.js';
 import { initScene } from './Init/initScene.js';
 import { initPostProcessing } from './Init/initPostProcessing.js';
 import { BallEntity } from './entities/BallEntity.js';
@@ -21,15 +20,14 @@ export const	GameStates = Object.freeze({
 	MENU: 3,
 });
 
-
 export class Pong
 {
 	constructor()
 	{
 		this.entities = {};
 		this.scene = initScene();
-		this.gameStateWrapper = { gameState: GameStates.MENU };
-		this.entities['Camera'] = new CameraEntity(this.gameStateWrapper);
+		this.gameGlobals = { gameState: GameStates.MENU };
+		this.entities['Camera'] = new CameraEntity(this.gameGlobals);
 		this.camera = this.entities['Camera'].camera;
 		this.renderer = initRenderer();
 		this.composer = initPostProcessing(this.scene, this.camera, this.renderer);
@@ -61,7 +59,7 @@ export class Pong
 		this.clockDelta = new THREE.Clock();
 		this.interval = 1 / 300;
 
-		initEventListener(this.entities, this.gameStateWrapper);
+		initEventListener(this.entities, this.gameGlobals);
 	}
 
 	endGame()
@@ -83,7 +81,7 @@ export class Pong
 			console.log("Player1 WINS!");
 		else
 			return;
-		this.gameStateWrapper.gameState = GameStates.GAMEOVER;
+		this.gameGlobals.gameState = GameStates.GAMEOVER;
 	}
 
 	gameLoop()
@@ -91,13 +89,13 @@ export class Pong
 		requestAnimationFrame(() => this.gameLoop());
 		if (this.clock.getElapsedTime() < this.interval) 
 			return;
-
+		
 		this.clock.start();
 		const deltaTime = this.clockDelta.getDelta() * 100;
 		
 		this.composer.render(this.scene, this.camera);
 
-		switch (this.gameStateWrapper.gameState)
+		switch (this.gameGlobals.gameState)
 		{
 			case GameStates.PAUSED:
 				return;
@@ -119,5 +117,11 @@ export class Pong
 				this.endGame();
 		}
 		this.entities['Camera'].update(deltaTime);
+		if (this.renderer.getSize(new THREE.Vector2()).x !== window.innerWidth || this.renderer.getSize(new THREE.Vector2()).y !== window.innerHeight)
+		{
+			this.entities['Camera'].camera.aspect = window.innerWidth / window.innerHeight;
+			this.entities['Camera'].camera.updateProjectionMatrix();
+			this.renderer.setSize(window.innerWidth, window.innerHeight);
+		}
 	}
 }
