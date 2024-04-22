@@ -57,8 +57,7 @@ export class Pong
 		
 		this.clock = new THREE.Clock();
 		this.clockDelta = new THREE.Clock();
-		this.interval = 1 / 300;
-
+		this.interval = 1 / 300
 		initEventListener(this.entities, this.gameGlobals);
 	}
 

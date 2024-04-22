@@ -3,10 +3,24 @@ import { GameStates } from "./pong/pong.js";
 const routes = {
 	"/": uiHandler,
 	"/pong/": pongHandler,
+	"/login/": loginHandler,
+	"/register/": registerHandler,
 };
 
 async function uiHandler() {
     const html = await fetch("/ui").then((data) => data.text());
+	document.getElementById('root').insertAdjacentHTML('beforeend', html);
+}
+
+async function loginHandler() {
+    const html = await fetch("/users/login.html").then((data) => data.text());
+	console.log(html);
+	document.getElementById('root').insertAdjacentHTML('beforeend', html);
+}
+
+async function registerHandler() {
+    const html = await fetch("/users/register.html").then((data) => data.text());
+	console.log(html);
 	document.getElementById('root').insertAdjacentHTML('beforeend', html);
 }
 
