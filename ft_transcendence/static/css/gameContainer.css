@@ -1,0 +1,9 @@
+#gameContainer {
+    position: absolute; /* This allows you to position children of this element */
+    z-index: -1
+}
+
+#gameContainer canvas {
+    position: absolute;
+    z-index: -1; /* This positions the canvas behind all other elements */
+}

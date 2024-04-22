@@ -1,8 +1,9 @@
 import * as THREE from 'three'
+import * as COLORS from '../colors.js';
 
 export class PlayerEntity
 {
-	constructor(initPosition)
+	constructor(initPosition, color)
 	{
 		const position = initPosition;
 		
@@ -15,26 +16,26 @@ export class PlayerEntity
 		this.speed = 0.05
 
 		// Input keys
-		this.keyRight = false;
-		this.keyLeft = false;
 		this.keyUp = false;
 		this.keyDown = false;
 
 		// Mesh
-		this.geometry = new THREE.BoxGeometry(0.1, 0.8, 0.1);
-		this.height = 0.8;
+		this.height = 0.9;
+		this.geometry = new THREE.BoxGeometry(0.1, this.height, 0.1);
 		this.material = new THREE.MeshStandardMaterial();
+		this.visualMesh = new THREE.Mesh(new THREE.CapsuleGeometry(0.1, 0.75, 3, 10), this.material);
 		this.mesh = new THREE.Mesh(this.geometry, this.material);
 		this.collisionBox = new THREE.Box3();
-
+		this.mesh.visible = false;
 		// init object data
-		this.material.color.set(0xF72585);
-		this.material.emissive.set(0xF72585);
+		this.material.color.set(color);
+		this.material.emissive.set(color);
 		this.mesh.geometry.computeBoundingBox();
 
 		this.acceleration = 0.1;
 		this.friction = 0.1;
 		this.mesh.position.copy( this.position );
+		this.visualMesh.position.copy( this.position );
 		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
 	}	
 
@@ -43,10 +44,6 @@ export class PlayerEntity
 		// Input
 		let targetVelocity = new THREE.Vector3(0, 0, 0);
 
-		if (this.keyRight === true)
-			targetVelocity.x += this.speed;
-		if (this.keyLeft === true)
-			targetVelocity.x -= this.speed;
 		if (this.keyUp === true)
 			targetVelocity.y += this.speed;
 		if (this.keyDown === true)
@@ -57,14 +54,23 @@ export class PlayerEntity
 			this.velocity.lerp( targetVelocity, this.acceleration * deltaTime );
 		else
 			this.velocity.lerp( new THREE.Vector3(0, 0, 0), this.friction * deltaTime );
-		this.position.add( this.velocity.clone().multiplyScalar(deltaTime) );
+		let newPosition = this.position.clone().add( this.velocity.clone().multiplyScalar(deltaTime) );
+		let minY = -2.45;
+		let maxY = 2.45;
+		if (newPosition.y >= minY && newPosition.y <= maxY)
+		{
+			this.position = newPosition;
+			this.mesh.position.copy( this.position );
+			this.visualMesh.position.copy( this.position );
+		}
 		this.mesh.position.copy( this.position );
+		this.visualMesh.position.copy( this.position );
 		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
-
 	}
 
 	render(scene)
 	{	
 		scene.add(this.mesh);
+		scene.add(this.visualMesh);
 	}	
 }

@@ -1,0 +1,25 @@
+#sidePanel{
+    position: relative;
+    border: 2px solid #f141f1;
+    background-color: rgba(233, 68, 225, 0.1);
+    width: 300px;
+    height: 100vh;
+    z-index: 1;
+}
+
+#sidePanel::before {
+    content: "";
+    position: absolute;
+    top: -2px; /* Adjust these values to match your border width */
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: inherit;
+    z-index: -1;
+
+    /* Neon glow effect */
+    box-shadow: 0 0 10px #f141f1, 0 0 20px #f141f1, 0 0 30px #f141f1, 0 0 40px #f141f1;
+
+    /* Apply the blur to the pseudo-element */
+    filter: blur(2px);
+}

@@ -1,46 +1,35 @@
-import {Pong} from './pong/pong.js'
-
-const route = (event) => {
-    event = event || window.event;
-    event.preventDefault();
-    window.history.pushState({}, "", event.target.href);
-    handleLocation();
-};
+import { GameStates } from "./pong/pong.js";
 
 const routes = {
-    404: "/404",
-    "/": "api/data/home.html",
-    "/login": "api/data/login.html",
-	"/pong123": "/pong/api/pong.html"
+	"/": uiHandler,
+	"/pong/": pongHandler,
 };
 
-const handleLocation = async () => {
+async function uiHandler() {
+    const html = await fetch("/ui").then((data) => data.text());
+	document.getElementById('root').insertAdjacentHTML('beforeend', html);
+}
+
+async function pongHandler() {
+    const html = await fetch("/pong/").then((data) => data.text());
+	document.getElementById('sidePanel').style.display = 'none'; // Using display
+	document.getElementById('sidePanel').style.visibility = 'hidden';
+	window.pong.gameGlobals.gameState = GameStates.PLAYING;
+}
+
+async function handleLocation() {
 	const path = window.location.pathname;
-	const route = routes[path] || routes[404];
-	console.log(route);
-	const html = await fetch(route).then((data) => data.text());
 	console.log(path);
-	if (path === '/pong123')
-		startPongGame()
-	else
-		document.getElementById("main-page").innerHTML = html;
-	
-	// Add event listener when the page is loaded
-	addEventListenerToPlayButton();
+	const handler = routes[path] || routes["/404"];
+	await handler();
+}
 
+window.route = (event) => {
+	event.preventDefault();
+	window.history.pushState({}, "", event.currentTarget.href);
+	handleLocation();
 };
 
-const addEventListenerToPlayButton = () => {
-    const playButton = document.getElementById("playButton");
-    playButton.addEventListener("click", startPongGame);
-};
-
-const startPongGame = () => {
-	document.getElementById("main-page").innerHTML = ""; //tyhjennetää cardi, tämä on purkkakikka
-    const pongGame = new Pong();
-	pongGame.gameLoop();
-};
-
+window.pong.gameLoop();
 window.onpopstate = handleLocation;
-window.route = route;
 handleLocation();

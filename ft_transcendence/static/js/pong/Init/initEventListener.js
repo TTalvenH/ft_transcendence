@@ -1,30 +1,19 @@
 import { GameStates } from "../pong.js";
 
-export function initEventListener(entities, gameStateWrapper)
+export function initEventListener(entities, gameGlobals)
 {
 	const player1 = entities["Player1"];
 	const player2 = entities["Player2"];
+
 	document.addEventListener('keydown', (event) =>
 	{
 		switch (event.key)
 		{
-			case "ArrowRight":
-				player1.keyRight = true;
-				break;
-			case "ArrowLeft":
-				player1.keyLeft = true;
-				break;
 			case "ArrowUp":
 				player1.keyUp = true;
 				break;
 			case "ArrowDown":
 				player1.keyDown = true;
-				break;
-			case "d":
-				player2.keyRight = true;
-				break;
-			case "a":
-				player2.keyLeft = true;
 				break;
 			case "w":
 				player2.keyUp = true;
@@ -33,13 +22,13 @@ export function initEventListener(entities, gameStateWrapper)
 				player2.keyDown = true;
 				break;
 			case "p":
-				if (gameStateWrapper.gameState === GameStates.PAUSED)
+				if (gameGlobals.gameState === GameStates.PAUSED || gameGlobals.gameState === GameStates.MENU)
 				{
-					gameStateWrapper.gameState = GameStates.PLAYING;
+					gameGlobals.gameState = GameStates.PLAYING;
 				}
-				else if (gameStateWrapper.gameState === GameStates.PLAYING)
+				else if (gameGlobals.gameState === GameStates.PLAYING)
 				{
-					gameStateWrapper.gameState = GameStates.PAUSED;
+					gameGlobals.gameState = GameStates.PAUSED;
 				}
 				break;
 		}

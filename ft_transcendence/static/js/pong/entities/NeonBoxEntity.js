@@ -1,12 +1,12 @@
 import * as THREE from 'three'
+import * as COLORS from '../colors.js';
 
 export class NeonBoxEntity
 {
-	constructor(position, width, height, depth, isGoal)
+	constructor(position, width, height, depth, isGoal, color)
 	{
 		// Neon Light around the box
-		const lightColor = 0xffffff; // Red color
-        const lightIntensity = 1;
+        this.lightIntensity = 10;
 
 		this.position = position;
 		this.isGoal = isGoal;
@@ -16,12 +16,12 @@ export class NeonBoxEntity
 		this.mesh = new THREE.Mesh(this.geometry, this.material);
 
         this.rectLights = [
-            new THREE.RectAreaLight(lightColor, lightIntensity, width, height), // Front
-            new THREE.RectAreaLight(lightColor, lightIntensity, width, height), // Back
-            new THREE.RectAreaLight(lightColor, lightIntensity, width, height), // Top
-            new THREE.RectAreaLight(lightColor, lightIntensity, width, height), // Bottom
-            new THREE.RectAreaLight(lightColor, lightIntensity, width, height), // Right
-            new THREE.RectAreaLight(lightColor, lightIntensity, width, height), // Left
+            new THREE.RectAreaLight(color, this.lightIntensity, width, height), // Front
+            new THREE.RectAreaLight(color, this.lightIntensity, width, height), // Back
+            new THREE.RectAreaLight(color, this.lightIntensity, width, height), // Top
+            new THREE.RectAreaLight(color, this.lightIntensity, width, height), // Bottom
+            new THREE.RectAreaLight(color, this.lightIntensity, width, height), // Right
+            new THREE.RectAreaLight(color, this.lightIntensity, width, height), // Left
         ];
 
 		this.rectLights[0].position.set(position.x, position.y, position.z + depth / 2 + 0.001);
@@ -45,16 +45,40 @@ export class NeonBoxEntity
 
 		// Geometry and Material
 		this.mesh.position.copy(this.position);
-		this.material.color.set(0xB5179E);
-		this.material.emissive.set(0xB5179E);
+		this.material.color.set(color);
+		this.material.emissive.set(color);
 		this.mesh.geometry.computeBoundingBox();
 
 		this.collisionBox = new THREE.Box3();
 		this.collisionBox.copy( this.mesh.geometry.boundingBox );
 		this.mesh.updateMatrixWorld ( true );
 		this.collisionBox.applyMatrix4( this.mesh.matrixWorld)
+		this.flickerTime = 0;
 	}
 	
+
+	lightFlicker(deltaTime)
+	{
+		if (this.flickerTime > 0)
+		{
+			let flickerFactor = Math.random();
+	
+			// Apply the flicker factor to the light intensity and emissive color
+			for (let i = 0; i < this.rectLights.length; i++)
+				this.rectLights[i].intensity = flickerFactor;
+			this.material.emissiveIntensity = flickerFactor;
+	
+			this.flickerTime -= 0.2 * deltaTime;
+		}
+		else
+		{
+			// If flickerTime is 0 or less, reset the light intensity and emissive color
+			for (let i = 0; i < this.rectLights.length; i++)
+				this.rectLights[i].intensity = this.lightIntensity; // Reset to the original intensity
+			this.material.emissiveIntensity = 1; // Reset to the original emissive intensity
+		}
+	}
+
 	render(scene)
 	{
 		scene.add(this.mesh);
@@ -65,5 +89,6 @@ export class NeonBoxEntity
 	
 	update(deltaTime)
 	{
+		this.lightFlicker(deltaTime)
 	}
 }
