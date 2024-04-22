@@ -11,7 +11,7 @@ const routes = {
     404: "/404",
     "/": "api/data/home.html",
     "/login": "api/data/login.html",
-	"/pong123": "/pong"
+	"/pong123": "/pong/api/pong.html"
 };
 
 const handleLocation = async () => {
@@ -19,7 +19,8 @@ const handleLocation = async () => {
 	const route = routes[path] || routes[404];
 	console.log(route);
 	const html = await fetch(route).then((data) => data.text());
-	if (html === '"it works"')
+	console.log(path);
+	if (path === '/pong123')
 		startPongGame()
 	else
 		document.getElementById("main-page").innerHTML = html;
@@ -36,7 +37,7 @@ const addEventListenerToPlayButton = () => {
 
 const startPongGame = () => {
 	document.getElementById("main-page").innerHTML = ""; //tyhjennetää cardi, tämä on purkkakikka
-    const pongGame = new Pong(); // Assuming Pong() is the constructor for your Pong game
+    const pongGame = new Pong();
 	pongGame.gameLoop();
 };
 

@@ -5,5 +5,4 @@ from rest_framework.decorators import api_view
 # Create your views here.
 @api_view(['GET'])
 def pong(request):
-	test = 'it works'
-	return Response(test)
+	return render(request, 'pong/pong.html')
