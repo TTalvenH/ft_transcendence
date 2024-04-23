@@ -5,10 +5,11 @@ export class PlayerEntity
 {
 	constructor(initPosition, color)
 	{
-		const position = initPosition;
-		
-		this.hitPoints = 10;
-		this.position = initPosition;
+		this.initHitPoints = 10;
+		this.hitPoints = this.initHitPoints;
+		this.initPosition = initPosition.clone();
+		this.position = this.initPosition.clone();
+
 		// Movement
 		this.velocity = new THREE.Vector3(0, 0, 0,);
 		this.acceleration = 0;

@@ -62,11 +62,30 @@ export class Pong
 		initEventListener(this.entities, this.gameGlobals);
 	}
 
-	endGame()
+	resetGame(deltaTime)
 	{
-		this.scene.traverse((object) => {
-			object.visible = false;
-		})
+		const player1 = this.entities["Player1"];
+		const player2 = this.entities["Player2"];
+		const ball = this.entities["Ball"];
+
+
+		player1.position.copy(player1.initPosition);
+		player1.hitPoints = player1.initHitPoints;
+		player2.position.copy(player2.initPosition);
+		player2.hitPoints = player2.initHitPoints;
+		ball.position.copy(ball.initPosition);
+		ball.speed = ball.initSpeed;
+
+		for (const key in this.entities)
+		{
+			if (this.entities.hasOwnProperty(key))
+			{
+				const entity = this.entities[key];
+				entity.update(deltaTime);
+			}
+		}
+
+		this.gameGlobals.gameState = GameStates.MENU;
 	}
 
 	checkGameOver()
@@ -114,7 +133,7 @@ export class Pong
 			case GameStates.MENU:
 				break;
 			case GameStates.GAMEOVER:
-				this.endGame();
+				this.resetGame(deltaTime);
 		}
 		this.entities['Camera'].update(deltaTime);
 		if (this.renderer.getSize(new THREE.Vector2()).x !== window.innerWidth || this.renderer.getSize(new THREE.Vector2()).y !== window.innerHeight)

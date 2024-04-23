@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import * as COLORS from '../colors.js';
-
 export class NeonBoxEntity
 {
 	constructor(position, width, height, depth, isGoal, color)
@@ -11,7 +10,7 @@ export class NeonBoxEntity
 		this.position = position;
 		this.isGoal = isGoal;
 		// Mesh
-		this.geometry = new THREE.BoxGeometry(width, height, depth);
+		this.geometry = new THREE.BoxGeometry(width, height, depth, 100, 100, 100);
 		this.material = new THREE.MeshStandardMaterial();
 		this.mesh = new THREE.Mesh(this.geometry, this.material);
 
