@@ -96,3 +96,15 @@
 	background-color: #1cb1f5;
   }
   
+
+.box .inputBox input:-webkit-autofill {
+    -webkit-text-fill-color: rgb(255, 255, 255); /* Change the text color */
+	-webkit-box-shadow: 0 0 0px 40rem rgb(92, 35, 89) inset;
+}
+
+.box .inputBox input:-webkit-autofill ~ label {
+    top: -1.125rem;
+    left: 0;
+    color: #03a9f4;
+    font-size: 0.75rem;
+}

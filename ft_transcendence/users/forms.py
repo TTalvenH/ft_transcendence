@@ -1,8 +1,41 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
+from .models import CustomUser
+from django.contrib.auth.forms import AuthenticationForm
 
-class RegisterationForm(UserCreationForm):
+class CreateUserForm(forms.ModelForm):
 	class Meta:
-		model = User
-		fields = ['username', 'email', 'password1', 'password2']
+		model = CustomUser
+		fields = ['username', 'email', 'password']
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.fields['username'].widget.attrs.update({
+			'required onkeyup': "this.setAttribute('value', this.value);",
+			 'value': ''
+		})
+		self.fields['email'].widget.attrs.update({
+			'required onkeyup': "this.setAttribute('value', this.value);",
+			 'value': ''
+		})
+		self.fields['password'].widget.attrs.update({
+			'required onkeyup': "this.setAttribute('value', this.value);",
+			'value': '',
+			'pattern': "(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}",
+			'title': 'Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters'
+		})
+
+class LoginForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.update({
+            'required': True,
+            'onkeyup': "this.setAttribute('value', this.value);",
+            'value': ''
+        })
+        self.fields['password'].widget.attrs.update({
+            'required': True,
+            'onkeyup': "this.setAttribute('value', this.value);",
+            'value': '',
+            'pattern': '(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}',
+            'title': 'Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters'
+        })
