@@ -28,7 +28,7 @@ async function loginHandler() {
         event.preventDefault(); // Prevent default form submission behavior
 
         // Get form data
-        const formData = new FormData(registerForm);
+        let formData = new FormData(registerForm);
         
         try {
             // Send form data to the backend
@@ -67,8 +67,10 @@ async function registerHandler() {
         event.preventDefault(); // Prevent default form submission behavior
 
         // Get form data
-        const formData = new FormData(registerForm);
-        
+		let formData = new FormData(registerForm);
+		const pw = formData.get('password1')
+		if (pw !== '')
+			formData.append('password', pw) // we add a field with the key password that has the password1 value this might not be a good way of doing this        
         try {
             // Send form data to the backend
             const response = await fetch('/users/create-user', {
