@@ -2,5 +2,5 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
-	path('', views.pong)
+	path('api/pong.html', views.pong)
 ]

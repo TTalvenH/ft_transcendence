@@ -2,7 +2,7 @@ import * as THREE from 'three'
 
 export function initRenderer()
 {
-	const container = document.getElementById("neon-container");
+	const container = document.getElementById("game");
 
 	const renderer = new THREE.WebGLRenderer( { antialias: true } );
 	renderer.toneMapping = THREE.ReinhardToneMapping;
