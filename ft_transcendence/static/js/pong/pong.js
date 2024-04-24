@@ -11,6 +11,8 @@ import { BallEntity } from './entities/BallEntity.js';
 import { collisionSystem } from './collisionSystem.js';
 import { HealthBarEntity } from './entities/HealthBarEntity.js';
 import { CameraEntity } from './entities/CameraEntity.js';
+import { TextEntity } from './entities/TextEntity.js';
+
 import * as COLORS from './colors.js';
 
 export const	GameStates = Object.freeze({
@@ -43,7 +45,9 @@ export class Pong
 		this.entities['NeonBox4'] = new NeonBoxEntity(new THREE.Vector3(5, 0, 0), 0.1, 6.1, 0.04, true, COLORS.FOLLY);
 		this.entities['Ball'] = new BallEntity();
 		this.entities['Plane'] = new PlaneEntity(new THREE.Vector3(0, 0, -0.25), window.innerWidth, window.innerHeight);
-		
+		this.entities['User1'] = new TextEntity("Guest1", new THREE.Vector3(6, 7.7, 0), this.font, COLORS.INDIGO);
+		this.entities['User2'] = new TextEntity("Guest2", new THREE.Vector3(-6, 7.7, 0), this.font, COLORS.INDIGO);
+
 		for (const key in this.entities)
 		{
 			if (this.entities.hasOwnProperty(key))
@@ -52,13 +56,21 @@ export class Pong
 				entity.render(this.scene);
 			}
 		}
-		
 
-		
 		this.clock = new THREE.Clock();
 		this.clockDelta = new THREE.Clock();
 		this.interval = 1 / 300
 		initEventListener(this.entities, this.gameGlobals);
+	}
+
+
+	startGame(userData) {
+		const user1Name = this.entities['User1']
+		const user2Name = this.entities['User2']
+
+		user1Name.setText(userData.user.username);
+		console.log(userData);
+		this.gameGlobals.gameState = GameStates.PLAYING;
 	}
 
 	resetGame(deltaTime)

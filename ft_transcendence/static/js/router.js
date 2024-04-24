@@ -1,8 +1,9 @@
-import { GameStates } from "./pong/pong.js";
+import { GameStates, Pong } from "./pong/pong.js";
 
 const routes = {
 	"/": uiHandler,
-	"/pong": pongHandler,
+	"/pongStart": pongStartHandler,
+	"/pongMatchOver": pongMatchOverHandler,
 	"/login": loginHandler,
 	"/register": registerHandler,
 };
@@ -40,6 +41,8 @@ async function loginHandler() {
             if (response.ok) {
                 // Registration successful
                 alert('Login successful!');
+                const data = await response.json();
+                pong.startGame(data);
                 // Redirect to another page or handle the response as needed
             } else {
                 // Registration failed
@@ -89,13 +92,14 @@ async function registerHandler() {
         }
     });
 }
-
-
-async function pongHandler() {
-    const html = await fetch("/pong/").then((data) => data.text());
-	document.getElementById('sidePanel').style.display = 'none'; // Using display
-	document.getElementById('sidePanel').style.visibility = 'hidden';
-	window.pong.gameGlobals.gameState = GameStates.PLAYING;
+async function pongStartHandler() {
+    const html = await fetch("/pong/start").then((data) => data.text());
+    pong.pongStart(playerData);
+	pong.gameGlobals.gameState = GameStates.PLAYING;
+}
+async function pongMatchOverHandler() {
+    const html = await fetch("/pong/matchover").then((data) => data.text());
+	pong.gameGlobals.gameState = GameStates.MENU;
 }
 
 async function handleLocation() {
@@ -116,7 +120,8 @@ window.route = (event) => {
     }
 };
 
+const pong = new Pong();
 
-window.pong.gameLoop();
+pong.gameLoop();
 window.onpopstate = handleLocation;
 handleLocation();

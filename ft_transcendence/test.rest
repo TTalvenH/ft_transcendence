@@ -5,6 +5,27 @@ Content-Type: application/json
 
 ###
 
+POST http://127.0.0.1:8000/users/create-user
+Content-Type: application/json
+
+{ "username": "test", "email": "test3@gmail.com", "password": "Qweasdzxc123!", "confirm_password": "Qweasdzxc123!"}
+
+###
+
+POST http://127.0.0.1:8000/users/create-user
+Content-Type: application/json
+
+{ "username": "Nikki", "email": "test3@gmail.com", "password": "Qweasdzxc123!", "confirm_password": "Qweasdzxc123!"}
+
+###
+
+POST http://127.0.0.1:8000/users/login-user
+Content-Type: application/json
+
+{ "username": "kalle12", "password": "testisalis"}
+
+###
+
 POST http://127.0.0.1:8000/users/login-user
 Content-Type: application/json
 
