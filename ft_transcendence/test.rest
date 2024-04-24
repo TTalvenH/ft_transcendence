@@ -1,7 +1,7 @@
 POST http://127.0.0.1:8000/users/create-user
 Content-Type: application/json
 
-{ "username": "kalle10", "email": "kalle3@gmail.com", "password1": "testisalis", "password2": "testisalis", "password": "testisalis"}
+{ "username": "kalle12", "email": "kalle3@gmail.com", "password": "testisalis", "confirm_password": "testisalis"}
 
 ###
 

@@ -25,7 +25,6 @@ class CreateUserForm(UserCreationForm):
 			'value': '',
 			'pattern': "(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}",
 			'title': 'Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters',
-			'type': 'password',
 		})
 		self.fields['password2'].widget.attrs.update({
 			'required': True,
@@ -33,7 +32,6 @@ class CreateUserForm(UserCreationForm):
 			'value': '',
 			'pattern': "(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}",
 			'title': 'Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters',
-			'type': 'password',
 		})
 
 class LoginForm(AuthenticationForm):

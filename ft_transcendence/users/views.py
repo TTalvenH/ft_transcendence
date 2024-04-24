@@ -8,21 +8,19 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from .models import CustomUser
 from .serializers import UserSerializer
+from .forms import CreateUserForm, LoginForm
 
 # Create your views here.
 @api_view(['GET'])
 def login(request):
-	form = LoginForm()
-	return render(request, 'users/login.html', {'form': form})
+	return render(request, 'users/login.html')
 
 @api_view(['GET'])
 def register(request):
-	form = CreateUserForm()
-	return render(request, 'users/register.html', {'form': form})
+	return render(request, 'users/register.html')
 
 @api_view(['POST'])
 def createUser(request):
-	print(request.data)
 	serializer = UserSerializer(data=request.data)
 	if serializer.is_valid():
 		serializer.save()

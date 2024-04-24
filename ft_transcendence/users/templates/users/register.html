@@ -1,9 +1,10 @@
-{% comment %} <div class="box">
+<div class="box">
     <h2>Register</h2>
-    <form>
+    <form id="registerForm">
+		{% csrf_token %}
         <div class="inputBox">
-            <input type="text" name="fullname" required onkeyup="this.setAttribute('value', this.value);" value="">
-            <label>Full Name</label>
+            <input type="text" name="username" required onkeyup="this.setAttribute('value', this.value);" value="">
+            <label>Username</label>
         </div>
         <div class="inputBox">
             <input type="email" name="email" required onkeyup="this.setAttribute('value', this.value);" value="">
@@ -25,9 +26,9 @@
         </div>
         <input type="submit" name="sign-up" value="Sign Up">
     </form>
-</div> {% endcomment %}
+</div>
 
-<div class="box">
+{% comment %} <div class="box">
     <h2>Register</h2>
     <form method="post" enctype="multipart/form-data" id="registerForm">
         {% csrf_token %}
@@ -49,4 +50,4 @@
 		</div>
         <input type="submit" name="sign-up" value="Sign Up">
     </form>
-</div>
+</div> {% endcomment %}
