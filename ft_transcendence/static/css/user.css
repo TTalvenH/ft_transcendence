@@ -1,12 +1,16 @@
-/* body {
-	margin: 0;
-	padding: 0;
-	background: url(https://picsum.photos/2500/1500?image=1041);
-	background-size: cover;
-	font-family: sans-serif;
-  } */
-  
-  .box {
+
+@keyframes appearSmoothly {
+	from {
+		/* transform: translate(-100%, -50%); */
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+		/* transform: translate(-50, -50); */
+	}
+}
+
+.box {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -17,12 +21,20 @@
 	box-sizing: border-box;
 	background: rgba(233, 68, 225, 0.1);
 	border-radius: 0.625rem;
+
+	animation: appearSmoothly 1.5s;
+	/* animation-timing-function: ;
+	animation-delay: ;
+	animation-iteration-count: ;
+	animation-direction: ;
+	animation-fill-mode: ; */
 }
+
 
 .box::before {
     content: "";
     position: absolute;
-    top: -2px; /* Adjust these values to match your border width */
+    top: -2px; 
     left: -2px;
     right: -2px;
     bottom: -2px;
@@ -30,10 +42,9 @@
     z-index: -1;
 	border-radius: 0.625rem;
 
-    /* Neon glow effect */
     box-shadow: 0 0 10px #f141f1, 0 0 20px #f141f1, 0 0 30px #f141f1, 0 0 40px #f141f1;
 
-    /* Apply the blur to the pseudo-element */
+
     filter: blur(2px);
 }
   
@@ -108,3 +119,4 @@
     color: #03a9f4;
     font-size: 0.75rem;
 }
+

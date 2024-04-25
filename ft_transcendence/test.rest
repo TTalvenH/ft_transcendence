@@ -1,19 +1,19 @@
 POST http://127.0.0.1:8000/users/create-user
 Content-Type: application/json
 
-{ "username": "kalle12", "email": "kalle3@gmail.com", "password": "testisalis", "confirm_password": "testisalis"}
+{ "username": "kalle18", "email": "kalle3@gmail.com", "password": "Testisalis123#", "confirm_password": "testisalis"}
 
 ###
 
 POST http://127.0.0.1:8000/users/login-user
 Content-Type: application/json
 
-{ "username": "kalle", "password": "testisalis"}
+{ "username": "kalle17", "password": "testisalis"}
 
 ###
 
 GET http://127.0.0.1:8000/users/test-token
 Content-Type: application/json
-Authorization: Token bcfbe525af1dfc39277e1d49ba28ded45a3c59f9
+Authorization: Token 8fb37dda022e4e905117c6a66bec4b004a987bc5
 
 {}

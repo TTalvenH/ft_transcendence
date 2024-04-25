@@ -1,5 +1,5 @@
 #sidePanel{
-    position: relative;
+    position: absolute;
     border: 2px solid #f141f1;
     background-color: rgba(233, 68, 225, 0.1);
     /* width: 300px; */

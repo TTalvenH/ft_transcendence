@@ -41,8 +41,28 @@ def loginUser(request):
 	serializer = UserSerializer(instance=user)
 	return Response({'token': token.key, 'user': serializer.data})
 
+# This function is an api_view that can be accessed with a GET request
+# It is decorated with @authentication_classes, which means that it will
+# attempt to authenticate the request using either SessionAuthentication or
+# TokenAuthentication.
+# The user is only allowed to access this view if they are authenticated,
+# which is specified in the @permission_classes decorator.
+# The function returns a Response with a dictionary containing the user's
+# email, which is taken from request.user.email. This is only accessible if
+# the user is authenticated, as specified by the IsAuthenticated permission.
 @api_view(['GET'])
 @authentication_classes([SessionAuthentication, TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def testToken(request):
+	"""
+	This function is an api_view that can be accessed with a GET request.
+	It is decorated with @authentication_classes, which means that it will
+	attempt to authenticate the request using either SessionAuthentication or
+	TokenAuthentication.
+	The user is only allowed to access this view if they are authenticated,
+	which is specified in the @permission_classes decorator.
+	The function returns a Response with a dictionary containing the user's
+	email, which is taken from request.user.email. This is only accessible if
+	the user is authenticated, as specified by the IsAuthenticated permission.
+	"""
 	return Response({"passed for {}".format(request.user.email)})

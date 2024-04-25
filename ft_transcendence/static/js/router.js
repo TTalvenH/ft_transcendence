@@ -1,5 +1,10 @@
 import { GameStates } from "./pong/pong.js";
 
+//variables where we save the html content when it is first fetched
+let loginFormHTML;
+let registerFormHTML;
+let uiHTML;
+
 const routes = {
 	"/": uiHandler,
 	"/pong": pongHandler,
@@ -8,27 +13,26 @@ const routes = {
 };
 
 async function uiHandler() {
-    const html = await fetch("/ui").then((data) => data.text());
-	document.getElementById('root').insertAdjacentHTML('beforeend', html);
+	if (!uiHTML)
+		uiHTML = await fetch("/ui").then((data) => data.text());
+	document.getElementById('ui').insertAdjacentHTML('beforeend', uiHTML);
 }
 
-// async function loginHandler() {
-//     const html = await fetch("/users/login.html").then((data) => data.text());
-// 	console.log(html);
-// 	document.getElementById('root').insertAdjacentHTML('beforeend', html);
-// }
 
 async function loginHandler() {
-    const html = await fetch("/users/login.html").then((data) => data.text());
-    document.getElementById('root').insertAdjacentHTML('beforeend', html);
-
+	const registerBox = document.getElementById('registerBox');
+	if (registerBox)
+		registerBox.remove();
+	if (!loginFormHTML)
+		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
+    document.getElementById('ui').insertAdjacentHTML('beforeend', loginFormHTML);
     // Add event listener to the registration form
-    const registerForm = document.getElementById('loginForm');
-    registerForm.addEventListener('submit', async (event) => {
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', async (event) => {
         event.preventDefault(); // Prevent default form submission behavior
 
         // Get form data
-        let formData = new FormData(registerForm);
+        let formData = new FormData(loginForm);
         
         try {
             // Send form data to the backend
@@ -52,20 +56,19 @@ async function loginHandler() {
     });
 }
 
-// async function registerHandler() {
-//     const html = await fetch("/users/register.html").then((data) => data.text());
-// 	document.getElementById('root').insertAdjacentHTML('beforeend', html);
-// }
 
 async function registerHandler() {
-    const html = await fetch("/users/register.html").then((data) => data.text());
-    document.getElementById('root').insertAdjacentHTML('beforeend', html);
-
+	const loginBox = document.getElementById('loginBox');
+	if (loginBox) {
+		loginBox.remove();
+	}
+	if (!registerFormHTML) // we only fetch once and then save it locally
+		registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
+    document.getElementById('ui').insertAdjacentHTML('beforeend', registerFormHTML);
     // Add event listener to the registration form
     const registerForm = document.getElementById('registerForm');
     registerForm.addEventListener('submit', async (event) => {
         event.preventDefault(); // Prevent default form submission behavior
-
         // Get form data
 		const formData = new FormData(registerForm);
         try {
@@ -93,8 +96,8 @@ async function registerHandler() {
 
 async function pongHandler() {
     const html = await fetch("/pong/").then((data) => data.text());
-	document.getElementById('sidePanel').style.display = 'none'; // Using display
-	document.getElementById('sidePanel').style.visibility = 'hidden';
+	document.getElementById('ui').style.display = 'none'; // Using display
+	document.getElementById('ui').style.visibility = 'hidden';
 	window.pong.gameGlobals.gameState = GameStates.PLAYING;
 }
 
