@@ -5,7 +5,7 @@ export class PlayerEntity
 {
 	constructor(initPosition, color)
 	{
-		this.initHitPoints = 10;
+		this.initHitPoints = 5;
 		this.hitPoints = this.initHitPoints;
 		this.initPosition = initPosition.clone();
 		this.position = this.initPosition.clone();
