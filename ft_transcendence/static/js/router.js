@@ -4,12 +4,14 @@ import { GameStates } from "./pong/pong.js";
 let loginFormHTML;
 let registerFormHTML;
 let uiHTML;
+let profileHTML;
 
 const routes = {
 	"/": uiHandler,
 	"/pong": pongHandler,
 	"/login": loginHandler,
 	"/register": registerHandler,
+	"/profile": profileHandler,
 };
 
 async function uiHandler() {
@@ -18,6 +20,14 @@ async function uiHandler() {
 	document.getElementById('ui').insertAdjacentHTML('beforeend', uiHTML);
 }
 
+async function profileHandler() {
+	// const profileBox = document.getElementById('profileBox');
+	// if (profileBox)
+	// 	profileBox.remove();
+	if (!profileHTML)
+		profileHTML = await fetch("/users/profile.html").then((data) => data.text());
+	document.getElementById('ui').insertAdjacentHTML('beforeend', profileHTML);
+}
 
 async function loginHandler() {
 	const registerBox = document.getElementById('registerBox');

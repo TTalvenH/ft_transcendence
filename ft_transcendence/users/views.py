@@ -16,6 +16,10 @@ def login(request):
 def register(request):
 	return render(request, 'users/register.html')
 
+@api_view(['GET'])
+def userProfileTemplate(request):
+	return render(request, 'users/profile.html')	
+
 @api_view(['POST'])
 def createUser(request):
 	"""

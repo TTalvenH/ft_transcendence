@@ -1,0 +1,43 @@
+
+@keyframes appearSmoothly {
+	from {
+		/* transform: translate(-100%, -50%); */
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+		/* transform: translate(-50, -50); */
+	}
+}
+
+#userProfile {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	border: 2px solid #f141f1;
+	transform: translate(-50%, -50%);
+	width: 40rem;
+	padding: 2.5rem;
+	box-sizing: border-box;
+	background: rgba(233, 68, 225, 0.1);
+	border-radius: 0.625rem;
+
+	animation: appearSmoothly 1.5s;
+}
+
+#userProfile::before {
+    content: "";
+    position: absolute;
+    top: -2px; 
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: inherit;
+    z-index: -1;
+	border-radius: 0.625rem;
+
+    box-shadow: 0 0 10px #f141f1, 0 0 20px #f141f1, 0 0 30px #f141f1, 0 0 40px #f141f1;
+
+
+    filter: blur(2px);
+}
