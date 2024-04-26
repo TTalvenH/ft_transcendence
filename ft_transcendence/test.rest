@@ -1,19 +1,27 @@
 POST http://127.0.0.1:8000/users/create-user
 Content-Type: application/json
 
-{ "username": "kalle18", "email": "kalle3@gmail.com", "password": "Testisalis123#", "confirm_password": "testisalis"}
+{ "username": "mulli", "email": "mulli@gmail.com", "password": "Testisalis123#", "confirm_password": "Testisalis123#"}
 
 ###
+
+POST http://127.0.0.1:8000/users/create-user
+Content-Type: application/json
+
+{ "username": "mulli", "email": "mulli@gmail.com", "password": "Testisalis123#", "confirm_password": "Testisalis123#"}
+
+###
+
 
 POST http://127.0.0.1:8000/users/login-user
 Content-Type: application/json
 
-{ "username": "kalle17", "password": "testisalis"}
+{ "username": "mulli", "password": "Testisalis123#"}
 
 ###
 
 GET http://127.0.0.1:8000/users/test-token
 Content-Type: application/json
-Authorization: Token 8fb37dda022e4e905117c6a66bec4b004a987bc5
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0MTM1ODMwLCJpYXQiOjE3MTQxMjg2MzAsImp0aSI6IjgzN2I0ZWYwZWUxZTRhNDliOTlmNjI0YTMyMmE5NTZlIiwidXNlcl9pZCI6NDR9.2W6bKiwEHggqejQb-XVYvc3rLLcfyMAu53wtMEgIeYA
 
 {}

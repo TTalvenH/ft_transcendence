@@ -3,13 +3,10 @@ from .forms import CreateUserForm, LoginForm
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.authentication import SessionAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authtoken.models import Token
 from .models import CustomUser
-from .serializers import UserSerializer
-from .forms import CreateUserForm, LoginForm
-
+from .serializers import UserSerializer, RegisterUserSerializer
+from .tokens import create_jwt_pair_for_user
 # Create your views here.
 @api_view(['GET'])
 def login(request):
@@ -21,14 +18,18 @@ def register(request):
 
 @api_view(['POST'])
 def createUser(request):
-	serializer = UserSerializer(data=request.data)
+	"""
+	This function is an api_view that can be accessed with a POST request.
+	It uses RegisterUserSerializer to validate the request data.
+	If the data is valid, it creates a new user with the given data,
+	gets the user object, and returns a Response containing the serialized user data.
+	If the data is invalid, it returns a Response with error messages.
+	"""
+	serializer = RegisterUserSerializer(data=request.data)
 	if serializer.is_valid():
 		serializer.save()
 		user = CustomUser.objects.get(username=request.data['username'])
-		user.set_password(request.data['password'])
-		user.save()
-		token = Token.objects.create(user=user)
-		return Response({'token': token.key, 'user': serializer.data})
+		return Response({'user': serializer.data})
 	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -37,9 +38,9 @@ def loginUser(request):
 	user = get_object_or_404(CustomUser, username=request.data['username'])
 	if not user.check_password(request.data['password']):
 		return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
-	token, created = Token.objects.get_or_create(user=user)
+	token = create_jwt_pair_for_user(user)
 	serializer = UserSerializer(instance=user)
-	return Response({'token': token.key, 'user': serializer.data})
+	return Response({'tokens': token, 'user': serializer.data})
 
 # This function is an api_view that can be accessed with a GET request
 # It is decorated with @authentication_classes, which means that it will
@@ -50,8 +51,11 @@ def loginUser(request):
 # The function returns a Response with a dictionary containing the user's
 # email, which is taken from request.user.email. This is only accessible if
 # the user is authenticated, as specified by the IsAuthenticated permission.
+
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 @api_view(['GET'])
-@authentication_classes([SessionAuthentication, TokenAuthentication])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def testToken(request):
 	"""
@@ -66,3 +70,4 @@ def testToken(request):
 	the user is authenticated, as specified by the IsAuthenticated permission.
 	"""
 	return Response({"passed for {}".format(request.user.email)})
+
