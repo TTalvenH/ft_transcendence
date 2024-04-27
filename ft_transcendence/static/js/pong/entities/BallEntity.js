@@ -1,10 +1,8 @@
 import * as THREE from 'three'
 import * as COLORS from '../colors.js';
 
-export class BallEntity
-{
-	constructor()
-	{
+export class BallEntity {
+	constructor() {
 		// Position
 		this.initPosition = new THREE.Vector3(0, 0, 0);
 		this.position = this.initPosition.clone();
@@ -38,8 +36,7 @@ export class BallEntity
 		this.mesh.geometry.computeBoundingSphere();
 	}
 
-	update(deltaTime)
-	{
+	update(deltaTime) {
 		this.velocity = this.direction.clone().multiplyScalar(this.speed);
 		this.position.add(this.velocity.clone().multiplyScalar(deltaTime));
 		this.position.z = 0;
@@ -48,8 +45,7 @@ export class BallEntity
 		this.mesh.position.copy(this.position);
 	}
 
-	render(scene)
-	{
+	render(scene) {
 		scene.add(this.mesh);
 		scene.add(this.pointLight);
 	}

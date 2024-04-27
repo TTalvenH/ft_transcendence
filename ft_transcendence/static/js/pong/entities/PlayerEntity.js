@@ -1,11 +1,9 @@
 import * as THREE from 'three'
 import * as COLORS from '../colors.js';
 
-export class PlayerEntity
-{
-	constructor(initPosition, color)
-	{
-		this.initHitPoints = 5;
+export class PlayerEntity {
+	constructor(initPosition, color) {
+		this.initHitPoints = 1;
 		this.hitPoints = this.initHitPoints;
 		this.initPosition = initPosition.clone();
 		this.position = this.initPosition.clone();
@@ -40,8 +38,7 @@ export class PlayerEntity
 		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
 	}	
 
-	update(deltaTime)
-	{
+	update(deltaTime) {
 		// Input
 		let targetVelocity = new THREE.Vector3(0, 0, 0);
 
@@ -69,8 +66,7 @@ export class PlayerEntity
 		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
 	}
 
-	render(scene)
-	{	
+	render(scene) {	
 		scene.add(this.mesh);
 		scene.add(this.visualMesh);
 	}	

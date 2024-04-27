@@ -5,8 +5,7 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
-export function initPostProcessing(scene, camera, renderer)
-{
+export function initPostProcessing(scene, camera, renderer) {
 	const	composer = new EffectComposer(renderer);
 	
 	const	renderScene = new RenderPass( scene, camera );

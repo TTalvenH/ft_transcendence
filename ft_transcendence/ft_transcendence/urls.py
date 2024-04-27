@@ -17,7 +17,11 @@ Including another URLconf
 from django.views.generic import TemplateView
 from django.contrib import admin
 from django.urls import path, include, re_path
+
+from rest_framework import routers
 from . import views
+
+router = routers.DefaultRouter()
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,5 +29,4 @@ urlpatterns = [
 	path('ui', views.ui),
 	path('pong/', include('pong.urls')),
 	path('users/', include('users.urls')),
-    # re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
 ]

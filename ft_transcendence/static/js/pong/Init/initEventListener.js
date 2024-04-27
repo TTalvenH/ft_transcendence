@@ -1,14 +1,11 @@
 import { GameStates } from "../pong.js";
 
-export function initEventListener(entities, gameGlobals)
-{
+export function initEventListener(entities, gameGlobals) {
 	const player1 = entities["Player1"];
 	const player2 = entities["Player2"];
 
-	document.addEventListener('keydown', (event) =>
-	{
-		switch (event.key)
-		{
+	document.addEventListener('keydown', (event) => {
+		switch (event.key) {
 			case "ArrowUp":
 				player1.keyUp = true;
 				break;
@@ -36,8 +33,7 @@ export function initEventListener(entities, gameGlobals)
 	
 	document.addEventListener('keyup', (event) =>
 	{
-		switch (event.key)
-		{
+		switch (event.key) {
 			case "ArrowRight":
 				player1.keyRight = false;
 				break;

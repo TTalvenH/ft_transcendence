@@ -1,9 +1,7 @@
 import * as THREE from 'three'
 
-export class PlaneEntity
-{
-	constructor(position, ...args)
-	{
+export class PlaneEntity {
+	constructor(position, ...args) {
 		// Position
 		this.position = position;
 
@@ -16,13 +14,11 @@ export class PlaneEntity
 		this.mesh.position.copy(this.position);
 	}
 
-	render(scene)
-	{	
+	render(scene) {	
 		scene.add(this.mesh);
 	}	
 
-	update(deltaTime)
-	{
+	update(deltaTime) {
 
 	}
 }

@@ -1,4 +1,5 @@
 import { GameStates, Pong } from "./pong/pong.js";
+import { pongStartHandler, pongMatchOverHandler } from "./routeHandlers/pongHandlers.js";
 
 const routes = {
 	"/": uiHandler,
@@ -11,13 +12,14 @@ const routes = {
 async function uiHandler() {
     const html = await fetch("/ui").then((data) => data.text());
 	document.getElementById('root').insertAdjacentHTML('beforeend', html);
-}
+	const sidePanel = document.getElementById('sidePanel');
+	sidePanel.addEventListener('click', (event) => {
+		if (event.target.id === 'startGameButton') {
+			pong.startGame();
+		}
+	});
 
-// async function loginHandler() {
-//     const html = await fetch("/users/login.html").then((data) => data.text());
-// 	console.log(html);
-// 	document.getElementById('root').insertAdjacentHTML('beforeend', html);
-// }
+}
 
 async function loginHandler() {
     const html = await fetch("/users/login.html").then((data) => data.text());
@@ -40,7 +42,6 @@ async function loginHandler() {
 
             if (response.ok) {
                 // Registration successful
-                alert('Login successful!');
                 const data = await response.json();
                 pong.startGame(data);
                 // Redirect to another page or handle the response as needed
@@ -54,11 +55,6 @@ async function loginHandler() {
         }
     });
 }
-
-// async function registerHandler() {
-//     const html = await fetch("/users/register.html").then((data) => data.text());
-// 	document.getElementById('root').insertAdjacentHTML('beforeend', html);
-// }
 
 async function registerHandler() {
     const html = await fetch("/users/register.html").then((data) => data.text());
@@ -91,15 +87,6 @@ async function registerHandler() {
             alert('An error occurred during registration. Please try again later.');
         }
     });
-}
-async function pongStartHandler() {
-    const html = await fetch("/pong/start").then((data) => data.text());
-    pong.pongStart(playerData);
-	pong.gameGlobals.gameState = GameStates.PLAYING;
-}
-async function pongMatchOverHandler() {
-    const html = await fetch("/pong/matchover").then((data) => data.text());
-	pong.gameGlobals.gameState = GameStates.MENU;
 }
 
 async function handleLocation() {

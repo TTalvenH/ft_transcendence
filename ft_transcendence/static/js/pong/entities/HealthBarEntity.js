@@ -1,10 +1,8 @@
 import * as THREE from 'three'
 import * as COLORS from '../colors.js';
 
-export class HealthBarEntity
-{
-	constructor(position, player)
-	{
+export class HealthBarEntity {
+	constructor(position, player) {
 		this.playerRef = player;
 		this.position = position;
 		this.geometry = new THREE.CapsuleGeometry(0.2, 0.5, 3, 10);
@@ -26,15 +24,13 @@ export class HealthBarEntity
 		}
 	}	
 
-	render(scene)
-	{
+	render(scene) {
 		this.healthBars.forEach( bar => {
 			scene.add(bar);
 		})
 	}
 
-	update(deltaTime)
-	{
+	update(deltaTime) {
 		if (this.currentHealth === this.playerRef.hitPoints)
 			return;
 

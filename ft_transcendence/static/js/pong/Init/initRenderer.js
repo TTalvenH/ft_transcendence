@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 
-export function initRenderer()
-{
+export function initRenderer() {
 	const container = document.getElementById("game");
 
 	const renderer = new THREE.WebGLRenderer( { antialias: true } );

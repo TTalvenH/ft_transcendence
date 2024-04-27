@@ -1,7 +1,6 @@
 import * as THREE from 'three'
 import * as COLORS from '../colors.js';
-export class NeonBoxEntity
-{
+export class NeonBoxEntity {
 	constructor(position, width, height, depth, isGoal, color)
 	{
 		// Neon Light around the box
@@ -56,10 +55,8 @@ export class NeonBoxEntity
 	}
 	
 
-	lightFlicker(deltaTime)
-	{
-		if (this.flickerTime > 0)
-		{
+	lightFlicker(deltaTime) {
+		if (this.flickerTime > 0) {
 			let flickerFactor = Math.random();
 	
 			// Apply the flicker factor to the light intensity and emissive color
@@ -69,8 +66,7 @@ export class NeonBoxEntity
 	
 			this.flickerTime -= 0.2 * deltaTime;
 		}
-		else
-		{
+		else {
 			// If flickerTime is 0 or less, reset the light intensity and emissive color
 			for (let i = 0; i < this.rectLights.length; i++)
 				this.rectLights[i].intensity = this.lightIntensity; // Reset to the original intensity
@@ -78,16 +74,14 @@ export class NeonBoxEntity
 		}
 	}
 
-	render(scene)
-	{
+	render(scene) {
 		scene.add(this.mesh);
 		this.rectLights.forEach(light => {
 			scene.add(light);
 		})
 	}
 	
-	update(deltaTime)
-	{
+	update(deltaTime) {
 		this.lightFlicker(deltaTime)
 	}
 }
