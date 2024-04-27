@@ -1,15 +1,4 @@
 
-@keyframes appearSmoothly {
-	from {
-		/* transform: translate(-100%, -50%); */
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
-		/* transform: translate(-50, -50); */
-	}
-}
-
 .box {
 	position: absolute;
 	top: 50%;
@@ -21,13 +10,6 @@
 	box-sizing: border-box;
 	background: rgba(233, 68, 225, 0.1);
 	border-radius: 0.625rem;
-
-	animation: appearSmoothly 1.5s;
-	/* animation-timing-function: ;
-	animation-delay: ;
-	animation-iteration-count: ;
-	animation-direction: ;
-	animation-fill-mode: ; */
 }
 
 
@@ -114,7 +96,7 @@
 }
 
 .box .inputBox input:-webkit-autofill ~ label {
-    top: -1.125rem;
+	top: -2rem;
     left: 0;
     color: #03a9f4;
     font-size: 0.75rem;

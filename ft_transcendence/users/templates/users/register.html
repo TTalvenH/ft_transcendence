@@ -1,4 +1,4 @@
-<div class="box" id="registerBox">
+<div class="box smoothAppear" id="registerBox">
     <h2>Register</h2>
     <form id="registerForm">
 		{% csrf_token %}
@@ -24,7 +24,8 @@
                    title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters">
             <label>Confirm Password</label>
         </div>
-        <input type="submit" name="sign-up" value="Sign Up">
+		<button class="btn button" type="submit">SIGN UP</button>
+        {% comment %} <input class="button" type="submit" name="sign-up" value="Sign Up"> {% endcomment %}
     </form>
 </div>
 

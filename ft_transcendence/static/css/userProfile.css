@@ -16,7 +16,8 @@
 	left: 50%;
 	border: 2px solid #f141f1;
 	transform: translate(-50%, -50%);
-	width: 40rem;
+	min-height: 600px;
+	max-width: 800px;
 	padding: 2.5rem;
 	box-sizing: border-box;
 	background: rgba(233, 68, 225, 0.1);

@@ -1,0 +1,18 @@
+.button {
+	position: relative;
+    border: 2px solid #27defa;
+    background-color: rgba(233, 68, 225, 0.1);
+    z-index: 1;
+	width: 100px;
+	height: 50px;
+	border-radius: 0.625rem;
+	color: #fff;
+	transition: transform 0.5s;
+}
+
+
+.button:hover {
+	border: 2px solid #27defa;
+	transform: scale(1.10);
+	color: #fff;
+}
