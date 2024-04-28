@@ -1,3 +1,164 @@
-<div class="container square-box d-flex" id="userProfile">
+{% load static %}
 
+<div class="container userProfile" id="userProfile">
+	<div class="row gy-5">
+		<div class="col-4">
+			<div class="profilePicture">
+				<img src="{% static 'images/plankton.jpg' %}" alt="...">
+			</div>
+			<div class="profileInfo">
+				<h3 style="color: white;">username</h3>
+			</div>
+			<div class="table-responsive" style="max-height: 35%;">
+				<table class="table">
+					<thead>
+						<tr>
+							<th scope="col">Friends</th>
+							<th scope="col">Status</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Alice</td>
+							<td>Online</td>
+						</tr>
+						<tr>
+							<td>Bob</td>
+							<td>Offline</td>
+						</tr>
+						<tr>
+							<td>Charlie</td>
+							<td>Offline</td>
+						</tr>
+						<tr>
+							<td>David</td>
+							<td>Offline</td>
+						</tr>
+						<tr>
+							<td>Alice</td>
+							<td>Online</td>
+						</tr>
+						<tr>
+							<td>Bob</td>
+							<td>Offline</td>
+						</tr>
+						<tr>
+							<td>Charlie</td>
+							<td>Offline</td>
+						</tr>
+						<tr>
+							<td>David</td>
+							<td>Offline</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="col-8">
+			<h1 style="color: white;">Match History</h1>
+			<div class="table-responsive" style="max-height: 53.5%;">
+				<table class="table">
+					<thead>
+						<tr>
+							<th scope="col">Opponent</th>
+							<th scope="col">Score</th>
+							<th scope="col">Date</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Alice</td>
+							<td>3-2</td>
+							<td>01/02/2023</td>
+						</tr>
+						<tr>
+							<td>Bob</td>
+							<td>4-1</td>
+							<td>02/03/2023</td>
+						</tr>
+						<tr>
+							<td>Charlie</td>
+							<td>2-3</td>
+							<td>03/04/2023</td>
+						</tr>
+						<tr>
+							<td>David</td>
+							<td>1-4</td>
+							<td>04/05/2023</td>
+						</tr>
+						<tr>
+							<td>Eve</td>
+							<td>5-1</td>
+							<td>05/06/2023</td>
+						</tr>
+						<tr>
+							<td>Frank</td>
+							<td>2-2</td>
+							<td>06/07/2023</td>
+						</tr>
+						<tr>
+							<td>Alice</td>
+							<td>3-2</td>
+							<td>01/02/2023</td>
+						</tr>
+						<tr>
+							<td>Bob</td>
+							<td>4-1</td>
+							<td>02/03/2023</td>
+						</tr>
+						<tr>
+							<td>Charlie</td>
+							<td>2-3</td>
+							<td>03/04/2023</td>
+						</tr>
+						<tr>
+							<td>David</td>
+							<td>1-4</td>
+							<td>04/05/2023</td>
+						</tr>
+						<tr>
+							<td>Eve</td>
+							<td>5-1</td>
+							<td>05/06/2023</td>
+						</tr>
+						<tr>
+							<td>Frank</td>
+							<td>2-2</td>
+							<td>06/07/2023</td>
+						</tr>
+						<tr>
+							<td>Alice</td>
+							<td>3-2</td>
+							<td>01/02/2023</td>
+						</tr>
+						<tr>
+							<td>Bob</td>
+							<td>4-1</td>
+							<td>02/03/2023</td>
+						</tr>
+						<tr>
+							<td>Charlie</td>
+							<td>2-3</td>
+							<td>03/04/2023</td>
+						</tr>
+						<tr>
+							<td>David</td>
+							<td>1-4</td>
+							<td>04/05/2023</td>
+						</tr>
+						<tr>
+							<td>Eve</td>
+							<td>5-1</td>
+							<td>05/06/2023</td>
+						</tr>
+						<tr>
+							<td>Frank</td>
+							<td>2-2</td>
+							<td>06/07/2023</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
 </div>
