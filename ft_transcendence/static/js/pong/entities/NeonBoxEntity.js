@@ -52,26 +52,31 @@ export class NeonBoxEntity {
 		this.mesh.updateMatrixWorld ( true );
 		this.collisionBox.applyMatrix4( this.mesh.matrixWorld)
 		this.flickerTime = 0;
+		this.isFlickering = false;
 	}
 	
-
-	lightFlicker(deltaTime) {
-		if (this.flickerTime > 0) {
-			let flickerFactor = Math.random();
-	
-			// Apply the flicker factor to the light intensity and emissive color
-			for (let i = 0; i < this.rectLights.length; i++)
-				this.rectLights[i].intensity = flickerFactor;
-			this.material.emissiveIntensity = flickerFactor;
-	
-			this.flickerTime -= 0.2 * deltaTime;
+	lightFlicker(minFlicker, maxFlicker, flickerTime) {
+		if (!this.isFlickering){
+			this.flickerTime = flickerTime;
+			this.isFlickering = true;
 		}
-		else {
-			// If flickerTime is 0 or less, reset the light intensity and emissive color
-			for (let i = 0; i < this.rectLights.length; i++)
+		if (this.flickerTime <= 0) {
+			for (let i = 0; i < this.rectLights.length; i++){
 				this.rectLights[i].intensity = this.lightIntensity; // Reset to the original intensity
-			this.material.emissiveIntensity = 1; // Reset to the original emissive intensity
+			}
+			this.material.emissiveIntensity = 1;
+			this.isFlickering = false;
+			return;
 		}
+		let emissiveIntensity = THREE.MathUtils.clamp(Math.random(), minFlicker, maxFlicker);
+		let lightIntensity = THREE.MathUtils.clamp(Math.random(), minFlicker, maxFlicker) * 10;
+		for (let i = 0; i < this.rectLights.length; i++) {
+			this.rectLights[i].intensity = lightIntensity;
+		}
+		this.material.emissiveIntensity = emissiveIntensity;
+		
+		this.flickerTime -= 0.2 + 1/60;
+		requestAnimationFrame(() => this.lightFlicker(minFlicker, maxFlicker, flickerTime));
 	}
 
 	render(scene) {
@@ -82,6 +87,5 @@ export class NeonBoxEntity {
 	}
 	
 	update(deltaTime) {
-		this.lightFlicker(deltaTime)
 	}
 }

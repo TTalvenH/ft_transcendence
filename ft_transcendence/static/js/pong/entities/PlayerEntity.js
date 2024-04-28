@@ -3,7 +3,7 @@ import * as COLORS from '../colors.js';
 
 export class PlayerEntity {
 	constructor(initPosition, color) {
-		this.initHitPoints = 1;
+		this.initHitPoints = 10;
 		this.hitPoints = this.initHitPoints;
 		this.initPosition = initPosition.clone();
 		this.position = this.initPosition.clone();
@@ -12,7 +12,7 @@ export class PlayerEntity {
 		this.velocity = new THREE.Vector3(0, 0, 0,);
 		this.acceleration = 0;
 		this.friction = 0;
-		this.speed = 0.05
+		this.speed = 0.09;
 
 		// Input keys
 		this.keyUp = false;
@@ -31,12 +31,35 @@ export class PlayerEntity {
 		this.material.emissive.set(color);
 		this.mesh.geometry.computeBoundingBox();
 
+		this.flickerTime = 0;
+		this.isFlickering = false;
+
+		this.trailMeshes = [];
+		this.trailLife = 3;
+
 		this.acceleration = 0.1;
 		this.friction = 0.1;
 		this.mesh.position.copy( this.position );
 		this.visualMesh.position.copy( this.position );
 		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
 	}	
+
+	lightFlicker(minFlicker, maxFlicker, flickerTime) {
+		if (!this.isFlickering){
+			this.flickerTime = flickerTime;
+			this.isFlickering = true;
+		}
+		if (this.flickerTime <= 0) {
+			this.material.emissiveIntensity = 1;
+			this.isFlickering = false;
+			return;
+		}
+		let emissiveIntensity = THREE.MathUtils.clamp(Math.random(), minFlicker, maxFlicker);
+		this.material.emissiveIntensity = emissiveIntensity;
+		
+		this.flickerTime -= 0.2 + 1/60;
+		requestAnimationFrame(() => this.lightFlicker(minFlicker, maxFlicker, flickerTime));
+	}
 
 	update(deltaTime) {
 		// Input
@@ -64,9 +87,26 @@ export class PlayerEntity {
 		this.mesh.position.copy( this.position );
 		this.visualMesh.position.copy( this.position );
 		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
+		let trailMesh = this.visualMesh.clone();
+		// Create a new material for the trail mesh
+		trailMesh.material = this.material.clone();
+		trailMesh.material.transparent = true;
+		this.trailMeshes.push(trailMesh);
+		this.scene.add(trailMesh);
+
+		// Fade out and remove old trail meshes
+		for (let i = this.trailMeshes.length - 1; i >= 0; i--) {
+			let mesh = this.trailMeshes[i];
+			mesh.material.opacity -= deltaTime / this.trailLife;
+			if (mesh.material.opacity <= 0) {
+				this.scene.remove(mesh);
+				this.trailMeshes.splice(i, 1);
+			}
+		}
 	}
 
 	render(scene) {	
+		this.scene = scene;
 		scene.add(this.mesh);
 		scene.add(this.visualMesh);
 	}	

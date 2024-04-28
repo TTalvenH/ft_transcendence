@@ -78,7 +78,7 @@ export class Pong
 		this.gameClock = new THREE.Clock();
 		this.clock = new THREE.Clock();
 		this.clockDelta = new THREE.Clock();
-		this.interval = 1 / 300
+		this.interval = 1 / 60;
 		this.isWinnerLoopOn = false;
 		this.winner = "";
 		initEventListener(this.entities, this.gameGlobals);
@@ -106,9 +106,7 @@ export class Pong
 		this.isWinnerLoopOn = true;
 		winnerName.setText(this.winner);
 		camera.setTargetLookAt(winnerName.position);
-		console.log("timer start");
 		await new Promise(resolve => setTimeout(resolve, 5000));
-		console.log("timer stopped");
 		camera.setTargetLookAt(new THREE.Vector3(0, 0, 0));
 		this.isWinnerLoopOn = false;
 	}

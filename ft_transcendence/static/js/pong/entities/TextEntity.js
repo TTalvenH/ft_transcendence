@@ -38,6 +38,23 @@ export class TextEntity {
 		this.mesh.geometry.center();
 	}
 
+	lightFlicker(minFlicker, maxFlicker, flickerTime) {
+		if (!this.isFlickering){
+			this.flickerTime = flickerTime;
+			this.isFlickering = true;
+		}
+		if (this.flickerTime <= 0) {
+			this.material.emissiveIntensity = 1;
+			this.isFlickering = false;
+			return;
+		}
+		let emissiveIntensity = THREE.MathUtils.clamp(Math.random(), minFlicker, maxFlicker);
+		this.material.emissiveIntensity = emissiveIntensity;
+		
+		this.flickerTime -= 0.2 + 1/60;
+		requestAnimationFrame(() => this.lightFlicker(minFlicker, maxFlicker, flickerTime));
+	}
+
 	render(scene) {
 		scene.add(this.mesh);
 	}

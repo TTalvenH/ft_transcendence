@@ -3,9 +3,10 @@ import * as THREE from 'three';
 
 function handleDamage(wall, players, camera) {
     if (wall.isGoal === false) {
+		wall.lightFlicker(0.7, 1, 3.0);
         return;
     }
-    wall.flickerTime += 3;
+	wall.lightFlicker(0, 1, 3.0);
     camera.shakeTime += 1.5;
     const player1DistanceFromWall = players[0].position.clone().sub(wall.position).length();
     const player2DistanceFromWall = players[1].position.clone().sub(wall.position).length();
@@ -20,6 +21,7 @@ function handleWallCollision(ball, wall, players, camera) {
     const raycaster = new THREE.Raycaster(ball.position, ball.direction);
     const intersects = raycaster.intersectObject(wall.mesh);
     if (intersects.length > 0) {
+		ball.lightFlicker(0, 1, 3.0);
         handleDamage(wall, players, camera);
         const normal = intersects[0].normal.clone();
         const velocityPerpendicular = ball.direction.dot(normal);
@@ -32,6 +34,8 @@ function handlePlayerCollision(ball, player) {
     const intersects = raycaster.intersectObject(player.mesh);
     
     if (intersects.length > 0) {
+		ball.lightFlicker(0, 1, 6.0);
+		player.lightFlicker(0, 1, 10.0);
         const normal = intersects[0].normal.clone();
         let relativeCollisionPoint = intersects[0].point.y - player.position.y;
         relativeCollisionPoint = 2 * (relativeCollisionPoint / player.height);
