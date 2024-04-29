@@ -32,7 +32,6 @@ def createUser(request):
 	serializer = RegisterUserSerializer(data=request.data)
 	if serializer.is_valid():
 		serializer.save()
-		user = CustomUser.objects.get(username=request.data['username'])
 		return Response({'user': serializer.data})
 	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -45,6 +44,8 @@ def loginUser(request):
 	token = create_jwt_pair_for_user(user)
 	serializer = UserSerializer(instance=user)
 	return Response({'tokens': token, 'user': serializer.data})
+
+
 
 # This function is an api_view that can be accessed with a GET request
 # It is decorated with @authentication_classes, which means that it will
@@ -74,4 +75,27 @@ def testToken(request):
 	the user is authenticated, as specified by the IsAuthenticated permission.
 	"""
 	return Response({"passed for {}".format(request.user.email)})
+
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def getUser(request, user_id):
+    # Extract user ID from the token
+    token_user_id = request.user.id
+    
+    # Ensure the token user matches the requested user ID
+    if token_user_id != user_id:
+        return Response({"error": "You are not authorized to access this user's data."}, status=403)
+    
+    # Retrieve user from the database
+    user = get_object_or_404(CustomUser, id=user_id)
+    
+    # Serialize the user data
+    serializer = UserSerializer(instance=user)
+    
+    # Return the serialized user data
+    return Response({'user': serializer.data})
 

@@ -1,7 +1,7 @@
 POST http://127.0.0.1:8000/users/create-user
 Content-Type: application/json
 
-{ "username": "mulli", "email": "mulli@gmail.com", "password": "Testisalis123#", "confirm_password": "Testisalis123#"}
+{ "username": "test1", "email": "testi1@gmail.com", "password": "Testisalis123#", "confirm_password": "Testisalis123#"}
 
 ###
 
@@ -16,12 +16,18 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/users/login-user
 Content-Type: application/json
 
-{ "username": "mulli", "password": "Testisalis123#"}
+{ "username": "test1", "password": "Testisalis123#"}
 
 ###
 
 GET http://127.0.0.1:8000/users/test-token
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0MTM1ODMwLCJpYXQiOjE3MTQxMjg2MzAsImp0aSI6IjgzN2I0ZWYwZWUxZTRhNDliOTlmNjI0YTMyMmE5NTZlIiwidXNlcl9pZCI6NDR9.2W6bKiwEHggqejQb-XVYvc3rLLcfyMAu53wtMEgIeYA
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0Mzg3MTMzLCJpYXQiOjE3MTQzNzk5MzMsImp0aSI6Ijk5NDMyMDZhZjcxZDRhOTg4NGRmYjE3ZGQzMDVmMjJjIiwidXNlcl9pZCI6NDR9.ZR4yQ_shCFwWeK1GtBZNjZU-htVhhMyC5unAOhXG3gI
 
 {}
+
+###
+
+GET http://127.0.0.1:8000/users/get-user/46/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0Mzk4NTkyLCJpYXQiOjE3MTQzOTEzOTIsImp0aSI6IjA3YmE4OGNhNGFkNTRlZGNhYTJmYzliZmI1NzRiOGFkIiwidXNlcl9pZCI6NDZ9.3Cm1uZbsGOMVCOmexWcmf1HD-cC5gtr1gaWHJrXXEc8
