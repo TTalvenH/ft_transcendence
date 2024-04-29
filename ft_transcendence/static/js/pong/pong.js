@@ -78,7 +78,7 @@ export class Pong
 		this.gameClock = new THREE.Clock();
 		this.clock = new THREE.Clock();
 		this.clockDelta = new THREE.Clock();
-		this.interval = 1 / 60;
+		this.interval = 1 / 120;
 		this.isWinnerLoopOn = false;
 		this.winner = "";
 		initEventListener(this.entities, this.gameGlobals);
@@ -143,6 +143,9 @@ export class Pong
 		player2.hitPoints = player2.initHitPoints;
 		ball.position.copy(ball.initPosition);
 		ball.speed = ball.initSpeed;
+		ball.trail.forEach(trailMesh => {
+			trailMesh.position.set(0, 0, 0);
+		});
 
 		for (const key in this.entities) {
 			if (this.entities.hasOwnProperty(key)) {

@@ -88,7 +88,7 @@ export class CameraEntity {
 		}
 		
 		if (Math.abs(this.camera.fov - this.targetFov) > 0.1) {
-			this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, this.targetFov, 0.05 * deltaTime);
+			this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, this.targetFov, 0.03 * deltaTime);
 			this.camera.updateProjectionMatrix();
 		}
 		this.camera.lookAt(this.lookAt);

@@ -1,8 +1,6 @@
 import * as THREE from 'three'
 
 export function initRenderer() {
-	const container = document.getElementById("game");
-
 	const renderer = new THREE.WebGLRenderer( { antialias: true } );
 	renderer.toneMapping = THREE.ReinhardToneMapping;
 	renderer.setSize(window.innerWidth, window.innerHeight);
@@ -10,7 +8,7 @@ export function initRenderer() {
 	const gameContainer = document.createElement('div');
 	gameContainer.id = 'gameContainer';
 	gameContainer.appendChild(renderer.domElement);
-	document.getElementById('root').appendChild(gameContainer);
+	document.getElementById('root').insertBefore(gameContainer, document.getElementById('root').firstChild);
 
 	return renderer;
 }

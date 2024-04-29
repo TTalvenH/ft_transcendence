@@ -15,6 +15,7 @@ async function uiHandler() {
 	const sidePanel = document.getElementById('sidePanel');
 	sidePanel.addEventListener('click', (event) => {
 		if (event.target.id === 'startGameButton') {
+			document.getElementById('sidePanel').style.visibility = 'hidden';
 			pong.startGame();
 		}
 	});

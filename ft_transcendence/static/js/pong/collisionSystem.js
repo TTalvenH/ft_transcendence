@@ -35,7 +35,7 @@ function handlePlayerCollision(ball, player) {
     
     if (intersects.length > 0) {
 		ball.lightFlicker(0, 1, 6.0);
-		player.lightFlicker(0, 1, 10.0);
+		player.lightFlicker(0, 1, 7.0);
         const normal = intersects[0].normal.clone();
         let relativeCollisionPoint = intersects[0].point.y - player.position.y;
         relativeCollisionPoint = 2 * (relativeCollisionPoint / player.height);
