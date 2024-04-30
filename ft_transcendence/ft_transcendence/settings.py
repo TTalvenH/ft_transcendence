@@ -43,7 +43,11 @@ INSTALLED_APPS = [
 	'rest_framework_simplejwt',
 	'rest_framework.authtoken',
 	'pong',
-	'users'
+	'users',
+    'django_otp',
+    'django_otp.plugins.otp_totp',
+    'django_otp.plugins.otp_static',
+    'two_factor',
 ]
 
 MIDDLEWARE = [
