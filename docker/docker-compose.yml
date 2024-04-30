@@ -50,23 +50,19 @@ services:
       - mynetwork
     restart: always
 
-
-
-
-  # postgres:
-  #   image: postgres:latest
-  #   container_name: postgres-cont
-  #   environment:
-  #     POSTGRES_USER: root
-  #     POSTGRES_PASSWORD: root
-  #     POSTGRES_DB: pg
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   networks:
-  #     - mynetwork
-  #   restart: always
-  #   ports:
-  #     - "5432:5432"
+  postgres:
+    image: postgres:latest
+    build:
+      context: ./postgreSQL
+      dockerfile: ./Dockerfile
+    container_name: postgres-cont
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+    restart: always
+    ports:
+      - "5432:5432"
 
   # pgadmin:
   #   image: dpage/pgadmin4

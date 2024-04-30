@@ -20,5 +20,5 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-	path('', views.write_secret)
+	path('', views.get_vault_credentials)
 ]

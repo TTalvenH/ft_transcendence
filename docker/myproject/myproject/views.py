@@ -22,3 +22,14 @@ def write_secret(request):
 		secret=secret_data,
     )
 	return HttpResponse("Secret written successfully.")
+
+def get_vault_credentials(request):
+    # Connect to Vault
+    client = hvac.Client(url='http://vault-cont:8200')
+
+    # Read credentials from Vault
+    read_response = client.secrets.database.read_secret_version(path='creds/user-specific-role')
+    username = read_response['data']['username']
+    password = read_response['data']['password']
+
+    return username, password

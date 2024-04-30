@@ -28,34 +28,52 @@ vault read -field=role_id auth/approle/role/my-role/role-id > /etc/vault/vault-i
 # Retrieve and save the Secret ID
 vault write -f -field=secret_id auth/approle/role/my-role/secret-id > /etc/vault/vault-id/secret_id
 
-# Generate SSL certs
-vault secrets enable pki
+vault secrets enable database
 
-# new root CA, not usual for production, would use intermediate cert instead
-vault write pki/root/generate/internal \
-    common_name="rootCert" \
-    ttl=87600h
+vault write database/config/my-postgresql-database \
+    plugin_name=postgresql-database-plugin \
+    allowed_roles="user-specific-role" \
+    connection_url="postgresql://{{username}}:{{password}}@postgres-cont:5432/mydatabase?sslmode=disable" \
+    username="postgres" \
+    password="your_postgres_password"
 
-vault write pki/config/urls \
-issuing_certificates="localhost:8200/v1/pki/ca" \
-crl_distribution_points="localhost:8200/v1/pki/crl"
+vault write database/roles/user-specific-role \
+    db_name=my-postgresql-database \
+    creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{{name}}\"; ALTER ROLE \"{{name}}\" SET row_security = ON;" \
+    default_ttl="1h" \
+    max_ttl="24h"
 
-vault write pki/roles/client-cert \
-    allowed_domains="localhost" \
-    allow_subdomains=true \
-    max_ttl="72h"
+vault read database/creds/user-specific-role
 
-mkdir vault/certs
 
-vault write -format=json pki/issue/client-cert common_name="localhost" | jq -r '.data.issuing_ca' > vault/certs/issuing-ca.pem
+# # Generate SSL certs
+# vault secrets enable pki
 
-vault write -format=json pki/issue/client-cert \
-    common_name="localhost" \
-    format="pem" \
-    private_key_format="pem" \
-    exclude_cn_from_sans=true \
-    ttl="72h" \
-    | jq -r '.data.private_key, .data.certificate' > vault/certs/client-cert-and-key.pem
+# # new root CA, not usual for production, would use intermediate cert instead
+# vault write pki/root/generate/internal \
+#     common_name="rootCert" \
+#     ttl=87600h
+
+# vault write pki/config/urls \
+# issuing_certificates="localhost:8200/v1/pki/ca" \
+# crl_distribution_points="localhost:8200/v1/pki/crl"
+
+# vault write pki/roles/client-cert \
+#     allowed_domains="localhost" \
+#     allow_subdomains=true \
+#     max_ttl="72h"
+
+# mkdir vault/certs
+
+# vault write -format=json pki/issue/client-cert common_name="localhost" | jq -r '.data.issuing_ca' > vault/certs/issuing-ca.pem
+
+# vault write -format=json pki/issue/client-cert \
+#     common_name="localhost" \
+#     format="pem" \
+#     private_key_format="pem" \
+#     exclude_cn_from_sans=true \
+#     ttl="72h" \
+#     | jq -r '.data.private_key, .data.certificate' > vault/certs/client-cert-and-key.pem
 
 
 
