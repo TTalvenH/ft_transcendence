@@ -1,15 +1,4 @@
 
-@keyframes appearSmoothly {
-	from {
-		/* transform: translate(-100%, -50%); */
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
-		/* transform: translate(-50, -50); */
-	}
-}
-
 .userProfile {
 	position: absolute;
 	top: 50%;
@@ -24,7 +13,6 @@
 	background: rgba(233, 68, 225, 0.1);
 	border-radius: 0.625rem;
 
-	animation: appearSmoothly 1.5s;
 }
 
 .userProfile::before {
@@ -81,7 +69,38 @@
 
 
 
-/* .table {
-	border: 2px solid #27defa;
-	border-radius: 0.625rem;
-} */
+.profile-pic {
+    border-radius: 50%;
+    height: 150px;
+    width: 150px;
+    background-size: cover;
+    background-position: center;
+    background-blend-mode: multiply;
+    vertical-align: middle;
+    text-align: center;
+    color: transparent;
+    transition: all .3s ease;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.profile-pic:hover {
+    background-color: rgba(0,0,0,.5);
+    z-index: 10000;
+    color: #fff;
+    transition: all .3s ease;
+    text-decoration: none;
+}
+
+.profile-pic span {
+    display: inline-block;
+    padding-top: 4.5em;
+    padding-bottom: 4.5em;
+}
+
+form input[type="file"] {
+          display: none;
+          cursor: pointer;
+ }
+
+ 
