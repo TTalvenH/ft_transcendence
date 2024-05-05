@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from .models import CustomUser
-from .serializers import UserSerializer, RegisterUserSerializer
+from .serializers import UserSerializer, RegisterUserSerializer, UserProfileSerializer
 from .tokens import create_jwt_pair_for_user
 # Create your views here.
 @api_view(['GET'])
@@ -99,3 +99,31 @@ def getUser(request, user_id):
     # Return the serialized user data
     return Response({'user': serializer.data})
 
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def getUserPorfile(request, user_id):
+    # Retrieve user from the database
+    user = get_object_or_404(CustomUser, id=user_id)
+    
+    # Serialize the user data
+    serializer = UserProfileSerializer(instance=user)
+    
+    # Return the serialized user data
+    return Response(serializer.data)
+
+@api_view(['PUT'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def updateUserPorfile(request):
+	# Retrieve user from the database
+	user = get_object_or_404(CustomUser, id=request.user.id)
+
+	# Serialize the user data
+	serializer = UserProfileSerializer(instance=user, data=request.data, partial=True)
+	if (serializer.is_valid()):
+		print('its trueee')
+		serializer.save()
+
+	# Return the serialized user data
+	return Response(serializer.data)

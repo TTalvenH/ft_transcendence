@@ -9,4 +9,6 @@ urlpatterns = [
 	path('login-user', views.loginUser, name="login-user"),
 	path('test-token', views.testToken, name="test-token"),
 	path('get-user/<int:user_id>/', views.getUser, name="get-user"),
+	path('get-user-profile/<int:user_id>/', views.getUserPorfile, name="get-user-profile"),
+	path('update-user-profile', views.updateUserPorfile, name="update-user-profile"),
 ]
