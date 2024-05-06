@@ -4,3 +4,4 @@ django-cors-headers
 djangorestframework
 djangorestframework-simplejwt
 Pillow
+django-mfa==3.2

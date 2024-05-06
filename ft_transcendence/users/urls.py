@@ -8,4 +8,5 @@ urlpatterns = [
 	path('create-user', views.createUser, name="create-user"),
 	path('login-user', views.loginUser, name="login-user"),
 	path('test-token', views.testToken, name="test-token"),
+	path('get-user/<int:user_id>/', views.getUser, name="get-user"),
 ]

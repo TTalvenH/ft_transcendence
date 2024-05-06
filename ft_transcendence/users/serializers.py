@@ -1,10 +1,11 @@
 from rest_framework import serializers
 from .models import CustomUser
+from .tokens import create_jwt_pair_for_user
 
 class UserSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = CustomUser
-		fields = ['id', 'username', 'email', 'password', 'image']
+		fields = ['id', 'username', 'email']
 
 from django.contrib.auth.password_validation import password_validators_help_texts, validate_password
 from rest_framework.validators import UniqueValidator
@@ -71,3 +72,5 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 		user.save()
 
 		return user
+
+
