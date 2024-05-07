@@ -1,5 +1,1 @@
-[ ]		implement html content caching and state manager in javascript
-
-[ ]		research and start using jwt token thingy in django	
-
-[ ]		make profile site/box in html
+[ ]		make a container for the user forms and profile in html
