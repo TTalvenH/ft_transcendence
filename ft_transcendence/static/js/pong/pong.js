@@ -13,6 +13,7 @@ import { HealthBarEntity } from './entities/HealthBarEntity.js';
 import { CameraEntity } from './entities/CameraEntity.js';
 import { TextEntity } from './entities/TextEntity.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { gameOverEvent } from '../router.js';
 
 import * as COLORS from './colors.js';
 
@@ -78,9 +79,11 @@ export class Pong
 		this.gameClock = new THREE.Clock();
 		this.clock = new THREE.Clock();
 		this.clockDelta = new THREE.Clock();
+		this.matchTime = new THREE.Clock();
+		this.matchDate = {};
 		this.interval = 1 / 120;
 		this.isWinnerLoopOn = false;
-		this.winner = "";
+		this.winnerText = "";
 		initEventListener(this.entities, this.gameGlobals);
 	}
 
@@ -96,7 +99,9 @@ export class Pong
 		}
 		camera.setTargetLookAt(new THREE.Vector3(0, 0, 0));
 		countDown.setText("");
-		this.gameGlobals.gameState = i === -1 ? GameStates.PLAYING : GameStates.MENU;
+		this.matchTime.start();
+		this.matchDate = new Date();
+		this.gameGlobals.gameState = GameStates.PLAYING;
 	}
 
 	async winnerLoop() {
@@ -104,7 +109,7 @@ export class Pong
 		const camera = this.entities['Camera'];
 
 		this.isWinnerLoopOn = true;
-		winnerName.setText(this.winner);
+		winnerName.setText(this.winnerText);
 		camera.setTargetLookAt(winnerName.position);
 		await new Promise(resolve => setTimeout(resolve, 5000));
 		camera.setTargetLookAt(new THREE.Vector3(0, 0, 0));
@@ -114,7 +119,11 @@ export class Pong
 	startGame(userData) {
 		const user1Name = this.entities['User1Name']
 		const user2Name = this.entities['User2Name']
-
+		
+		user1Name.setText(userData.users[0]);
+		user2Name.setText(userData.users[1]);
+		user1Name.text = userData.users[0];
+		user2Name.text = userData.users[1];
 		// user1Name.setText(userData.user.username);
 		// console.log(userData);
 		this.startCountDown();
@@ -164,19 +173,38 @@ export class Pong
 		const userName2 = this.entities["User2Name"];
 		const goal1 = this.entities["NeonBox3"];
 		const goal2 = this.entities["NeonBox4"];
+		let winner = {};
 
 		if (player1.hitPoints <= 0) {
 			console.log("Player2 WINS!");
-			this.winner = "Winner is " + userName2.text + " !";
+			winner = userName2.text;
+			this.winnerText = "Winner is " + userName2.text + " !";
 		} else if (player2.hitPoints <= 0) {
 			console.log("Player1 WINS!");
-			this.winner = "Winner is " + userName1.text + " !";
+			winner = userName1.text;
+			this.winnerText = "Winner is " + userName1.text + " !";
 		} else {
 			return;
 		}
 
+		const gameOverData = {
+			player1: {
+				name: userName1.text,
+				hitpoints: player1.hitPoints,
+			},
+			player2: {
+				name: userName2.text,
+				hitpoints: player2.hitPoints,
+			},
+			winner: winner,
+			matchTimeLength: this.matchTime.getElapsedTime().toFixed(2) + "s",
+			dateTime: this.matchDate,
+		};
+
 		goal1.material.emissiveIntensity = 1;
 		goal2.material.emissiveIntensity = 1;
+		gameOverEvent.detail.gameOverData = gameOverData;
+		document.dispatchEvent(gameOverEvent);
 		this.winnerLoop();
 		this.gameGlobals.gameState = GameStates.GAMEOVER;
 	}

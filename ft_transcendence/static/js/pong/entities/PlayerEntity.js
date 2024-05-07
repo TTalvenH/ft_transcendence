@@ -3,7 +3,7 @@ import * as COLORS from '../colors.js';
 
 export class PlayerEntity {
 	constructor(initPosition, color) {
-		this.initHitPoints = 10;
+		this.initHitPoints = 3;
 		this.hitPoints = this.initHitPoints;
 		this.initPosition = initPosition.clone();
 		this.position = this.initPosition.clone();

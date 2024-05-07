@@ -1,6 +1,22 @@
 import { GameStates, Pong } from "./pong/pong.js";
 import { pongStartHandler, pongMatchOverHandler } from "./routeHandlers/pongHandlers.js";
 
+const gameOverData = {
+	player1: {
+		name: "",
+		hitpoints: 0,
+	},
+	player2: {
+		name: "",
+		hitpoints: 0,
+	},
+	winner: "",
+	matchTimeLength: 0,
+	dateTime: 0,
+};
+
+export const gameOverEvent = new CustomEvent('endMatch', { detail: gameOverData });
+
 const routes = {
 	"/": uiHandler,
 	"/pongStart": pongStartHandler,
@@ -13,13 +29,24 @@ async function uiHandler() {
     const html = await fetch("/ui").then((data) => data.text());
 	document.getElementById('root').insertAdjacentHTML('beforeend', html);
 	const sidePanel = document.getElementById('sidePanel');
-	sidePanel.addEventListener('click', (event) => {
+	sidePanel.addEventListener('click', async (event) => {
 		if (event.target.id === 'startGameButton') {
 			document.getElementById('sidePanel').style.visibility = 'hidden';
-			pong.startGame();
+			const players = await fetch('/pong/startMatch').then((data) => data.json());
+			pong.startGame(players);
 		}
 	});
-
+	document.addEventListener('endMatch', async (event) =>{
+		console.log(event.detail.gameOverData);
+		console.log('Game over event triggered!');
+		const response = await fetch('/pong/endMatch', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(event.detail.gameOverData)
+		});
+	});
 }
 
 async function loginHandler() {
