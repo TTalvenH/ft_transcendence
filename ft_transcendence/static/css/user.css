@@ -37,11 +37,11 @@
 	text-align: center;
   }
   
-  .box .inputBox {
+  .inputBox {
 	position: relative;
   }
   
-  .box .inputBox input {
+ .inputBox input {
 	width: 100%;
 	padding: 0.625rem 0;
 	font-size: 1rem;
@@ -54,7 +54,7 @@
 	background: transparent;
   }
   
-  .box .inputBox label {
+.inputBox label {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -65,16 +65,16 @@
 	transition: 0.5s;
   }
   
-  .box .inputBox input:focus ~ label,
-  .box .inputBox input:valid ~ label,
-  .box .inputBox input:not([value=""]) ~ label {
+.inputBox input:focus ~ label,
+.inputBox input:valid ~ label,
+.inputBox input:not([value=""]) ~ label {
 	top: -1.125rem;
 	left: 0;
 	color: #ffffff;
 	font-size: 0.75rem;
   }
   
-  .box input[type="submit"] {
+  .inputBox input[type="submit"] {
 	border: none;
 	outline: none;
 	color: #fff;
@@ -85,60 +85,19 @@
 	font-size: 1rem;
   }
   
-  .box input[type="submit"]:hover {
+  .inputBox input[type="submit"]:hover {
 	background-color: #1cb1f5;
   }
   
 
-.box .inputBox input:-webkit-autofill {
+.inputBox input:-webkit-autofill {
     -webkit-text-fill-color: rgb(255, 255, 255); /* Change the text color */
 	-webkit-box-shadow: 0 0 0px 40rem rgb(92, 35, 89) inset;
 }
 
-.box .inputBox input:-webkit-autofill ~ label {
+.inputBox input:-webkit-autofill ~ label {
 	top: -2rem;
     left: 0;
     color: #ffffff;
     font-size: 0.75rem;
-}
-
-
-.editProfilePicture {
-	width: 60%;
-	height: 60%;
-	transform: translateX(35%);
-	margin-bottom: 30px;
-}
-
-.editProfilePicture img {
-	width: 100%;
-	height: 100%;
-	border: #27defa 2px solid;
-	border-bottom: none;
-	border-top-left-radius: 0.625rem;
-	border-top-right-radius: 0.625rem;
-	object-fit: contain;
-}
-
-.editProfilePicture .butn {
-	width: 100%;
-	height: 25%;
-	border: #27defa 2px solid;
-	background: #27defa;
-	border-bottom-left-radius: 0.625rem;
-	border-bottom-right-radius: 0.625rem;
-	transition: 0.3s;
-}
-
-.editProfilePicture .butn:hover {
-	width: 100%;
-	border: #2790fa 2px solid;
-	background: #2790fa;
-	border-bottom-left-radius: 0.625rem;
-	border-bottom-right-radius: 0.625rem;
-}
-
-.editProfilePicture .butn label {
-	color: #ffffff;
-	cursor: pointer;
 }
