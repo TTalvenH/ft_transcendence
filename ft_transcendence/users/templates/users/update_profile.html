@@ -1,35 +1,51 @@
+{% load static %}
+
 <div class="box smoothAppear" id="registerBox">
-    <h2>Register</h2>
-    <form id="registerForm">
-		{% csrf_token %}
-        <div class="inputBox">
-            <input type="text" name="username" required onkeyup="this.setAttribute('value', this.value);" value="">
-            <label>New Username (Optional)</label>
-        </div>
-        <div class="inputBox">
-            <input type="email" name="email" required onkeyup="this.setAttribute('value', this.value);" value="">
-            <label>New Email (Optional)</label>
-        </div>
-        <div class="inputBox">
-            <input type="password" name="password" required value=""
-                   onkeyup="this.setAttribute('value', this.value);"
-                   pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-                   title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters">
-            <label>Current Password</label>
-        </div>
-        <div class="inputBox">
-            <input type="password" name="new_password" required value=""
-                   onkeyup="this.setAttribute('value', this.value);"
-                   pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-                   title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters">
-            <label>New Password</label>
-        <div class="inputBox">
-            <input type="password" name="new_password" required value=""
-                   onkeyup="this.setAttribute('value', this.value);"
-                   pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-                   title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters">
-            <label>Confirm New Password</label>
-        </div>
-		<button class="button" type="submit">Update</button>
-    </form>
+	<h2>Edit Profile</h2>
+	<form id="updateProfileForm" enctype="multipart/form-data" autocomplete="off">
+		<div class="editProfilePicture">
+			<img id="profileImage" src="{% static 'images/plankton.jpg' %}" alt="...">
+			<button class="butn" id="chooseImage">
+				<input type="file" accept="image/*" id="imageInput" hidden>
+				<label for="imageInput">Choose Image</label>
+			</button>
+		</div>
+		<div class="inputBox">
+			<input autocomplete="off" type="text" name="username" required onkeyup="this.setAttribute('value', this.value);" value="">
+			<label>Change Username</label>
+		</div>
+		<div class="inputBox">
+			<input autocomplete="off" type="email" name="email" required onkeyup="this.setAttribute('value', this.value);" value="">
+			<label>Change Email</label>
+		</div>
+		<div class="form-check form-switch" style="color: white; margin-bottom: 20px;">
+			<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+			<label class="form-check-label" for="flexSwitchCheckDefault">Change Password</label>
+		</div>
+		<div class="inputBox passwordField" style="display: none;">
+			<input type="password" name="password" required value=""
+				onkeyup="this.setAttribute('value', this.value);"
+				pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+				title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+				autocomplete="off">
+			<label>Old Password</label>
+		</div>
+		<div class="inputBox passwordField" style="display: none;">
+			<input type="password" name="password" required value=""
+				onkeyup="this.setAttribute('value', this.value);"
+				pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+				title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+				autocomplete="off">
+			<label>New Password</label>
+		</div>
+		<div class="inputBox passwordField" style="display: none;">
+			<input type="password" name="password" required value=""
+				onkeyup="this.setAttribute('value', this.value);"
+				pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+				title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+				autocomplete="off">
+			<label>Confirm Password</label>
+		</div>
+		<button class="button" type="submit">UPDATE</button>
+	</form>
 </div>

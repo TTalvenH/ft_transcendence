@@ -14,7 +14,10 @@
 		<form id="registerForm" enctype="multipart/form-data">
 			<div class="editProfilePicture">
 				<img src="plankton.jpg" alt="...">
-				<button class="butn" onclick="chooseImage()">Choose Image</button>
+				<button class="butn" id="chooseImage">
+					<input type="file" accept="image/*" id="imageInput" hidden>
+					<label for="imageInput">Choose Image</label>
+				</button>
 			</div>
 			<div class="inputBox">
 				<input type="text" name="username" required onkeyup="this.setAttribute('value', this.value);" value="">

@@ -12,6 +12,7 @@ const routes = {
 	"/login": loginHandler,
 	"/register": registerHandler,
 	"/profile": profileHandler,
+	"/edit-profile": editProfileHandler,
 };
 
 async function uiHandler() {
@@ -20,29 +21,83 @@ async function uiHandler() {
 	document.getElementById('ui').insertAdjacentHTML('beforeend', uiHTML);
 }
 
+
+
+async function editProfileHandler() {
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
+	const updateProfileHTML = await fetch("/users/update_profile.html").then((data) => data.text());
+	userContainer.insertAdjacentHTML('beforeend', updateProfileHTML);
+	const updateProfileForm = document.getElementById('updateProfileForm');
+	updateProfileForm.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		const formData = new FormData(updateProfileForm);
+		const response = await fetch('/users/update-user', {
+			method: 'PUT',
+			body: formData
+		});
+		if (response.ok) {
+			alert('Profile updated!');
+		} else {
+			alert('Profile update failed!');
+		}
+	});
+
+	const input = document.getElementById('imageInput');
+	const profileImage = document.getElementById('profileImage');
+	input.addEventListener('change', async (event) => {
+		var file = input.files[0];
+		if (file) {
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				// Replace the image source with the selected image
+				profileImage.src = e.target.result;
+				profileImage.onload = function() {
+					// Make sure the image is loaded before displaying it
+					profileImage.style.display = 'block';
+				}
+			}
+			reader.readAsDataURL(file);
+		}
+	});
+
+	const checkBox = document.getElementById('flexSwitchCheckDefault');
+	checkBox.addEventListener('change', (event) => {
+		console.log('something happened 2')
+		const passwordFields = document.querySelectorAll('.passwordField');
+		if (event.target.checked) {
+			passwordFields.forEach((passwordField) => {
+				passwordField.style.display = 'block';
+			});
+		} else {
+			passwordFields.forEach((passwordField) => {
+				passwordField.style.display = 'none';
+			});
+		}
+	});
+}
+
 async function profileHandler() {
-	// const profileBox = document.getElementById('profileBox');
-	// if (profileBox)
-	// 	profileBox.remove();
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
 	if (!profileHTML)
 		profileHTML = await fetch("/users/profile.html").then((data) => data.text());
-	document.getElementById('ui').insertAdjacentHTML('beforeend', profileHTML);
+	userContainer.insertAdjacentHTML('beforeend', profileHTML);
 }
 
 async function loginHandler() {
-	const registerBox = document.getElementById('registerBox');
-	if (registerBox)
-		registerBox.remove();
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
 	if (!loginFormHTML)
 		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
-    document.getElementById('ui').insertAdjacentHTML('beforeend', loginFormHTML);
+	userContainer.insertAdjacentHTML('beforeend', loginFormHTML);
     // Add event listener to the registration form
     const loginForm = document.getElementById('loginForm');
     loginForm.addEventListener('submit', async (event) => {
         event.preventDefault(); // Prevent default form submission behavior
 
         // Get form data
-        let formData = new FormData(loginForm);
+        const formData = new FormData(loginForm);
         
         try {
             // Send form data to the backend
@@ -68,13 +123,11 @@ async function loginHandler() {
 
 
 async function registerHandler() {
-	const loginBox = document.getElementById('loginBox');
-	if (loginBox) {
-		loginBox.remove();
-	}
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
 	if (!registerFormHTML) // we only fetch once and then save it locally
 		registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
-    document.getElementById('ui').insertAdjacentHTML('beforeend', registerFormHTML);
+    userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
     // Add event listener to the registration form
     const registerForm = document.getElementById('registerForm');
     registerForm.addEventListener('submit', async (event) => {

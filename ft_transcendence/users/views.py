@@ -17,6 +17,10 @@ def register(request):
 	return render(request, 'users/register.html')
 
 @api_view(['GET'])
+def updateProfile(request):
+	return render(request, 'users/update_profile.html')
+
+@api_view(['GET'])
 def userProfileTemplate(request):
 	return render(request, 'users/profile.html')	
 

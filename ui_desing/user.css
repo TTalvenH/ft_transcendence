@@ -157,3 +157,8 @@
 	border-bottom-left-radius: 0.625rem;
 	border-bottom-right-radius: 0.625rem;
 }
+
+.editProfilePicture .butn label {
+	color: #ffffff;
+	cursor: pointer;
+}
