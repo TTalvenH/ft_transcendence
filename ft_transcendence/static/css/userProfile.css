@@ -1,14 +1,4 @@
 
-@keyframes appearSmoothly {
-	from {
-		/* transform: translate(-100%, -50%); */
-		opacity: 0;
-	}
-	to {
-		opacity: 1;
-		/* transform: translate(-50, -50); */
-	}
-}
 
 .userProfile {
 	position: absolute;
@@ -23,8 +13,6 @@
 	box-sizing: border-box;
 	background: rgba(233, 68, 225, 0.1);
 	border-radius: 0.625rem;
-
-	animation: appearSmoothly 1.5s;
 }
 
 .userProfile::before {
@@ -86,7 +74,7 @@
 	color: #ffffff;
 	cursor: pointer;
 	transition: 0.3s;
-	margin-left: 70px;
+	/* margin-left: 70px; */
 }
 
 .cancelButton:hover {
@@ -149,3 +137,33 @@
 	color: #ffffff;
 	cursor: pointer;
 }
+
+.addFriend {
+	width: 100%;
+	cursor: pointer;
+	background: #27defa;
+	color: white;
+	border-bottom-left-radius: 0.625rem;
+	border-bottom-right-radius: 0.625rem;
+	transition: 0.3s;
+ }
+
+ .addFriend:hover {
+	background: #27fa74;
+ }
+
+ .tableClass {
+	width: 100%;
+	height: 100%;
+	max-height: 100px;
+	color: white;
+ }
+
+ .tableClass thead tr {
+	background-color: #00000085;
+ }
+
+ .tableClass tbody tr {
+	background-color: #00000085;
+	border: rgb(99, 99, 99) 0.1px solid;
+ }

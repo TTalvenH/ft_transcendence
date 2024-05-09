@@ -24,10 +24,10 @@ async function uiHandler() {
 
 
 async function editProfileHandler() {
-	const userContainer = document.getElementById('userContainer');
-	userContainer.innerHTML = "";
+	const userProfile = document.getElementById('userProfile');
 	const updateProfileHTML = await fetch("/users/update_profile.html").then((data) => data.text());
-	userContainer.insertAdjacentHTML('beforeend', updateProfileHTML);
+	userProfile.innerHTML = updateProfileHTML;
+	// userProfile.insertAdjacentHTML('beforeend', updateProfileHTML);
 	const updateProfileForm = document.getElementById('updateProfileForm');
 	updateProfileForm.addEventListener('submit', async (event) => {
 		event.preventDefault();

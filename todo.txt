@@ -1,1 +1,4 @@
-[ ]		make a container for the user forms and profile in html
+
+[ ]		figure out how a user can add friends
+
+[ ]		make the user buttons only show when logged in

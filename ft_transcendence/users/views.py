@@ -131,3 +131,16 @@ def updateUserPorfile(request):
 
 	# Return the serialized user data
 	return Response(serializer.data)
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def addFriend(request, user_id):
+	# Retrieve user from the database
+	user = get_object_or_404(CustomUser, id=user_id)
+
+	# Add the user to the friend list
+	request.user.friends.add(user)
+
+	# Return the serialized user data
+	return Response(UserSerializer(instance=user).data)
