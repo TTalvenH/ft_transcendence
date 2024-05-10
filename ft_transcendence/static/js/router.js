@@ -3,11 +3,10 @@ import { GameStates } from "./pong/pong.js";
 //variables where we save the html content when it is first fetched
 let loginFormHTML;
 let registerFormHTML;
-let uiHTML;
 let profileHTML;
 
 const routes = {
-	"/": uiHandler,
+	"/": homeHandler,
 	"/pong": pongHandler,
 	"/login": loginHandler,
 	"/register": registerHandler,
@@ -15,10 +14,9 @@ const routes = {
 	"/edit-profile": editProfileHandler,
 };
 
-async function uiHandler() {
-	if (!uiHTML)
-		uiHTML = await fetch("/ui").then((data) => data.text());
-	document.getElementById('ui').insertAdjacentHTML('beforeend', uiHTML);
+async function homeHandler() {
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
 }
 
 
@@ -102,8 +100,8 @@ async function loginHandler() {
         try {
             // Send form data to the backend
             const response = await fetch('/users/login-user', {
-                method: 'POST',
-                body: formData
+				method: 'POST',
+				body: formData
             });
 
             if (response.ok) {

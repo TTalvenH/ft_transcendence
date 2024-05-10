@@ -9,7 +9,7 @@
 			<div class="profileInfo">
 				<h3 style="color: white;">username</h3>
 			</div>
-			<div class="table-responsive" style="height: 290px;">
+			<div class="table-responsive" style="max-height: 280px;">
 				<table class="tableClass">
 					<thead>
 						<tr>
@@ -51,16 +51,8 @@
 							<td>Offline</td>
 						</tr>
 						<tr>
-							<td>Bob</td>
-							<td>Offline</td>
-						</tr>
-						<tr>
-							<td>Charlie</td>
-							<td>Offline</td>
-						</tr>
-						<tr>
-							<td>David</td>
-							<td>Offline</td>
+							<td>Alice</td>
+							<td>Online</td>
 						</tr>
 						<tr>
 							<td>Bob</td>
@@ -77,13 +69,16 @@
 					</tbody>
 				</table>
 			</div>
-			<button class="addFriend">+ Add</button>
+			<div class="addFriend">
+				<input type="search" id="query" name="q" placeholder="Add Friend...">
+				<button>+</button>
+			</div>
 		</div>
 		<div class="col-8">
 			<h1 style="color: white;">
 				Match History
 			</h1>
-			<div class="table-responsive" style="max-height: 470px;">
+			<div class="table-responsive" style="max-height: 475px;">
 				<table class="tableClass">
 					<thead>
 						<tr>

@@ -16,7 +16,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/users/login-user
 Content-Type: application/json
 
-{ "username": "uusi", "password": "Testisalis123#"}
+{ "username": "mulli", "password": "Testisalis123#"}
 
 ###
 
@@ -30,13 +30,13 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
 
 GET http://127.0.0.1:8000/users/get-user/46/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0Mzk4NTkyLCJpYXQiOjE3MTQzOTEzOTIsImp0aSI6IjA3YmE4OGNhNGFkNTRlZGNhYTJmYzliZmI1NzRiOGFkIiwidXNlcl9pZCI6NDZ9.3Cm1uZbsGOMVCOmexWcmf1HD-cC5gtr1gaWHJrXXEc8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1MzM5OTQ0LCJpYXQiOjE3MTUzMzI3NDQsImp0aSI6IjcyODc3ZWIyZmE4MTQ4OGI5OTQ5MGI3NTBlYzc2Y2VkIiwidXNlcl9pZCI6NDZ9.YXIGDSBW73CyAnFgBQe7RiLH4HXJPP9lnMZupmaF4fo
 
 ###
 
 GET http://127.0.0.1:8000/users/get-user-profile/46/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0OTE4NDAyLCJpYXQiOjE3MTQ5MTEyMDIsImp0aSI6ImI0ZTUwZTZhYTQ4YjQzNzE4ZjMxOTRmMmM3MDQzOWQ3IiwidXNlcl9pZCI6NDZ9.RMw6gn0khu07JQOCseJVU7Hi_Fs7T1zsiPWfZpSah2c
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1MzM5OTQ0LCJpYXQiOjE3MTUzMzI3NDQsImp0aSI6IjcyODc3ZWIyZmE4MTQ4OGI5OTQ5MGI3NTBlYzc2Y2VkIiwidXNlcl9pZCI6NDZ9.YXIGDSBW73CyAnFgBQe7RiLH4HXJPP9lnMZupmaF4fo
 
 
 ###
@@ -49,6 +49,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
 
 ###
 
-POST http://127.0.0.1:8000/users/add-friend/46/
+POST http://127.0.0.1:8000/users/add-friend/44/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1MjY4NTgxLCJpYXQiOjE3MTUyNjEzODEsImp0aSI6IjdhMjA5OWViNGE2ZDRmNjFhZDAwN2U1MzBiZjQ5M2NmIiwidXNlcl9pZCI6NDd9.fRCgHBfBhE6dzujp2YWTzVDlK7bz1TB7xVRYK_bZVUY
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1MzM5OTQ0LCJpYXQiOjE3MTUzMzI3NDQsImp0aSI6IjcyODc3ZWIyZmE4MTQ4OGI5OTQ5MGI3NTBlYzc2Y2VkIiwidXNlcl9pZCI6NDZ9.YXIGDSBW73CyAnFgBQe7RiLH4HXJPP9lnMZupmaF4fo

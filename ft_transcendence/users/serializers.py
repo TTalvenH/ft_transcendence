@@ -77,4 +77,4 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = CustomUser
-		fields = ['id', 'image', 'username']
+		fields = ['id', 'image', 'username', 'friends', 'match_history']

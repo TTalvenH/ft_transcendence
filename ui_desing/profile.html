@@ -9,16 +9,16 @@
 	<title>Document</title>
 </head>
 <body>
-	<div class="container userProfile" id="userProfile">
+	<div class="container userProfile smoothAppear" id="userProfile">
 		<div class="row gy-5">
 			<div class="col-4">
 				<div class="profilePicture">
 					<img src="plankton.jpg" alt="...">
 				</div>
 				<div class="profileInfo">
-					<h3>username</h3>
+					<h3 style="color: white;">username</h3>
 				</div>
-				<div class="table-responsive" style="height: 290px;">
+				<div class="table-responsive" style="max-height: 290px;">
 					<table class="tableClass">
 						<thead>
 							<tr>
@@ -60,16 +60,8 @@
 								<td>Offline</td>
 							</tr>
 							<tr>
-								<td>Bob</td>
-								<td>Offline</td>
-							</tr>
-							<tr>
-								<td>Charlie</td>
-								<td>Offline</td>
-							</tr>
-							<tr>
-								<td>David</td>
-								<td>Offline</td>
+								<td>Alice</td>
+								<td>Online</td>
 							</tr>
 							<tr>
 								<td>Bob</td>
@@ -86,12 +78,14 @@
 						</tbody>
 					</table>
 				</div>
-				<button class="addFriend">+ Add</button>
+				<div class="addFriend">
+					<input type="search" id="query" name="q" placeholder="Search...">
+					<button>Add</button>
+				</div>
 			</div>
 			<div class="col-8">
-				<h1>
+				<h1 style="color: white;">
 					Match History
-					<button id="editProfile">Edit Profile</button>
 				</h1>
 				<div class="table-responsive" style="max-height: 470px;">
 					<table class="tableClass">

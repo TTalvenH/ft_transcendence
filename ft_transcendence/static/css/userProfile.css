@@ -9,6 +9,8 @@
 	height: 600px;
 	max-height: 600px;
 	max-width: 800px;
+	min-width: 800px;
+	min-height: 600px;
 	padding: 2.5rem;
 	box-sizing: border-box;
 	background: rgba(233, 68, 225, 0.1);
@@ -44,7 +46,7 @@
 	position: relative;
     width: 100%;
     height: 100%;
-	object-fit: contain;
+	object-fit: cover;
 }
 
 .profilePicture .file {
@@ -68,34 +70,6 @@
     margin-top: 10%;
 }
 
-.cancelButton {
-	background: none;
-	border: none;
-	color: #ffffff;
-	cursor: pointer;
-	transition: 0.3s;
-	/* margin-left: 70px; */
-}
-
-.cancelButton:hover {
-	color: #ff1919;
-	transform: scale(2.1);
-}
-
-.saveButton {
-	background: none;
-	border: none;
-	color: #ffffff;
-	cursor: pointer;
-	transition: 0.3s;
-	margin-left: 70px;
-	margin-top: 470px;
-}
-
-.saveButton:hover {
-	color: #1ffa39;
-	transform: scale(2.1);
-}
 
 .editProfilePicture {
 	height: 150px;
@@ -112,7 +86,7 @@
 	border-bottom: none;
 	border-top-left-radius: 0.625rem;
 	border-top-right-radius: 0.625rem;
-	object-fit: contain;
+	object-fit: cover;
 }
 
 .editProfilePicture .butn {
@@ -138,20 +112,6 @@
 	cursor: pointer;
 }
 
-.addFriend {
-	width: 100%;
-	cursor: pointer;
-	background: #27defa;
-	color: white;
-	border-bottom-left-radius: 0.625rem;
-	border-bottom-right-radius: 0.625rem;
-	transition: 0.3s;
- }
-
- .addFriend:hover {
-	background: #27fa74;
- }
-
  .tableClass {
 	width: 100%;
 	height: 100%;
@@ -160,10 +120,41 @@
  }
 
  .tableClass thead tr {
-	background-color: #00000085;
+	background-color: #0000002f;
+	border-top-left-radius: 0.625rem;
  }
 
  .tableClass tbody tr {
-	background-color: #00000085;
+	background-color: #0000002f;
 	border: rgb(99, 99, 99) 0.1px solid;
+	border-left: none;
+	border-right: none;
+	border-top-left-radius: 0.625rem;
+	border-bottom-left-radius: 0.625rem;
  }
+
+ .table-responsive {
+	border: rgb(99, 99, 99) 0.1px solid;
+	border-radius: 0.625rem;
+ }
+
+.table-responsive::-webkit-scrollbar {
+    width: 9px; /* Width of the scrollbar */
+}
+
+/* Track */
+.table-responsive::-webkit-scrollbar-track {
+    background: #585858; /* Color of the scrollbar track */
+	border-radius: 0.625rem;
+}
+
+/* Handle */
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #272727; /* Color of the scrollbar handle */
+    border-radius: 6px; /* Roundness of the scrollbar handle */
+}
+
+/* Handle on hover */
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #000000; /* Color of the scrollbar handle on hover */
+}

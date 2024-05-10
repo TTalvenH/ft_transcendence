@@ -53,7 +53,7 @@
 <div class="row gy-5">
 	<div class="col-4">
 		<div class="editProfilePicture">
-			<img src="{%static 'images/plankton.jpg' %}" alt="...">
+			<img src="{%static 'images/plankton.jpg' %}" alt="..." id="profileImage">
 			<button class="butn" id="chooseImage">
 				<input type="file" accept="image/*" id="imageInput" hidden>
 				<label for="imageInput">Choose Image</label>
@@ -61,7 +61,7 @@
 		</div>
 	</div>
 	<div class="col-6">
-		<form id="updateProfileForm" style="margin-top: 20px;">
+		<form id="updateProfileForm" style="margin-top: 20px;" autocomplete="off">
 
 			<div class="inputBox">
 				<input type="text" name="username" required onkeyup="this.setAttribute('value', this.value);" value="">

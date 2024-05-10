@@ -1,6 +1,6 @@
 <div class="box smoothAppear" id="loginBox">
 	<h2>Login</h2>
-	<form id="loginForm">
+	<form id="loginForm" autocomplete="off">
 		{% csrf_token %}
 		<div class="inputBox">
 			<input type="username" name="username" required onkeyup="this.setAttribute('value', this.value);" value="">

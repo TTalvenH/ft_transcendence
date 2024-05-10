@@ -16,3 +16,76 @@
 	transform: scale(1.10);
 	color: #fff;
 }
+
+.cancelButton {
+	background: none;
+	border: none;
+	color: #ffffff;
+	cursor: pointer;
+	transition: 0.3s;
+	margin-left: 70px;
+}
+
+.cancelButton:hover {
+	color: #ff1919;
+	transform: scale(2.1);
+}
+
+.saveButton {
+	background: none;
+	border: none;
+	color: #ffffff;
+	cursor: pointer;
+	transition: 0.3s;
+	margin-left: 70px;
+	margin-top: 470px;
+	transform: scale(1.3);
+}
+
+.saveButton:hover {
+	color: #1ffa39;
+	transform: scale(2.3);
+}
+
+.addFriend {
+    display: flex; /* Make the search bar and button align horizontally */
+    align-items: center; /* Center items vertically */
+    width: 100%; /* Adjust width as needed */
+    margin: 0 auto; /* Center the search bar */
+    border-bottom-left-radius: 0.625rem;
+	border-bottom-right-radius: 0.625rem;
+    padding: 5px; /* Add some padding */
+	background-color:  #0000002f; /* Set background color */
+	border: rgb(99, 99, 99) 0.1px solid;
+	border-top: none;
+}
+
+.addFriend input[type="search"] {
+    flex: 1; /* Make the input take remaining space */
+    border: none; /* Remove default input border */
+    padding: 8px; /* Add some padding */
+    border-radius: 5px; /* Add some roundness to the corners */
+    outline: none; /* Remove outline on focus */
+	width: 100%;
+	height: 25px;
+	background: #0000002f;
+	border: rgb(99, 99, 99) 0.1px solid;
+	color: white;
+}
+
+.addFriend button {
+    color: white; /* Button text color */
+	background: none;
+    border: none; /* Remove default button border */
+    margin-left: 5px; /* Add some space between input and button */
+    cursor: pointer; /* Change cursor to pointer on hover */
+    outline: none; /* Remove outline on focus */
+	height: 25px;
+	transition: 0.3s;
+	margin-bottom: 3px;
+}
+
+.addFriend button:hover {
+	transform: scale(1.5);
+	color: #1ffa39;
+}

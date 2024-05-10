@@ -44,7 +44,7 @@
 	position: relative;
     width: 100%;
     height: 100%;
-	object-fit: contain;
+	object-fit: cover;
 }
 
 .profilePicture .file {
@@ -121,7 +121,7 @@ form input[type="file"] {
 	border: #fff 0.1px solid;
  }
 
- .addFriend {
+ /* .addFriend {
 	width: 100%;
 	cursor: pointer;
 	background: #27defa;
@@ -132,4 +132,40 @@ form input[type="file"] {
 
  .addFriend:hover {
 	background: #27fa74;
- }
+ } */
+
+ .addFriend {
+    display: flex; /* Make the search bar and button align horizontally */
+    align-items: center; /* Center items vertically */
+    width: 100%; /* Adjust width as needed */
+    margin: 0 auto; /* Center the search bar */
+    border-bottom-left-radius: 0.625rem;
+	border-bottom-right-radius: 0.625rem;
+    padding: 5px; /* Add some padding */
+	background-color:  #27defa; /* Set background color */
+}
+
+.addFriend input[type="search"] {
+    flex: 1; /* Make the input take remaining space */
+    border: none; /* Remove default input border */
+    padding: 8px; /* Add some padding */
+    border-radius: 5px; /* Add some roundness to the corners */
+    outline: none; /* Remove outline on focus */
+	width: 100%;
+	height: 25px;
+}
+
+.addFriend button {
+    background-color: #27defa; /* Button background color */
+    color: white; /* Button text color */
+    border: none; /* Remove default button border */
+    margin-left: 5px; /* Add some space between input and button */
+    border-radius: 5px; /* Add some roundness to the corners */
+    cursor: pointer; /* Change cursor to pointer on hover */
+    outline: none; /* Remove outline on focus */
+	height: 25px;
+}
+
+.addFriend button:hover {
+    background-color: #0056b3; /* Darker background color on hover */
+}
