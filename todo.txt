@@ -1,0 +1,4 @@
+
+[ ]		figure out how a user can add friends
+
+[ ]		make the user buttons only show when logged in

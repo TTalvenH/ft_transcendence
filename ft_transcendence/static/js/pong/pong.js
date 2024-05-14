@@ -243,7 +243,8 @@ export class Pong
 		if (width !== window.innerWidth || height !== window.innerHeight) {
 			this.entities['Camera'].camera.aspect = window.innerWidth / window.innerHeight;
 			this.entities['Camera'].camera.updateProjectionMatrix();
-			this.renderer.setSize(window.innerWidth, window.innerHeight);
+			if (window.innerWidth > 800 && window.innerHeight > 600)
+				this.renderer.setSize(window.innerWidth, window.innerHeight);
 		}
 	}
 }

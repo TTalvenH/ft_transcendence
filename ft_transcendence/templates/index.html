@@ -12,10 +12,14 @@
     <title>ft_trancendence</title>
 
     <!-- stylesheets -->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/user.css'%}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/gameContainer.css'%}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/root.css'%}">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/sidePanel.css'%}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/user.css'%}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/gameContainer.css'%}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/root.css'%}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/sidePanel.css'%}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/ui.css'%}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/userProfile.css'%}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/button.css'%}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/animation.css'%}">
 </head>
 <body>
     <script type="importmap">
@@ -27,7 +31,29 @@
         }
       </script>
     <div id="root">
+		<div id="ui">
+			<div id="sidePanel" class="smoothAppear col-1 d-flex flex-column justify-content-start align-items-center pt-5">
+				<a href="/pong" onclick="route(event)">
+					<button class="button mb-4">START</button>
+				</a>
+				<a href="/login" onclick="route(event)">
+					<button class="button mb-4">LOGIN</button>
+				</a>
+				<a href="/register" onclick="route(event)">
+					<button class="button mb-4">REGISTER</button>
+				</a>
+				<a href="/profile" onclick="route(event)">
+					<button class="button mb-4">PROFILE</button>
+				</a>
+				<a href="/edit-profile" onclick="route(event)">
+					<button class="button mb-4">EDIT PROFILE</button>
+				</a>
+			</div>
+			
+			<div class="container" id="userContainer">
 
+			</div>
+		</div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script type="module" src="{% static 'js/router.js' %}"></script>

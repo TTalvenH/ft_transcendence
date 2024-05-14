@@ -1,41 +1,54 @@
 POST http://127.0.0.1:8000/users/create-user
 Content-Type: application/json
 
-{ "username": "kalle12", "email": "kalle3@gmail.com", "password": "testisalis", "confirm_password": "testisalis"}
+{ "username": "uusi", "email": "uusi@gmail.com", "password": "Testisalis123#", "confirm_password": "Testisalis123#"}
 
 ###
 
 POST http://127.0.0.1:8000/users/create-user
 Content-Type: application/json
 
-{ "username": "test", "email": "test3@gmail.com", "password": "Qweasdzxc123!", "confirm_password": "Qweasdzxc123!"}
+{ "username": "mulli", "email": "mulli@gmail.com", "password": "Testisalis123#", "confirm_password": "Testisalis123#"}
+
 ###
 
 
 POST http://127.0.0.1:8000/users/login-user
 Content-Type: application/json
 
-{ "username": "kalle12", "password": "testisalis"}
-
-###
-
-POST http://127.0.0.1:8000/users/login-user
-Content-Type: application/json
-
-{ "username": "kalle", "password": "testisalis"}
+{ "username": "mulli", "password": "Testisalis123#"}
 
 ###
 
 GET http://127.0.0.1:8000/users/test-token
 Content-Type: application/json
-Authorization: Token bcfbe525af1dfc39277e1d49ba28ded45a3c59f9
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0Mzg3MTMzLCJpYXQiOjE3MTQzNzk5MzMsImp0aSI6Ijk5NDMyMDZhZjcxZDRhOTg4NGRmYjE3ZGQzMDVmMjJjIiwidXNlcl9pZCI6NDR9.ZR4yQ_shCFwWeK1GtBZNjZU-htVhhMyC5unAOhXG3gI
 
 {}
 
 ###
 
-GET http://127.0.0.1:8000/pong/startMatch
+GET http://127.0.0.1:8000/users/get-user/46/
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1MzM5OTQ0LCJpYXQiOjE3MTUzMzI3NDQsImp0aSI6IjcyODc3ZWIyZmE4MTQ4OGI5OTQ5MGI3NTBlYzc2Y2VkIiwidXNlcl9pZCI6NDZ9.YXIGDSBW73CyAnFgBQe7RiLH4HXJPP9lnMZupmaF4fo
 
-{}
+###
 
+GET http://127.0.0.1:8000/users/get-user-profile/46/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1MzM5OTQ0LCJpYXQiOjE3MTUzMzI3NDQsImp0aSI6IjcyODc3ZWIyZmE4MTQ4OGI5OTQ5MGI3NTBlYzc2Y2VkIiwidXNlcl9pZCI6NDZ9.YXIGDSBW73CyAnFgBQe7RiLH4HXJPP9lnMZupmaF4fo
+
+
+###
+
+PUT http://127.0.0.1:8000/users/update-user-profile
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0OTE4NDAyLCJpYXQiOjE3MTQ5MTEyMDIsImp0aSI6ImI0ZTUwZTZhYTQ4YjQzNzE4ZjMxOTRmMmM3MDQzOWQ3IiwidXNlcl9pZCI6NDZ9.RMw6gn0khu07JQOCseJVU7Hi_Fs7T1zsiPWfZpSah2c
+
+{ "username": "markoboy" }
+
+###
+
+POST http://127.0.0.1:8000/users/add-friend/44/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1MzM5OTQ0LCJpYXQiOjE3MTUzMzI3NDQsImp0aSI6IjcyODc3ZWIyZmE4MTQ4OGI5OTQ5MGI3NTBlYzc2Y2VkIiwidXNlcl9pZCI6NDZ9.YXIGDSBW73CyAnFgBQe7RiLH4HXJPP9lnMZupmaF4fo

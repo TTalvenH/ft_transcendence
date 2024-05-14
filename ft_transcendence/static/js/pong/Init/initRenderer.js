@@ -7,7 +7,9 @@ export function initRenderer() {
 	const gameContainer = document.createElement('div');
 	gameContainer.id = 'gameContainer';
 	gameContainer.appendChild(renderer.domElement);
-	document.getElementById('root').insertBefore(gameContainer, document.getElementById('root').firstChild);
+	gameContainer.style.minHeight = '600px';
+	gameContainer.style.minWidth = '800px';
+	document.getElementById('root').appendChild(gameContainer);
 
 	return renderer;
 }

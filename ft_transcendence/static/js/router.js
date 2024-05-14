@@ -1,3 +1,10 @@
+import { GameStates } from "./pong/pong.js";
+
+//variables where we save the html content when it is first fetched
+let loginFormHTML;
+let registerFormHTML;
+let profileHTML;
+
 import { GameStates, Pong } from "./pong/pong.js";
 import { pongStartHandler, pongMatchOverHandler } from "./routeHandlers/pongHandlers.js";
 
@@ -18,54 +25,103 @@ const gameOverData = {
 export const gameOverEvent = new CustomEvent('endMatch', { detail: gameOverData });
 
 const routes = {
-	"/": uiHandler,
+	"/": homeHandler,
 	"/pongStart": pongStartHandler,
 	"/pongMatchOver": pongMatchOverHandler,
 	"/login": loginHandler,
 	"/register": registerHandler,
+	"/profile": profileHandler,
+	"/edit-profile": editProfileHandler,
 };
 
-async function uiHandler() {
-    const html = await fetch("/ui").then((data) => data.text());
-	document.getElementById('root').insertAdjacentHTML('beforeend', html);
-	const sidePanel = document.getElementById('sidePanel');
-	sidePanel.addEventListener('click', async (event) => {
-		if (event.target.id === 'startGameButton') {
-			document.getElementById('sidePanel').style.visibility = 'hidden';
-			const players = await fetch('/pong/startMatch').then((data) => data.json());
-			pong.startGame(players);
+async function homeHandler() {
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
+}
+
+
+
+async function editProfileHandler() {
+	const userProfile = document.getElementById('userProfile');
+	const updateProfileHTML = await fetch("/users/update_profile.html").then((data) => data.text());
+	userProfile.innerHTML = updateProfileHTML;
+	// userProfile.insertAdjacentHTML('beforeend', updateProfileHTML);
+	const updateProfileForm = document.getElementById('updateProfileForm');
+	updateProfileForm.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		const formData = new FormData(updateProfileForm);
+		const response = await fetch('/users/update-user', {
+			method: 'PUT',
+			body: formData
+		});
+		if (response.ok) {
+			alert('Profile updated!');
+		} else {
+			alert('Profile update failed!');
 		}
 	});
-	document.addEventListener('endMatch', async (event) =>{
-		console.log(event.detail.gameOverData);
-		console.log('Game over event triggered!');
-		const response = await fetch('/pong/endMatch', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify(event.detail.gameOverData)
-		});
+
+	const input = document.getElementById('imageInput');
+	const profileImage = document.getElementById('profileImage');
+	input.addEventListener('change', async (event) => {
+		var file = input.files[0];
+		if (file) {
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				// Replace the image source with the selected image
+				profileImage.src = e.target.result;
+				profileImage.onload = function() {
+					// Make sure the image is loaded before displaying it
+					profileImage.style.display = 'block';
+				}
+			}
+			reader.readAsDataURL(file);
+		}
+	});
+
+	const checkBox = document.getElementById('flexSwitchCheckDefault');
+	checkBox.addEventListener('change', (event) => {
+		console.log('something happened 2')
+		const passwordFields = document.querySelectorAll('.passwordField');
+		if (event.target.checked) {
+			passwordFields.forEach((passwordField) => {
+				passwordField.style.display = 'block';
+			});
+		} else {
+			passwordFields.forEach((passwordField) => {
+				passwordField.style.display = 'none';
+			});
+		}
 	});
 }
 
-async function loginHandler() {
-    const html = await fetch("/users/login.html").then((data) => data.text());
-    document.getElementById('root').insertAdjacentHTML('beforeend', html);
+async function profileHandler() {
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
+	if (!profileHTML)
+		profileHTML = await fetch("/users/profile.html").then((data) => data.text());
+	userContainer.insertAdjacentHTML('beforeend', profileHTML);
+}
 
+async function loginHandler() {
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
+	if (!loginFormHTML)
+		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
+	userContainer.insertAdjacentHTML('beforeend', loginFormHTML);
     // Add event listener to the registration form
-    const registerForm = document.getElementById('loginForm');
-    registerForm.addEventListener('submit', async (event) => {
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', async (event) => {
         event.preventDefault(); // Prevent default form submission behavior
 
         // Get form data
-        let formData = new FormData(registerForm);
+        const formData = new FormData(loginForm);
         
         try {
             // Send form data to the backend
             const response = await fetch('/users/login-user', {
-                method: 'POST',
-                body: formData
+				method: 'POST',
+				body: formData
             });
 
             if (response.ok) {
@@ -84,15 +140,17 @@ async function loginHandler() {
     });
 }
 
-async function registerHandler() {
-    const html = await fetch("/users/register.html").then((data) => data.text());
-    document.getElementById('root').insertAdjacentHTML('beforeend', html);
 
+async function registerHandler() {
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
+	if (!registerFormHTML) // we only fetch once and then save it locally
+		registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
+    userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
     // Add event listener to the registration form
     const registerForm = document.getElementById('registerForm');
     registerForm.addEventListener('submit', async (event) => {
         event.preventDefault(); // Prevent default form submission behavior
-
         // Get form data
 		const formData = new FormData(registerForm);
         try {
@@ -115,6 +173,14 @@ async function registerHandler() {
             alert('An error occurred during registration. Please try again later.');
         }
     });
+}
+
+
+async function pongHandler() {
+    const html = await fetch("/pong/").then((data) => data.text());
+	document.getElementById('ui').style.display = 'none'; // Using display
+	document.getElementById('ui').style.visibility = 'hidden';
+	window.pong.gameGlobals.gameState = GameStates.PLAYING;
 }
 
 async function handleLocation() {

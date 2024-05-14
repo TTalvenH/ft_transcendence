@@ -29,4 +29,5 @@ urlpatterns = [
 	path('ui', views.ui),
 	path('pong/', include('pong.urls')),
 	path('users/', include('users.urls')),
+    re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
 ]
