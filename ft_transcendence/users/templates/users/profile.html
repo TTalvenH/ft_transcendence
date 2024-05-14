@@ -1,8 +1,15 @@
 {% load static %}
 
 <div class="container userProfile smoothAppear" id="userProfile">
-	<div class="row gy-5">
+	<div class="row gy-5" id="profileRow">
 		<div class="col-4">
+			<div class="editProfileButton">
+				<a href="/edit-profile" onclick="route(event)">
+					<button>
+						<img src="{% static 'images/edit-profile.png' %}" alt="...">
+					</button>
+				</a>
+			</div>
 			<div class="profilePicture">
 				<img src="{% static 'images/plankton.jpg' %}" alt="...">
 			</div>
@@ -18,54 +25,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr>
-							<td>Alice</td>
-							<td>Online</td>
-						</tr>
-						<tr>
-							<td>Bob</td>
-							<td>Offline</td>
-						</tr>
-						<tr>
-							<td>Charlie</td>
-							<td>Offline</td>
-						</tr>
-						<tr>
-							<td>David</td>
-							<td>Offline</td>
-						</tr>
-						<tr>
-							<td>Alice</td>
-							<td>Online</td>
-						</tr>
-						<tr>
-							<td>Bob</td>
-							<td>Offline</td>
-						</tr>
-						<tr>
-							<td>Charlie</td>
-							<td>Offline</td>
-						</tr>
-						<tr>
-							<td>David</td>
-							<td>Offline</td>
-						</tr>
-						<tr>
-							<td>Alice</td>
-							<td>Online</td>
-						</tr>
-						<tr>
-							<td>Bob</td>
-							<td>Offline</td>
-						</tr>
-						<tr>
-							<td>Charlie</td>
-							<td>Offline</td>
-						</tr>
-						<tr>
-							<td>David</td>
-							<td>Offline</td>
-						</tr>
+						
 					</tbody>
 				</table>
 			</div>

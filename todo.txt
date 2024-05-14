@@ -1,4 +1,4 @@
 
-[ ]		figure out how a user can add friends
+make the user buttons only show when logged in
 
-[ ]		make the user buttons only show when logged in
+fetch user data and fill the user profile with that

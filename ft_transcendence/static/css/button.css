@@ -89,3 +89,24 @@
 	transform: scale(1.5);
 	color: #1ffa39;
 }
+
+.editProfileButton {
+	position: absolute;
+	width: 35px;
+	margin-left: 640px;
+	margin-top: -2px;
+}
+
+.editProfileButton img {
+	width: 100%;
+}
+
+.editProfileButton button {
+	background: none;
+	border: none;
+	transition: 0.3s;
+}
+
+.editProfileButton button:hover {
+	transform: scale(1.6);
+}

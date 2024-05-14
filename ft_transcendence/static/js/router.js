@@ -3,7 +3,6 @@ import { GameStates } from "./pong/pong.js";
 //variables where we save the html content when it is first fetched
 let loginFormHTML;
 let registerFormHTML;
-let profileHTML;
 
 const routes = {
 	"/": homeHandler,
@@ -22,10 +21,9 @@ async function homeHandler() {
 
 
 async function editProfileHandler() {
-	const userProfile = document.getElementById('userProfile');
-	const updateProfileHTML = await fetch("/users/update_profile.html").then((data) => data.text());
-	userProfile.innerHTML = updateProfileHTML;
-	// userProfile.insertAdjacentHTML('beforeend', updateProfileHTML);
+	const userContainer = document.getElementById('userContainer');
+	const updateProfileHTML = await fetch("/users/update_profile.html").then((data) => data.text());	userContainer.innerHTML = "";
+	userContainer.insertAdjacentHTML('beforeend', updateProfileHTML);
 	const updateProfileForm = document.getElementById('updateProfileForm');
 	updateProfileForm.addEventListener('submit', async (event) => {
 		event.preventDefault();
@@ -77,10 +75,17 @@ async function editProfileHandler() {
 
 async function profileHandler() {
 	const userContainer = document.getElementById('userContainer');
+	const profileHTML = await fetch("/users/profile.html").then((data) => data.text());
 	userContainer.innerHTML = "";
-	if (!profileHTML)
-		profileHTML = await fetch("/users/profile.html").then((data) => data.text());
 	userContainer.insertAdjacentHTML('beforeend', profileHTML);
+
+	const userProfileData = await fetch('/users/get-user-profile/46/', {
+		method: 'GET',
+		headers: {
+			'Authorization': 'Bearer ' + localStorage.getItem('token'),
+		},
+	});
+	console.log(userProfileData);
 }
 
 async function loginHandler() {
