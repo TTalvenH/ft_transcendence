@@ -1,4 +1,7 @@
 <div class="box smoothAppear" id="loginBox">
+	<a href="/" onclick="route(event)">
+		<button style="margin-left: 315px; margin-top: -20px; position: absolute;" class="cancelButton">X</button>
+	</a>
 	<h2>Login</h2>
 	<form id="loginForm" autocomplete="off">
 		{% csrf_token %}

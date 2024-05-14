@@ -1,4 +1,7 @@
 <div class="box smoothAppear" id="registerBox">
+	<a href="/" onclick="route(event)">
+		<button style="margin-left: 315px; margin-top: -20px; position: absolute;" class="cancelButton">X</button>
+	</a>
     <h2>Register</h2>
     <form id="registerForm" autocomplete="off">
 		{% csrf_token %}
@@ -25,30 +28,5 @@
             <label>Confirm Password</label>
         </div>
 		<button class="button" type="submit">SIGN UP</button>
-        {% comment %} <input class="button" type="submit" name="sign-up" value="Sign Up"> {% endcomment %}
     </form>
 </div>
-
-{% comment %} <div class="box">
-    <h2>Register</h2>
-    <form method="post" enctype="multipart/form-data" id="registerForm">
-        {% csrf_token %}
-		<div class="inputBox">
-       		{{ form.username }}
-			<label>Username</label>
-		</div>
-		<div class="inputBox">
-			{{ form.email }}
-		 	<label>Email</label>
-		</div>
-		<div class="inputBox">
-			{{ form.password1 }}
-		 	<label>Password</label>
-		</div>
-		<div class="inputBox">
-			{{ form.password2 }}
-		 	<label>Confirm Password</label>
-		</div>
-        <input type="submit" name="sign-up" value="Sign Up">
-    </form>
-</div> {% endcomment %}
