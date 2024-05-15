@@ -22,7 +22,7 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
 	path('', views.index),
-	path('ui', views.ui),
+	path('sidepanel.html', views.ui),
 	path('pong/', include('pong.urls')),
 	path('users/', include('users.urls')),
     re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),

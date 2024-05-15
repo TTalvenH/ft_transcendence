@@ -9,7 +9,7 @@ from .serializers import UserSerializer, RegisterUserSerializer, UserProfileSeri
 from .tokens import create_jwt_pair_for_user
 # Create your views here.
 @api_view(['GET'])
-def login(request):
+def login_template(request):
 	return render(request, 'users/login.html')
 
 @api_view(['GET'])
@@ -40,11 +40,19 @@ def createUser(request):
 	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+from django.contrib.auth import authenticate, login, logout
+
 @api_view(['POST'])
 def loginUser(request):
-	user = get_object_or_404(CustomUser, username=request.data['username'])
-	if not user.check_password(request.data['password']):
+	# user = get_object_or_404(CustomUser, username=request.data['username'])
+	user = authenticate(request, username=request.data['username'], password=request.data['password'])
+	if not user:
 		return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+	
+	# if not user.check_password(request.data['password']):
+	# 	return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+	login(request, user)
+	user.update_last_active()
 	token = create_jwt_pair_for_user(user)
 	serializer = UserSerializer(instance=user)
 	return Response({'tokens': token, 'user': serializer.data})
@@ -144,3 +152,10 @@ def addFriend(request, user_id):
 
 	# Return the serialized user data
 	return Response(UserSerializer(instance=user).data)
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def logOut(request):
+	logout(request)
+	return Response(status=status.HTTP_200_OK)

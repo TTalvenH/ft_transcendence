@@ -4,6 +4,18 @@ import { GameStates } from "./pong/pong.js";
 let loginFormHTML;
 let registerFormHTML;
 
+class User {
+	constructor() {
+		this.username = "";
+		this.id = -1;
+		this.accessToken = "";
+		this.refreshToken = "";
+		this.lastActive = -1;
+	}
+};
+
+let currentUser = new User();
+
 const routes = {
 	"/": homeHandler,
 	"/pong": pongHandler,
@@ -11,11 +23,32 @@ const routes = {
 	"/register": registerHandler,
 	"/profile": profileHandler,
 	"/edit-profile": editProfileHandler,
+	"/log-out": logOutHandler,
 };
 
+async function logOutHandler() {
+	const userData = JSON.parse(localStorage.getItem('currentUser'));
+	const response = await fetch("/users/log-out-view", {
+		method: 'POST',
+		headers: {
+			'Authorization': 'Bearer ' + userData.accessToken
+		},
+	});
+	if (response.ok) {
+		localStorage.removeItem('currentUser');
+		history.pushState({}, "", "/");
+		homeHandler();
+	} else {
+		alert('Logout failed!');
+	}
+}
+
 async function homeHandler() {
+	const sidepanel = document.getElementById('sidePanel');
 	const userContainer = document.getElementById('userContainer');
 	userContainer.innerHTML = "";
+	const sidePanelContent = await fetch("sidepanel.html").then((data) => data.text());
+	sidepanel.innerHTML = sidePanelContent;
 }
 
 
@@ -79,13 +112,37 @@ async function profileHandler() {
 	userContainer.innerHTML = "";
 	userContainer.insertAdjacentHTML('beforeend', profileHTML);
 
-	const userProfileData = await fetch('/users/get-user-profile/46/', {
+	const userData = JSON.parse(localStorage.getItem('currentUser'));
+	console.log(userData);
+	const response = await fetch(`/users/get-user-profile/${userData.id}/`, {
 		method: 'GET',
 		headers: {
-			'Authorization': 'Bearer ' + localStorage.getItem('token'),
+			'Authorization': 'Bearer ' + userData.accessToken
 		},
 	});
-	console.log(userProfileData);
+	if (response.ok) {
+		const data = await response.json();
+		console.log(data);
+		const friendBodyEl = document.getElementById('friendsBody');
+		data.friends.forEach((friend) => {
+			const friendRow = document.createElement('tr');
+			const friendName = document.createElement('td');
+			const friendStatus = document.createElement('td');
+			friendName.innerText = friend.username;
+			friendStatus.innerText = '•';
+			friendStatus.style.textAlign = 'center';
+			if (friend.is_active) {
+				friendStatus.style.color = 'green';
+			} else {
+				friendStatus.style.color = 'red';
+			}
+			friendRow.appendChild(friendName);
+			friendRow.appendChild(friendStatus);
+			friendBodyEl.appendChild(friendRow);
+		});
+	} else {
+		alert('Failed to get user profile');
+	}
 }
 
 async function loginHandler() {
@@ -110,8 +167,15 @@ async function loginHandler() {
             });
 
             if (response.ok) {
+				const data = await response.json();
+				currentUser.username = data.user.username;
+				currentUser.id = data.user.id;
+				currentUser.accessToken = data.tokens.access;
+				currentUser.refreshToken = data.tokens.refresh;
+				currentUser.lastActive = data.user.last_active;
+				console.log(currentUser);
+				localStorage.setItem('currentUser', JSON.stringify(currentUser));
                 // Registration successful
-                alert('Login successful!');
                 // Redirect to another page or handle the response as needed
             } else {
                 // Registration failed

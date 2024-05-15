@@ -2,7 +2,7 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
-	path('login.html', views.login),
+	path('login.html', views.login_template),
 	path('register.html', views.register),
 	path('profile.html', views.userProfileTemplate),
 	path('update_profile.html', views.updateProfile),
@@ -13,4 +13,5 @@ urlpatterns = [
 	path('get-user-profile/<int:user_id>/', views.getUserPorfile, name="get-user-profile"),
 	path('update-user-profile', views.updateUserPorfile, name="update-user-profile"),
 	path('add-friend/<int:user_id>/', views.addFriend, name="add-friend"),
+	path('log-out-view', views.logOut, name="log-out"),
 ]

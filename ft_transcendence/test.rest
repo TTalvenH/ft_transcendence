@@ -16,7 +16,15 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/users/login-user
 Content-Type: application/json
 
-{ "username": "mulli", "password": "Testisalis123#"}
+{ "username": "uusi5", "password": "Testisalis123#"}
+
+###
+
+
+POST http://127.0.0.1:8000/users/login-user
+Content-Type: application/json
+
+{ "username": "markoboy", "password": "Testisalis123#"}
 
 ###
 
@@ -49,6 +57,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
 
 ###
 
-POST http://127.0.0.1:8000/users/add-friend/44/
+POST http://127.0.0.1:8000/users/add-friend/48/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1MzM5OTQ0LCJpYXQiOjE3MTUzMzI3NDQsImp0aSI6IjcyODc3ZWIyZmE4MTQ4OGI5OTQ5MGI3NTBlYzc2Y2VkIiwidXNlcl9pZCI6NDZ9.YXIGDSBW73CyAnFgBQe7RiLH4HXJPP9lnMZupmaF4fo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1Nzc0NTEzLCJpYXQiOjE3MTU3NjczMTMsImp0aSI6IjM2YzFmMmJhOTIxYjRmMGY4NzdmNmEwNjAwZWNhMGZmIiwidXNlcl9pZCI6NDR9.9cdraPb3sNoIlxDNBmVIdDqq2FPQW3Zg50OfoOV0yyM

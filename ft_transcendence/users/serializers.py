@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from .models import CustomUser
 from .tokens import create_jwt_pair_for_user
+from django.utils import timezone
 
 class UserSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = CustomUser
-		fields = ['id', 'username']
+		fields = ['id', 'username', 'last_active']
 
 from django.contrib.auth.password_validation import password_validators_help_texts, validate_password
 from rest_framework.validators import UniqueValidator
@@ -74,7 +75,21 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 		return user
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class FriendSerializer(serializers.ModelSerializer):
+	is_active = serializers.SerializerMethodField()
 	class Meta:
 		model = CustomUser
-		fields = ['id', 'image', 'username', 'friends', 'match_history']
+		fields = ['id', 'username', 'is_active']
+	def get_is_active(self, obj):
+		# Check if the user has been active in the last 5 minutes
+		last_active = obj.last_active
+		now = timezone.now()
+		five_minutes_ago = now - timezone.timedelta(minutes=1)
+		return last_active >= five_minutes_ago
+
+class UserProfileSerializer(serializers.ModelSerializer):
+	friends = FriendSerializer(many=True)  # Use the nested serializer
+
+	class Meta:
+		model = CustomUser
+		fields = ['id', 'image', 'username', 'friends', 'match_history', 'last_active']
