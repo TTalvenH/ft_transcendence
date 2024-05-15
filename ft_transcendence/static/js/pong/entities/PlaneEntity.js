@@ -19,6 +19,6 @@ export class PlaneEntity {
 	}	
 
 	update(deltaTime) {
-
+		
 	}
 }

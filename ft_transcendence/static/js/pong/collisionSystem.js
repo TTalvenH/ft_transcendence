@@ -31,7 +31,7 @@ function handleWallCollision(ball, wall, players, camera) {
 
 function handlePlayerCollision(ball, player) {
     const raycaster = new THREE.Raycaster(ball.position, ball.direction);
-    const intersects = raycaster.intersectObject(player.mesh);
+    const intersects = raycaster.intersectObject(player.collisionMesh);
     
     if (intersects.length > 0) {
 		ball.lightFlicker(0, 1, 6.0);
@@ -51,10 +51,15 @@ function handlePlayerCollision(ball, player) {
 }
 
 export function collisionSystem(entities, deltaTime) {
-    const ball = entities["Ball"];
-    const walls = [entities["NeonBox1"], entities["NeonBox2"], entities["NeonBox3"], entities["NeonBox4"]];
-    const players = [entities["Player1"], entities["Player2"]];
-    const camera = entities["Camera"];
+    const ball = entities.pongEntities["Ball"];
+    const walls = [
+        entities.pongEntities["NeonBox1"],
+        entities.pongEntities["NeonBox2"],
+        entities.pongEntities["NeonBox3"],
+        entities.pongEntities["NeonBox4"]
+    ];
+    const players = [entities.pongEntities["Player1"], entities.pongEntities["Player2"]];
+    const camera = entities.entities["Camera"];
 	// CCD steps
     const numberOfSteps = 20;
     const stepSize = deltaTime / numberOfSteps;

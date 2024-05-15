@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import * as COLORS from '../colors.js';
 
-export class PlayerEntity {
+export class KnockoffPlayerEntity {
 	constructor(initPosition, color) {
 		this.initHitPoints = 3;
 		this.hitPoints = this.initHitPoints;
@@ -10,35 +10,46 @@ export class PlayerEntity {
 
 		// Movement
 		this.velocity = new THREE.Vector3(0, 0, 0,);
-		this.acceleration = 0.1;
-		this.friction = 0.1;
+		this.acceleration = 0;
+		this.friction = 0;
 		this.speed = 0.09;
 
 		// Input keys
 		this.keyUp = false;
 		this.keyDown = false;
+		this.keyRight = false;
+		this.keyLeft = false;
 
 		// Mesh
-		this.height = 0.9;
-		this.geometry = new THREE.BoxGeometry(0.1, this.height, 0.1);
-		this.material = new THREE.MeshStandardMaterial();
-		this.mesh = new THREE.Mesh(new THREE.CapsuleGeometry(0.1, 0.75, 3, 10), this.material);
-		this.collisionMesh = new THREE.Mesh(this.geometry, this.material);
-		this.collisionBox = new THREE.Box3();
-		this.collisionMesh.visible = false;
-		// init object data
-		this.material.color.set(color);
-		this.material.emissive.set(color);
-		this.collisionMesh.geometry.computeBoundingBox();
+		this.radius = 0.5;
+		this.geometry1 = new THREE.CircleGeometry(this.radius - 0.1, 64);
+		this.geometry2= new THREE.CircleGeometry(this.radius, 64);
+		this.material1 = new THREE.MeshStandardMaterial();
+		this.material2= new THREE.MeshStandardMaterial();
+		this.object = new THREE.Object3D();
+		this.mesh1 = new THREE.Mesh(this.geometry1, this.material2);
+		this.mesh2 = new THREE.Mesh(this.geometry2, this.material1);
 
+		this.object.add(this.mesh1);
+		this.object.add(this.mesh2);
+		// init object data
+		this.material1.emissive.set(color);
+		this.material1.color.set(color);
+		this.mesh1.position.set(0, 0, 0.001);
+
+		var darkColor = new THREE.Color(color);
+		darkColor.multiplyScalar(0.6);
+		this.material2.emissive.set(darkColor);
+		this.material2.color.set(darkColor);
+		
+		
 		this.flickerTime = 0;
 		this.isFlickering = false;
+		
+		this.acceleration = 0.1;
+		this.friction = 0.1;
 
-		this.object = new THREE.Object3D();
-		this.object.add(this.mesh);
-		this.object.add(this.collisionMesh);
 		this.object.position.copy(this.position);
-		this.collisionBox.copy( this.collisionMesh.geometry.boundingBox ).applyMatrix4( this.collisionMesh.matrixWorld );
 	}	
 
 	lightFlicker(minFlicker, maxFlicker, flickerTime) {
@@ -66,6 +77,10 @@ export class PlayerEntity {
 			targetVelocity.y += this.speed;
 		if (this.keyDown === true)
 			targetVelocity.y -= this.speed;
+		if (this.keyRight === true)
+			targetVelocity.x += this.speed;
+		if (this.keyLeft === true)
+			targetVelocity.x -= this.speed;
 
 		// Movement update
 		if (targetVelocity.x !== 0 || targetVelocity.y !== 0 || targetVelocity.z !== 0)
@@ -76,11 +91,15 @@ export class PlayerEntity {
 		let newPosition = this.position.clone().add( this.velocity.clone().multiplyScalar(deltaTime) );
 		let minY = -2.45;
 		let maxY = 2.45;
-		if (newPosition.y >= minY && newPosition.y <= maxY) {
+		if (newPosition.y >= minY && newPosition.y <= maxY)
+		{
 			this.position = newPosition;
+			this.mesh.position.copy( this.position );
+			this.mesh.position.copy( this.position );
 		}
-		this.object.position.copy(this.position);
-		this.collisionBox.copy( this.collisionMesh.geometry.boundingBox ).applyMatrix4( this.collisionMesh.matrixWorld );
+		this.mesh.position.copy( this.position );
+		this.mesh.position.copy( this.position );
+		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
 		}
 
 	render(scene) {	

@@ -16,6 +16,7 @@ import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { gameOverEvent } from '../router.js';
 
 import * as COLORS from './colors.js';
+import { KnockoffPlayerEntity } from './entities/knockoffPlayerEntity.js';
 
 export const	GameStates = Object.freeze({
 	PAUSED: 0,
@@ -23,13 +24,19 @@ export const	GameStates = Object.freeze({
 	GAMEOVER: 2,
 	MENU: 3,
 	LOADING: 4,
+	TRANSITIONING: 5
+});
+
+export const	Game = Object.freeze({
+	PONG: 0,
+	KNOCKOFF: 1
 });
 
 export class Pong
 {
 	constructor() {
-		this.gameGlobals = { gameState: GameStates.LOADING };
-
+		this.gameGlobals = { gameState: GameStates.LOADING, game: Game.PONG };
+		this.currentGame = Game.PONG;
 		const loadingManager = new THREE.LoadingManager();
 		const loader = new FontLoader(loadingManager);
 		loader.load('static/fonts/jersey10-regular.json', (font) => {
@@ -45,6 +52,13 @@ export class Pong
 
 	gameInit() {
 		this.entities = {};
+		this.pongEntities = {};
+		this.knockoffEntities = {};
+		this.allEntities = {
+			entities: this.entities,
+			pongEntities: this.pongEntities,
+			knockoffEntities: this.knockoffEntities
+		};
 		this.scene = initScene();
 		this.entities['Camera'] = new CameraEntity(this.gameGlobals);
 		this.camera = this.entities['Camera'].camera;
@@ -52,30 +66,50 @@ export class Pong
 		this.composer = initPostProcessing(this.scene, this.camera, this.renderer);
 		this.controls = new OrbitControls( this.camera, this.renderer.domElement );
 		
-		this.entities['Player1'] = new PlayerEntity(new THREE.Vector3(4, 0, 0), COLORS.FOLLY);
-		this.entities['Player1Health'] = new HealthBarEntity(new THREE.Vector3(5, 5.5, 0), this.entities["Player1"]);
-		this.entities['Player2'] = new PlayerEntity(new THREE.Vector3(-4, 0, 0), COLORS.SKYBLUE);
-		this.entities['Player2Health'] = new HealthBarEntity(new THREE.Vector3(-5, 5.5, 0), this.entities["Player2"]);
-		this.entities['NeonBox1'] = new NeonBoxEntity(new THREE.Vector3(0, -3, 0), 9.9, 0.1, 0.04, false, COLORS.INDIGO);
-		this.entities['NeonBox2'] = new NeonBoxEntity(new THREE.Vector3(0, 3, 0), 9.9, 0.1, 0.04, false, COLORS.INDIGO);
-		this.entities['NeonBox3'] = new NeonBoxEntity(new THREE.Vector3(-5, 0, 0), 0.1, 6.1, 0.04, true, COLORS.SKYBLUE);
-		this.entities['NeonBox4'] = new NeonBoxEntity(new THREE.Vector3(5, 0, 0), 0.1, 6.1, 0.04, true, COLORS.FOLLY);
-		this.entities['Ball'] = new BallEntity();
-		this.entities['Plane'] = new PlaneEntity(new THREE.Vector3(0, 0, -0.25), window.innerWidth, window.innerHeight);
+		
+		// Pong
+		this.pongEntities['Player1'] = new PlayerEntity(new THREE.Vector3(4, 0, 0), COLORS.FOLLY);
+		this.pongEntities['Player2'] = new PlayerEntity(new THREE.Vector3(-4, 0, 0), COLORS.SKYBLUE);
+		this.pongEntities['NeonBox1'] = new NeonBoxEntity(new THREE.Vector3(0, -3, 0), 9.9, 0.1, 0.04, false, COLORS.INDIGO);
+		this.pongEntities['NeonBox2'] = new NeonBoxEntity(new THREE.Vector3(0, 3, 0), 9.9, 0.1, 0.04, false, COLORS.INDIGO);
+		this.pongEntities['NeonBox3'] = new NeonBoxEntity(new THREE.Vector3(-5, 0, 0), 0.1, 6.1, 0.04, true, COLORS.SKYBLUE);
+		this.pongEntities['NeonBox4'] = new NeonBoxEntity(new THREE.Vector3(5, 0, 0), 0.1, 6.1, 0.04, true, COLORS.FOLLY);
+		this.pongEntities['Ball'] = new BallEntity();
+		
+		// Knockoff
+		this.knockoffEntities['Player1'] = new KnockoffPlayerEntity(new THREE.Vector3(4, 0, 0), COLORS.FOLLY);
+		this.knockoffEntities['Player2'] = new KnockoffPlayerEntity(new THREE.Vector3(-4, 0, 0), COLORS.SKYBLUE);
+
+		// Entities
 		this.entities['User1Name'] = new TextEntity("Guest1", new THREE.Vector3(6, 7.7, 0), this.font, COLORS.INDIGO);
 		this.entities['User2Name'] = new TextEntity("Guest2", new THREE.Vector3(-6, 7.7, 0), this.font, COLORS.INDIGO);
-		this.entities['CountDown'] = new TextEntity("", new THREE.Vector3(0, 0, 3), this.font, COLORS.INDIGO, this.camera);
+		this.entities['Countdown'] = new TextEntity("", new THREE.Vector3(0, 0, 3), this.font, COLORS.INDIGO, this.camera);
 		this.entities['WinnerName'] = new TextEntity("", new THREE.Vector3(0, 0, 3), this.font, COLORS.INDIGO, this.camera);
-
+		this.entities['Plane'] = new PlaneEntity(new THREE.Vector3(0, 0, -0.25), window.innerWidth, window.innerHeight);
+		this.entities['Player1Health'] = new HealthBarEntity(new THREE.Vector3(5, 5.5, 0), this.pongEntities["Player1"]);
+		this.entities['Player2Health'] = new HealthBarEntity(new THREE.Vector3(-5, 5.5, 0), this.pongEntities["Player2"]);
+		
+		// Render all entities
+		for (const key in this.pongEntities) {
+			if (this.pongEntities.hasOwnProperty(key)) {
+				const entity = this.pongEntities[key];
+				entity.render(this.scene);
+			}
+		}
 		for (const key in this.entities) {
-			if (this.entities.hasOwnProperty(key))
-			{
+			if (this.entities.hasOwnProperty(key)) {
 				const entity = this.entities[key];
 				entity.render(this.scene);
 			}
 		}
+		// KnockoffEntities
+		for (const key in this.knockoffEntities) {
+			if (this.knockoffEntities.hasOwnProperty(key)) {
+				const entity = this.knockoffEntities[key];
+				entity.render(this.scene);
+			}
+		}
 
-		
 		this.gameClock = new THREE.Clock();
 		this.clock = new THREE.Clock();
 		this.clockDelta = new THREE.Clock();
@@ -84,11 +118,14 @@ export class Pong
 		this.interval = 1 / 120;
 		this.isWinnerLoopOn = false;
 		this.winnerText = "";
-		initEventListener(this.entities, this.gameGlobals);
+		initEventListener(this.pongEntities, this.gameGlobals);		
+		Object.values(this.knockoffEntities).forEach(entity => {
+			entity.object.visible = false;
+		});
 	}
 
 	async startCountDown() {
-		const countDown = this.entities['CountDown'];
+		const countDown = this.entities['Countdown'];
 		const camera = this.entities['Camera'];
 		let i = 3;
 		camera.setTargetLookAt(countDown.position);
@@ -130,9 +167,9 @@ export class Pong
 	}
 
 	resetGame(deltaTime) {
-		const player1 = this.entities["Player1"];
-		const player2 = this.entities["Player2"];
-		const ball = this.entities["Ball"];
+		const player1 = this.pongEntities["Player1"];
+		const player2 = this.pongEntities["Player2"];
+		const ball = this.pongEntities["Ball"];
 		const camera = this.entities['Camera'];
 		const winnerName = this.entities['WinnerName'];
 
@@ -143,6 +180,21 @@ export class Pong
 		camera.targetFov = 180;
 		if (Math.abs(this.camera.fov - camera.targetFov) > 0.1) {
 			return;
+		}
+
+		Object.values(this.pongEntities).concat(Object.values(this.knockoffEntities)).forEach(entity => {
+			entity.object.visible = false;
+		});
+
+		if (this.gameGlobals.game === Game.KNOCKOFF) {
+			Object.values(this.knockoffEntities).forEach(entity => {
+				entity.object.visible = show;
+			});
+		}
+		else if (this.gameGlobals.game === Game.PONG) {
+			Object.values(this.pongEntities).forEach(entity => {
+				entity.mesh.visible = show;
+			});
 		}
 
 		winnerName.setText("");
@@ -156,9 +208,9 @@ export class Pong
 			trailMesh.position.set(0, 0, 0);
 		});
 
-		for (const key in this.entities) {
-			if (this.entities.hasOwnProperty(key)) {
-				const entity = this.entities[key];
+		for (const key in this.pongEntities) {
+			if (this.pongEntities.hasOwnProperty(key)) {
+				const entity = this.pongEntities[key];
 				entity.update(deltaTime);
 			}
 		}
@@ -167,12 +219,12 @@ export class Pong
 	}
 
 	checkGameOver() {
-		const player1 = this.entities["Player1"];
-		const player2 = this.entities["Player2"];
+		const player1 = this.pongEntities["Player1"];
+		const player2 = this.pongEntities["Player2"];
 		const userName1 = this.entities["User1Name"];
 		const userName2 = this.entities["User2Name"];
-		const goal1 = this.entities["NeonBox3"];
-		const goal2 = this.entities["NeonBox4"];
+		const goal1 = this.pongEntities["NeonBox3"];
+		const goal2 = this.pongEntities["NeonBox4"];
 		let winner = {};
 
 		if (player1.hitPoints <= 0) {
@@ -209,6 +261,33 @@ export class Pong
 		this.gameGlobals.gameState = GameStates.GAMEOVER;
 	}
 
+	changeGame() {
+		
+	}
+
+	hasGameChanged(){
+		if (this.currentGame !== this.gameGlobals.game) {
+			this.gameGlobals.gameState = GameStates.TRANSITIONING;
+			this.currentGame = this.gameGlobals.game;
+		}
+	}
+
+	update(deltaTime) {
+		this.entities['Player1Health'].update(deltaTime);
+		this.entities['Player2Health'].update(deltaTime);
+		if (this.gameGlobals.game === Game.PONG) {
+			for (const key in this.pongEntities) {
+				const entity = this.pongEntities[key];
+				entity.update(deltaTime);
+			}
+		}
+		else if (this.gameGlobals.game === Game.KNOCKOFF) {
+			for (const key in this.knockoffEntities) {
+				const entity = this.knockoffEntities[key];
+				entity.update(deltaTime);
+			}
+		}
+	}
 	gameLoop() {
 		requestAnimationFrame(() => this.gameLoop());
 		if ( this.gameGlobals.gameState === GameStates.LOADING || this.clock.getElapsedTime() < this.interval) {
@@ -221,23 +300,22 @@ export class Pong
 			case GameStates.PAUSED:
 				return;
 			case GameStates.PLAYING:
-				collisionSystem(this.entities, deltaTime);
+				collisionSystem(this.allEntities, deltaTime);
 				this.checkGameOver()
-				for (const key in this.entities) {
-					if (this.entities.hasOwnProperty(key)) {
-						const entity = this.entities[key];
-						entity.update(deltaTime);
-					}
-				}
+				this.update(deltaTime);
 				break;
 			case GameStates.MENU:
+				this.hasGameChanged();
 				break;
 			case GameStates.GAMEOVER:
 				this.resetGame(deltaTime);
 				break;
+			case GameStates.TRANSITIONING:
+				this.resetGame(deltaTime);
+				break;
 		}
 		this.entities['Camera'].update(deltaTime);
-		this.entities['CountDown'].update(deltaTime);
+		this.entities['Countdown'].update(deltaTime);
 		this.entities['WinnerName'].update(deltaTime);
 		const { width, height } = this.renderer.getSize(new THREE.Vector2());
 		if (width !== window.innerWidth || height !== window.innerHeight) {

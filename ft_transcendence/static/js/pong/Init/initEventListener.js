@@ -1,5 +1,5 @@
 import { GameStates } from "../pong.js";
-
+import { Game } from "../pong.js";
 export function initEventListener(entities, gameGlobals) {
 	const player1 = entities["Player1"];
 	const player2 = entities["Player2"];
@@ -27,6 +27,12 @@ export function initEventListener(entities, gameGlobals) {
 				{
 					gameGlobals.gameState = GameStates.PAUSED;
 				}
+				break;
+			case "t":
+				if (gameGlobals.gameState === GameStates.MENU && gameGlobals.game === Game.PONG)
+					gameGlobals.game = Game.KNOCKOFF;
+				else if (gameGlobals.gameState === GameStates.MENU && gameGlobals.game === Game.KNOCKOFF)
+					gameGlobals.game = Game.PONG;
 				break;
 		}
 	});

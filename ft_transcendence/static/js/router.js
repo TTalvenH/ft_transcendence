@@ -1,5 +1,3 @@
-import { GameStates } from "./pong/pong.js";
-
 //variables where we save the html content when it is first fetched
 let loginFormHTML;
 let registerFormHTML;
@@ -38,8 +36,6 @@ async function homeHandler() {
 	const userContainer = document.getElementById('userContainer');
 	userContainer.innerHTML = "";
 }
-
-
 
 async function editProfileHandler() {
 	const userProfile = document.getElementById('userProfile');
