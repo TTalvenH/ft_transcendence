@@ -30,8 +30,8 @@
 				</table>
 			</div>
 			<div class="addFriend">
-				<input type="search" id="query" name="q" placeholder="Add Friend...">
-				<button>+</button>
+				<input type="search" id="friendInput" name="q" placeholder="Add Friend...">
+				<button id="addFriendButton">+</button>
 			</div>
 		</div>
 		<div class="col-7">
@@ -47,149 +47,14 @@
 							<th scope="col">Date</th>
 						</tr>
 					</thead>
-					<tbody>
-						<tr>
-							<td>Alice</td>
-							<td>3-2</td>
-							<td>01/02/2023</td>
-						</tr>
-						<tr>
-							<td>Bob</td>
-							<td>4-1</td>
-							<td>02/03/2023</td>
-						</tr>
-						<tr>
-							<td>Charlie</td>
-							<td>2-3</td>
-							<td>03/04/2023</td>
-						</tr>
-						<tr>
-							<td>David</td>
-							<td>1-4</td>
-							<td>04/05/2023</td>
-						</tr>
-						<tr>
-							<td>Eve</td>
-							<td>5-1</td>
-							<td>05/06/2023</td>
-						</tr>
-						<tr>
-							<td>Frank</td>
-							<td>2-2</td>
-							<td>06/07/2023</td>
-						</tr>
-						<tr>
-							<td>Alice</td>
-							<td>3-2</td>
-							<td>01/02/2023</td>
-						</tr>
-						<tr>
-							<td>Bob</td>
-							<td>4-1</td>
-							<td>02/03/2023</td>
-						</tr>
-						<tr>
-							<td>Charlie</td>
-							<td>2-3</td>
-							<td>03/04/2023</td>
-						</tr>
-						<tr>
-							<td>David</td>
-							<td>1-4</td>
-							<td>04/05/2023</td>
-						</tr>
-						<tr>
-							<td>Eve</td>
-							<td>5-1</td>
-							<td>05/06/2023</td>
-						</tr>
-						<tr>
-							<td>Frank</td>
-							<td>2-2</td>
-							<td>06/07/2023</td>
-						</tr>
-						<tr>
-							<td>Alice</td>
-							<td>3-2</td>
-							<td>01/02/2023</td>
-						</tr>
-						<tr>
-							<td>Bob</td>
-							<td>4-1</td>
-							<td>02/03/2023</td>
-						</tr>
-						<tr>
-							<td>Charlie</td>
-							<td>2-3</td>
-							<td>03/04/2023</td>
-						</tr>
-						<tr>
-							<td>David</td>
-							<td>1-4</td>
-							<td>04/05/2023</td>
-						</tr>
-						<tr>
-							<td>Eve</td>
-							<td>5-1</td>
-							<td>05/06/2023</td>
-						</tr>
-						<tr>
-							<td>Frank</td>
-							<td>2-2</td>
-							<td>06/07/2023</td>
-						</tr>
-						<tr>
-							<td>David</td>
-							<td>1-4</td>
-							<td>04/05/2023</td>
-						</tr>
-						<tr>
-							<td>Eve</td>
-							<td>5-1</td>
-							<td>05/06/2023</td>
-						</tr>
-						<tr>
-							<td>Frank</td>
-							<td>2-2</td>
-							<td>06/07/2023</td>
-						</tr>
-						<tr>
-							<td>David</td>
-							<td>1-4</td>
-							<td>04/05/2023</td>
-						</tr>
-						<tr>
-							<td>Eve</td>
-							<td>5-1</td>
-							<td>05/06/2023</td>
-						</tr>
-						<tr>
-							<td>Frank</td>
-							<td>2-2</td>
-							<td>06/07/2023</td>
-						</tr>
-						<tr>
-							<td>David</td>
-							<td>1-4</td>
-							<td>04/05/2023</td>
-						</tr>
-						<tr>
-							<td>Eve</td>
-							<td>5-1</td>
-							<td>05/06/2023</td>
-						</tr>
-						<tr>
-							<td>Frank</td>
-							<td>2-2</td>
-							<td>06/07/2023</td>
-						</tr>
+					<tbody id="matchHistoryBody">
 					</tbody>
 				</table>
 			</div>
 		</div>
 		<div class="col-1">
 			<a href="/" onclick="route(event)">
-				<button style="margin-left: 8px;" class="cancelButton">X</button>
+				<button class="cancelButton">X</button>
 			</a>
 		</div>
 	</div>

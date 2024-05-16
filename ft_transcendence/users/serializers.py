@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser
+from .models import CustomUser, PongMatch
 from .tokens import create_jwt_pair_for_user
 from django.utils import timezone
 
@@ -87,8 +87,14 @@ class FriendSerializer(serializers.ModelSerializer):
 		five_minutes_ago = now - timezone.timedelta(minutes=1)
 		return last_active >= five_minutes_ago
 
+class MatchHistorySerializer(serializers.ModelSerializer):
+	class Meta:
+		model = PongMatch
+		fields = ['id', 'player1Name', 'player1Hp', 'player2Name', 'player2Hp', 'winner', 'timePlayed', 'dateTime']
+
 class UserProfileSerializer(serializers.ModelSerializer):
 	friends = FriendSerializer(many=True)  # Use the nested serializer
+	match_history = MatchHistorySerializer(many=True)
 
 	class Meta:
 		model = CustomUser

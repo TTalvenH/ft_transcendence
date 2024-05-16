@@ -1,6 +1,6 @@
 <div class="box smoothAppear" id="loginBox">
 	<a href="/" onclick="route(event)">
-		<button style="margin-left: 315px; margin-top: -20px; position: absolute;" class="cancelButton">X</button>
+		<button class="cancelButton">X</button>
 	</a>
 	<h2>Login</h2>
 	<form id="loginForm" autocomplete="off">
@@ -18,6 +18,11 @@
 		</div>
 		<button class="button" type="submit">SIGN IN</button>
 	</form>
+	<div class="notRegistered">
+		<a href="/register" onclick="route(event)">
+			<button>Not Registered?</button>
+		</a>
+	</div>
   </div>
 
   {% comment %} <div class="box">

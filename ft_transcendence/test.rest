@@ -16,7 +16,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/users/login-user
 Content-Type: application/json
 
-{ "username": "uusi5", "password": "Testisalis123#"}
+{ "username": "mulli", "password": "Testisalis123#"}
 
 ###
 
@@ -42,9 +42,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
 
 ###
 
-GET http://127.0.0.1:8000/users/get-user-profile/46/
+GET http://127.0.0.1:8000/users/get-user-profile/mulli/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1MzM5OTQ0LCJpYXQiOjE3MTUzMzI3NDQsImp0aSI6IjcyODc3ZWIyZmE4MTQ4OGI5OTQ5MGI3NTBlYzc2Y2VkIiwidXNlcl9pZCI6NDZ9.YXIGDSBW73CyAnFgBQe7RiLH4HXJPP9lnMZupmaF4fo
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1ODY5OTg3LCJpYXQiOjE3MTU4NjI3ODcsImp0aSI6ImMxYTY1NTg2YzBmMDRmOTFhN2E4MjQ0ZWYxZmM5MTY1IiwidXNlcl9pZCI6NDR9.lW4eC31gYOKBjOEMtRbCZKwZR_gDFYSc6Lt8lgqCs8Q
 
 
 ###
@@ -59,4 +59,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
 
 POST http://127.0.0.1:8000/users/add-friend/48/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1Nzc0NTEzLCJpYXQiOjE3MTU3NjczMTMsImp0aSI6IjM2YzFmMmJhOTIxYjRmMGY4NzdmNmEwNjAwZWNhMGZmIiwidXNlcl9pZCI6NDR9.9cdraPb3sNoIlxDNBmVIdDqq2FPQW3Zg50OfoOV0yyM
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1ODcyMDM3LCJpYXQiOjE3MTU4NjQ4MzcsImp0aSI6IjdlZmUzYmQ0YjE5NTQxNzM5YzBkMWFjMzI0ODA3MDRkIiwidXNlcl9pZCI6NDR9.20TG4I8gXq_UjRY1ESHS-qIra6LJCh24H3nr0Hk_Ufs
+
+###
+
+POST http://127.0.0.1:8000/users/add-matchHistory/1/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE1ODcwNjIxLCJpYXQiOjE3MTU4NjM0MjEsImp0aSI6ImU4YjQ5NTg1YzYzYTRmMDc5MWY3NWE4OTRhMDQyMWNjIiwidXNlcl9pZCI6NDR9.HOIa47cSQHlsr4lF05HPzBPdunM-EPzDwpqaBvuaYZY
+
+###
+
+GET http://127.0.0.1:8000/users/get-matchHistory

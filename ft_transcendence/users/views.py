@@ -4,8 +4,8 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from .models import CustomUser
-from .serializers import UserSerializer, RegisterUserSerializer, UserProfileSerializer
+from .models import CustomUser, PongMatch
+from .serializers import UserSerializer, RegisterUserSerializer, UserProfileSerializer, MatchHistorySerializer, FriendSerializer
 from .tokens import create_jwt_pair_for_user
 # Create your views here.
 @api_view(['GET'])
@@ -114,9 +114,9 @@ def getUser(request, user_id):
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-def getUserPorfile(request, user_id):
+def getUserPorfile(request, username):
     # Retrieve user from the database
-    user = get_object_or_404(CustomUser, id=user_id)
+    user = get_object_or_404(CustomUser, username=username)
     
     # Serialize the user data
     serializer = UserProfileSerializer(instance=user)
@@ -143,15 +143,39 @@ def updateUserPorfile(request):
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
-def addFriend(request, user_id):
+def addFriend(request, username):
 	# Retrieve user from the database
-	user = get_object_or_404(CustomUser, id=user_id)
-
+	user = get_object_or_404(CustomUser, username=username)
+	if request.user.friends.filter(username=username).exists():
+		return Response(status=status.HTTP_400_BAD_REQUEST)
 	# Add the user to the friend list
 	request.user.friends.add(user)
 
 	# Return the serialized user data
-	return Response(UserSerializer(instance=user).data)
+	return Response(FriendSerializer(instance=user).data)
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def add_matchHistory(request, match_id):
+	# Retrieve user from the database
+	match = get_object_or_404(PongMatch, id=match_id)
+
+	# Add the user to the friend list
+	request.user.match_history.add(match)
+
+	# Return the serialized user data
+	return Response(MatchHistorySerializer(instance=match).data)
+
+@api_view(['GET'])
+def get_matchHistory(request):
+	# Retrieve user from the database
+	match = PongMatch.objects.all()
+
+	serializer = MatchHistorySerializer(instance=match, many=True)
+	# Return the serialized user data
+	return Response(serializer.data)
+
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])

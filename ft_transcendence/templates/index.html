@@ -20,6 +20,8 @@
 	<link rel="stylesheet" type="text/css" href="{% static 'css/userProfile.css'%}">
 	<link rel="stylesheet" type="text/css" href="{% static 'css/button.css'%}">
 	<link rel="stylesheet" type="text/css" href="{% static 'css/animation.css'%}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/toast.css'%}">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
     <script type="importmap">
@@ -33,11 +35,29 @@
     <div id="root">
 		<div id="ui">
 			<div id="sidePanel" class="col-1 d-flex flex-column justify-content-start align-items-center pt-5">
-				
+				<div id="startButton">
+					<a href="/pong" onclick="route(event)">
+						<button class="button mb-4">START</button>
+					</a>
+				</div>
+				<div style="display: none" id="profileButton">
+					<a href="/profile" onclick="route(event)">
+						<button class="button mb-4">PROFILE</button>
+					</a>
+				</div>
+				<div style="display: none" id="logoutButton">
+					<a href="/log-out" onclick="route(event)">
+						<button class="button mb-4">LOG OUT</button>
+					</a>
+				</div>
+				<div id="loginButton">
+					<a href="/login" onclick="route(event)">
+						<button class="button mb-4">LOGIN</button>
+					</a>
+				</div>
 			</div>
-			<div class="container" id="userContainer">
-
-			</div>
+			<div class="container" id="userContainer"></div>
+			<div id="toastBox"></div>
 		</div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
