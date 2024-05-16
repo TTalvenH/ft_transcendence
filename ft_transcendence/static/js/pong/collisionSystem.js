@@ -19,7 +19,7 @@ function handleDamage(wall, players, camera) {
 
 function handleWallCollision(ball, wall, players, camera) {
     const raycaster = new THREE.Raycaster(ball.position, ball.direction);
-    const intersects = raycaster.intersectObject(wall.mesh);
+    const intersects = raycaster.intersectObject(wall.object);
     if (intersects.length > 0) {
 		ball.lightFlicker(0, 1, 3.0);
         handleDamage(wall, players, camera);
@@ -31,7 +31,7 @@ function handleWallCollision(ball, wall, players, camera) {
 
 function handlePlayerCollision(ball, player) {
     const raycaster = new THREE.Raycaster(ball.position, ball.direction);
-    const intersects = raycaster.intersectObject(player.collisionMesh);
+    const intersects = raycaster.intersectObject(player.object);
     
     if (intersects.length > 0) {
 		ball.lightFlicker(0, 1, 6.0);

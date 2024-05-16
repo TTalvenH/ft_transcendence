@@ -188,12 +188,12 @@ export class Pong
 
 		if (this.gameGlobals.game === Game.KNOCKOFF) {
 			Object.values(this.knockoffEntities).forEach(entity => {
-				entity.object.visible = show;
+				entity.object.visible = true;
 			});
 		}
 		else if (this.gameGlobals.game === Game.PONG) {
 			Object.values(this.pongEntities).forEach(entity => {
-				entity.mesh.visible = show;
+				entity.object.visible = true;
 			});
 		}
 

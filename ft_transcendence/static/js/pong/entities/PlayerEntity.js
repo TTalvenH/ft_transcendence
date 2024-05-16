@@ -26,19 +26,20 @@ export class PlayerEntity {
 		this.collisionMesh = new THREE.Mesh(this.geometry, this.material);
 		this.collisionBox = new THREE.Box3();
 		this.collisionMesh.visible = false;
+
 		// init object data
 		this.material.color.set(color);
 		this.material.emissive.set(color);
-		this.collisionMesh.geometry.computeBoundingBox();
 
 		this.flickerTime = 0;
 		this.isFlickering = false;
 
-		this.object = new THREE.Object3D();
+		this.object = new THREE.Group();
 		this.object.add(this.mesh);
 		this.object.add(this.collisionMesh);
 		this.object.position.copy(this.position);
-		this.collisionBox.copy( this.collisionMesh.geometry.boundingBox ).applyMatrix4( this.collisionMesh.matrixWorld );
+
+		this.collisionBox.setFromObject(this.object);
 	}	
 
 	lightFlicker(minFlicker, maxFlicker, flickerTime) {
@@ -80,7 +81,7 @@ export class PlayerEntity {
 			this.position = newPosition;
 		}
 		this.object.position.copy(this.position);
-		this.collisionBox.copy( this.collisionMesh.geometry.boundingBox ).applyMatrix4( this.collisionMesh.matrixWorld );
+		this.collisionBox.setFromObject(this.object);
 		}
 
 	render(scene) {	

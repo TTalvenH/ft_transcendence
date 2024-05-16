@@ -22,35 +22,42 @@ export class NeonBoxEntity {
             new THREE.RectAreaLight(color, this.lightIntensity, width, height), // Left
         ];
 
-		this.rectLights[0].position.set(position.x, position.y, position.z + depth / 2 + 0.001);
-		this.rectLights[1].position.set(position.x, position.y, position.z - depth / 2 - 0.001);
-		this.rectLights[2].position.set(position.x, position.y + height / 2 + 0.001, position.z);
-		this.rectLights[3].position.set(position.x, position.y - height / 2 - 0.001, position.z);
-		this.rectLights[4].position.set(position.x + width / 2 + 0.001, position.y, position.z);
-		this.rectLights[5].position.set(position.x + width / 2 - 0.001, position.y, position.z);
+		this.rectLights[0].position.set(0, 0, depth / 2 + 0.001);
+		this.rectLights[1].position.set(0, 0, -depth / 2 - 0.001);
+		this.rectLights[2].position.set(0, height / 2 + 0.001, 0);
+		this.rectLights[3].position.set(0, -height / 2 - 0.001, 0);
+		this.rectLights[4].position.set(width / 2 + 0.001, 0, 0);
+		this.rectLights[5].position.set(width / 2 - 0.001, 0, 0);
 
 		this.rectLights[2].rotation.x = Math.PI / 2;
 		this.rectLights[3].rotation.x = Math.PI / 2;
 		this.rectLights[4].rotation.z = Math.PI / 2;
 		this.rectLights[5].rotation.z = Math.PI / 2;
 
-		this.rectLights[0].lookAt( position.x, position.y, position.z + depth / 2 + 1);
-		this.rectLights[1].lookAt( position.x, position.y, position.z - depth / 2 - 1);
-		this.rectLights[2].lookAt( position.x, position.y + height / 2 + 1, position.z );
-		this.rectLights[3].lookAt( position.x, position.y - height / 2 - 1, position.z );
-		this.rectLights[4].lookAt( position.x + width / 2 + 1, position.y, position.z );
-		this.rectLights[5].lookAt( position.x + width / 2 - 1, position.y, position.z );
+		this.rectLights[0].lookAt( 0, 0, depth / 2 + 1);
+		this.rectLights[1].lookAt( 0, 0, -depth / 2 - 1);
+		this.rectLights[2].lookAt( 0, height / 2 + 1, 0 );
+		this.rectLights[3].lookAt( 0, -height / 2 - 1, 0 );
+		this.rectLights[4].lookAt( width / 2 + 1, 0, 0 );
+		this.rectLights[5].lookAt( width / 2 - 1, 0, 0 );
 
 		// Geometry and Material
-		this.mesh.position.copy(this.position);
+		this.object = new THREE.Group();
+		this.object.add(this.mesh);
+		this.object.add(this.rectLights[0]);
+		this.object.add(this.rectLights[1]);
+		this.object.add(this.rectLights[2]);
+		this.object.add(this.rectLights[3]);
+		this.object.add(this.rectLights[4]);
+		this.object.add(this.rectLights[5]);
+		
+		this.object.position.copy(this.position);
 		this.material.color.set(color);
 		this.material.emissive.set(color);
-		this.mesh.geometry.computeBoundingBox();
 
+		// this.mesh.geometry.computeBoundingBox();
 		this.collisionBox = new THREE.Box3();
-		this.collisionBox.copy( this.mesh.geometry.boundingBox );
-		this.mesh.updateMatrixWorld ( true );
-		this.collisionBox.applyMatrix4( this.mesh.matrixWorld)
+		this.collisionBox.setFromObject(this.object);
 		this.flickerTime = 0;
 		this.isFlickering = false;
 	}
@@ -80,10 +87,7 @@ export class NeonBoxEntity {
 	}
 
 	render(scene) {
-		scene.add(this.mesh);
-		this.rectLights.forEach(light => {
-			scene.add(light);
-		})
+		scene.add(this.object);
 	}
 	
 	update(deltaTime) {

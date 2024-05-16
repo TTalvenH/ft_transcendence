@@ -41,16 +41,21 @@ export class BallEntity {
 		// init object data
 		this.material.color.set(COLORS.SAFFRON);
 		this.material.emissive.set(COLORS.SAFFRON);
-		this.mesh.geometry.computeBoundingSphere();
 
+		
 		for (var i = 0; i < this.trailLength; i++) {
 			var trailObject = this.mesh.clone(); // Clone the ball object
 			trailObject.material = trailObject.material.clone(); // Clone the material
 			trailObject.material.transparent = true; // Enable transparency
- 			// Set the opacity based on the position in the trail
+			// Set the opacity based on the position in the trail
 			this.trail.push(trailObject);
 		}
-
+		this.object = new THREE.Group();
+		this.object.add(this.mesh);
+		this.object.add(this.pointLight);
+		for (var i = 0; i < this.trail.length; i++) {
+			this.object.add(this.trail[i]);
+		}
 	}
 	lightFlicker(minFlicker, maxFlicker, flickerTime) {
 		if (!this.isFlickering){
@@ -88,10 +93,6 @@ export class BallEntity {
 	}
 
 	render(scene) {
-		scene.add(this.mesh);
-		scene.add(this.pointLight);
-		for (var i = 0; i < this.trail.length; i++) {
-			scene.add(this.trail[i]);
-		}
+		scene.add(this.object);
 	}
 }
