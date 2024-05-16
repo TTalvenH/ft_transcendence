@@ -9,4 +9,5 @@ urlpatterns = [
 	path('login-user', views.loginUser, name="login-user"),
 	path('test-token', views.testToken, name="test-token"),
 	path('get-user/<int:user_id>/', views.getUser, name="get-user"),
+	path('setup-otp', views.setup_otp, name="setup-otp"),
 ]

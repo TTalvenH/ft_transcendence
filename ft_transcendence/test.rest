@@ -8,7 +8,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/users/create-user
 Content-Type: application/json
 
-{ "username": "mulli", "email": "mulli@gmail.com", "password": "Testisalis123#", "confirm_password": "Testisalis123#"}
+{ "username": "wmullie", "email": "mulledi@gemaild.com", "password": "Testisalis123#", "confirm_password": "Testisalis123#", "otp": true}
 
 ###
 
@@ -31,3 +31,11 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
 GET http://127.0.0.1:8000/users/get-user/46/
 Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE0Mzk4NTkyLCJpYXQiOjE3MTQzOTEzOTIsImp0aSI6IjA3YmE4OGNhNGFkNTRlZGNhYTJmYzliZmI1NzRiOGFkIiwidXNlcl9pZCI6NDZ9.3Cm1uZbsGOMVCOmexWcmf1HD-cC5gtr1gaWHJrXXEc8
+
+###
+
+POST http://127.0.0.1:8000/users/setup-otp
+Content-Type: application/json
+
+{ "username": "lolled123"}
+

@@ -72,35 +72,50 @@ async function registerHandler() {
 	if (loginBox) {
 		loginBox.remove();
 	}
-	if (!registerFormHTML) // we only fetch once and then save it locally
-		registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
-    document.getElementById('ui').insertAdjacentHTML('beforeend', registerFormHTML);
-    // Add event listener to the registration form
-    const registerForm = document.getElementById('registerForm');
-    registerForm.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Prevent default form submission behavior
-        // Get form data
-		const formData = new FormData(registerForm);
-        try {
-            // Send form data to the backend
-            const response = await fetch('/users/create-user', {
-                method: 'POST',
-                body: formData
-            });
 
-            if (response.ok) {
-                // Registration successful
-                alert('Registration successful!');
-                // Redirect to another page or handle the response as needed
-            } else {
-                // Registration failed
-                alert('Registration failed!');
-            }
-        } catch (error) {
-            console.error('Error registering user:', error);
-            alert('An error occurred during registration. Please try again later.');
-        }
-    });
+	if (!registerFormHTML) {
+		registerFormHTML = await fetch("/users/register.html").then(response => {
+			if (!response.ok) throw new Error('Failed to fetch registration form');
+			return response.text();
+		});
+	}
+
+	document.getElementById('ui').insertAdjacentHTML('beforeend', registerFormHTML);
+
+	const registerForm = document.getElementById('registerForm');
+	if (registerForm) {
+		registerForm.addEventListener('submit', async (event) => {
+			event.preventDefault(); // Prevent default form submission behavior
+
+			const formData = new FormData(registerForm);
+
+			try {
+				const response = await fetch('/users/create-user', {
+					method: 'POST',
+					body: formData
+				});
+
+				if (response.ok) {
+					const result = await response.json();
+
+					if (result.otp && result.otp.html) {
+						const qrHTML = result.otp.html;
+						document.getElementById('ui').insertAdjacentHTML('beforeend', qrHTML);
+					} else {
+						alert('Registration successful, but no OTP data was returned.');
+					}
+				} else {
+					const errorData = await response.json();
+					alert(`Registration failed: ${errorData.detail}`);
+				}
+			} catch (error) {
+				console.error('Error registering user:', error);
+				alert('An error occurred during registration. Please try again later.');
+			}
+		});
+	} else {
+		console.error('Register form not found');
+	}
 }
 
 
