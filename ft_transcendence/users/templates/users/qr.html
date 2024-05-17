@@ -1,93 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>OTP QR Code</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .box {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
-            text-align: center;
-        }
-        .box h2 {
-            margin-bottom: 20px;
-        }
-        .qr-code {
-            margin: 20px auto;
-        }
-        .qr-code img {
-            max-width: 100%;
-            height: auto;
-        }
-        .inputBox {
-            position: relative;
-            margin: 20px 0;
-        }
-        .inputBox input {
-            width: 100%;
-            padding: 10px;
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid #333;
-            outline: none;
-            color: #333;
-            font-size: 16px;
-        }
-        .inputBox label {
-            position: absolute;
-            top: 0;
-            left: 0;
-            padding: 10px 0;
-            pointer-events: none;
-            transition: 0.5s;
-            color: #666;
-        }
-        .inputBox input:focus ~ label,
-        .inputBox input:valid ~ label {
-            top: -20px;
-            left: 0;
-            color: #333;
-            font-size: 12px;
-        }
-        .button {
-            background-color: #333;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-        .button:hover {
-            background-color: #555;
-        }
-    </style>
-</head>
-<body>
-    <div class="box smoothAppear" id="qrBox">
-        <h2>Scan this QR Code with your Authenticator App</h2>
-        <div class="qr-code">
-            <img src="data:image/png;base64,$qr_code_url" alt="OTP QR Code">
-        </div>
-        <form id="otpForm">
-            <div class="inputBox">
-                <input type="text" name="otp_code" required onkeyup="this.setAttribute('value', this.value);" value="">
-                <label>Enter OTP Code</label>
-            </div>
-            <button class="button" type="submit">Verify</button>
-        </form>
-    </div>
-</body>
-</html>
+
+<div class="box smoothAppear" id="qrBox">
+	<h2>Scan this QR Code with your Authenticator App</h2>
+	<div class="qr-code">
+		<img src="data:image/png;base64,$qr_code_url" alt="OTP QR Code">
+	</div>
+	<form id="otpForm">
+		<div class="inputBox">
+			<input type="text" name="otp_code" required onkeyup="this.setAttribute('value', this.value);" value="">
+			<label>Enter OTP Code</label>
+		</div>
+		<button class="button" type="submit">Verify</button>
+	</form>
+</div>
+

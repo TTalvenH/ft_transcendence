@@ -8,7 +8,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/users/create-user
 Content-Type: application/json
 
-{ "username": "wmullie", "email": "mulledi@gemaild.com", "password": "Testisalis123#", "confirm_password": "Testisalis123#", "otp": true}
+{ "username": "wmulleie", "email": "melledi@gemaild.com", "password": "Testisalis1234#", "confirm_password": "Testisalis1234#", "enable_otp": true}
 
 ###
 

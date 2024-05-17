@@ -30,6 +30,10 @@ def register(request):
 def userProfileTemplate(request):
 	return render(request, 'users/profile.html')
 
+@api_view(['GET'])
+def qrPrompt(request):
+	return render(request, 'users/qr_prompt.html')
+
 @api_view(['POST'])
 def createUser(request):
     """
@@ -65,52 +69,85 @@ def createUser(request):
 
 
 def setup_otp(user):
-    device, created = TOTPDevice.objects.get_or_create(user=user, name='default')
+	device, created = TOTPDevice.objects.get_or_create(user=user, name='default')
 
-    if not created:
-        return {'detail': 'OTP device already exists.', 'created': False}
+	if not created:
+		return {'detail': 'OTP device already exists.', 'created': False}
 
-    # Generate a unique key for the user
-    key = pyotp.random_base32()
-    device.key = key
-    device.save()
+	# Generate a unique key for the user
+	key = pyotp.random_base32()
+	device.key = key
+	device.save()
 
-    # Generate the QR code URL
-    uri = pyotp.totp.TOTP(key).provisioning_uri(name=user.username, issuer_name="pong")
 
-    # Create the QR code image
-    qr = qrcode.make(uri)
-    buffered = BytesIO()
-    qr.save(buffered, format="PNG")
-    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+	user.otp_enabled = True
+	user.save()
+	# Generate the QR code URL
+	uri = pyotp.totp.TOTP(key).provisioning_uri(name=user.username, issuer_name="pong")
 
-    # Read the HTML template from a file
-    template_path = '/Users/atuliara/Desktop/new/ft_transcendence/users/templates/users/qr.html'
-    try:
-        with open(template_path, 'r') as file:
-            html_template = Template(file.read())
-    except FileNotFoundError:
-        return {'detail': 'Template file not found.', 'created': False}
+	# Create the QR code image
+	qr = qrcode.make(uri)
+	buffered = BytesIO()
+	qr.save(buffered, format="PNG")
+	img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
-    # Inject the base64 QR code and OTP secret into the HTML template
-    html = html_template.safe_substitute(qr_code_url=img_str, otp_secret=key)
+	# Read the HTML template from a file
+	template_path = '/Users/atuliara/Desktop/new/ft_transcendence/users/templates/users/qr.html'
+	try:
+		with open(template_path, 'r') as file:
+			html_template = Template(file.read())
+	except FileNotFoundError:
+		return {'detail': 'Template file not found.', 'created': False}
 
-    return {
-        'detail': 'OTP device created successfully.',
-        'created': True,
-        'html': html,
-        'provisioning_uri': uri
-    }
+	# Inject the base64 QR code and OTP secret into the HTML template
+	html = html_template.safe_substitute(qr_code_url=img_str, otp_secret=key)
 
+	return {
+		'detail': 'OTP device created successfully.',
+		'created': True,
+		'html': html,
+		'provisioning_uri': uri
+	}
 
 @api_view(['POST'])
 def loginUser(request):
 	user = get_object_or_404(CustomUser, username=request.data['username'])
+
 	if not user.check_password(request.data['password']):
-		return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+		return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_404_NOT_FOUND)
+
+	response_data = {'otp_required': user.otp_enabled}
+
+	if user.otp_enabled:
+		return Response(response_data, status=status.HTTP_200_OK)
+
 	token = create_jwt_pair_for_user(user)
 	serializer = UserSerializer(instance=user)
-	return Response({'tokens': token, 'user': serializer.data})
+	response_data.update({'tokens': token, 'user': serializer.data})
+
+	return Response(response_data, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def validateOtpAndLogin(request):
+	user = get_object_or_404(CustomUser, username=request.data['username'])
+
+	# if not user.check_password(request.data['password']):
+	# 	return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_404_NOT_FOUND)
+
+	otp = request.data.get('otp')
+	if not otp:
+		return Response({'detail': 'OTP required.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+	device = TOTPDevice.objects.get(user=user, name='default')
+	totp = pyotp.TOTP(device.key)
+
+	if not totp.verify(otp):
+		return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+	token = create_jwt_pair_for_user(user)
+	serializer = UserSerializer(instance=user)
+
+	return Response({'tokens': token, 'user': serializer.data}, status=status.HTTP_200_OK)
 
 
 

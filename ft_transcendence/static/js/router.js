@@ -29,42 +29,117 @@ async function profileHandler() {
 	document.getElementById('ui').insertAdjacentHTML('beforeend', profileHTML);
 }
 
+
 async function loginHandler() {
-	const registerBox = document.getElementById('registerBox');
-	if (registerBox)
-		registerBox.remove();
-	if (!loginFormHTML)
-		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
+    const registerBox = document.getElementById('registerBox');
+    if (registerBox)
+        registerBox.remove();
+    if (!loginFormHTML)
+        loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
     document.getElementById('ui').insertAdjacentHTML('beforeend', loginFormHTML);
-    // Add event listener to the registration form
+
+    // Add event listener to the login form
     const loginForm = document.getElementById('loginForm');
     loginForm.addEventListener('submit', async (event) => {
         event.preventDefault(); // Prevent default form submission behavior
 
         // Get form data
         let formData = new FormData(loginForm);
-        
+
         try {
             // Send form data to the backend
-            const response = await fetch('/users/login-user', {
+            let response = await fetch('/users/login-user', {
                 method: 'POST',
                 body: formData
             });
 
             if (response.ok) {
-                // Registration successful
-                alert('Login successful!');
-                // Redirect to another page or handle the response as needed
+                const data = await response.json();
+
+                // Check if 2FA is enabled for the user
+                if (data.otp_required) {
+                    // Display the OTP input field
+					let qr_prompt_response;
+                    qr_prompt_response = await fetch("/users/qr-prompt").then((data) => data.text());
+					document.getElementById('ui').insertAdjacentHTML('beforeend', qr_prompt_response);
+					console.log(qr_prompt_response);
+                    alert('2FA is enabled. Please enter your OTP.');
+
+                   // Add event listener for OTP form submission
+				   const otpForm = document.getElementById('otpForm');
+				   otpForm.addEventListener('submit', async (event) => {
+					   event.preventDefault();
+
+					   // Get OTP form data
+					   let otpFormData = new FormData(otpForm);
+
+					   // Send OTP form data to the backend
+					   let otpResponse = await fetch('/users/validate-otp', {
+						   method: 'POST',
+						   body: otpFormData
+					   });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            alert('Login successful!');
+                            // Redirect to another page or handle the response as needed
+                        } else {
+                            alert('Invalid OTP.');
+                        }
+                    });
+                } else {
+                    // Login successful without 2FA
+                    alert('Login successful!');
+                    // Redirect to another page or handle the response as needed
+                }
             } else {
-                // Registration failed
+                // Login failed
                 alert('Login failed!');
             }
         } catch (error) {
-            console.error('Error couldnt login', error);
-            alert('An error occurred during registration. Please try again later.');
+            console.error('Error could not login', error);
+            alert('An error occurred during login. Please try again later.');
         }
     });
 }
+
+
+// async function loginHandler() {
+// 	const registerBox = document.getElementById('registerBox');
+// 	if (registerBox)
+// 		registerBox.remove();
+// 	if (!loginFormHTML)
+// 		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
+//     document.getElementById('ui').insertAdjacentHTML('beforeend', loginFormHTML);
+//     // Add event listener to the registration form
+//     const loginForm = document.getElementById('loginForm');
+//     loginForm.addEventListener('submit', async (event) => {
+//         event.preventDefault(); // Prevent default form submission behavior
+
+//         // Get form data
+//         let formData = new FormData(loginForm);
+        
+//         try {
+//             // Send form data to the backend
+//             const response = await fetch('/users/login-user', {
+//                 method: 'POST',
+//                 body: formData
+//             });
+
+//             if (response.ok) {
+//                 // Registration successful
+//                 alert('Login successful!');
+//                 // Redirect to another page or handle the response as needed
+//             } else {
+//                 // Registration failed
+//                 alert('Login failed!');
+//             }
+//         } catch (error) {
+//             console.error('Error couldnt login', error);
+//             alert('An error occurred during registration. Please try again later.');
+//         }
+//     });
+// }
 
 
 async function registerHandler() {
@@ -102,7 +177,7 @@ async function registerHandler() {
 						const qrHTML = result.otp.html;
 						document.getElementById('ui').insertAdjacentHTML('beforeend', qrHTML);
 					} else {
-						alert('Registration successful, but no OTP data was returned.');
+						alert('Registration successful');
 					}
 				} else {
 					const errorData = await response.json();
@@ -118,6 +193,50 @@ async function registerHandler() {
 	}
 }
 
+// async function test() {
+// 	const data = {
+// 		username: 'pena123',
+// 		email: 'qweds@dk.ff',
+// 		password: 'Testisalis1234@',
+// 		confirm_password: 'Testisalis1234@',
+// 		enable_otp: 'true'
+// 	};
+
+// 	try {
+// 		const response = await fetch('http://127.0.0.1:8000/users/create-user', {
+// 			method: 'POST',
+// 			headers: {
+// 				'Content-Type': 'application/json',
+// 			},
+// 			body: JSON.stringify(data)
+// 		});
+
+// 		if (response.ok) {
+// 			const result = await response.json();
+// 			const html = result.otp.html;
+// 			document.getElementById('userContainer').insertAdjacentHTML('beforeend', html);
+// 		} else {
+// 			console.error('Error:', response.statusText);
+// 		}
+// 	} catch (error) {
+// 		console.error('An error occurred:', error);
+// 	}
+// }
+
+// function getCookie(name) {
+// 	let cookieValue = null;
+// 	if (document.cookie && document.cookie !== '') {
+// 		const cookies = document.cookie.split(';');
+// 		for (let i = 0; i < cookies.length; i++) {
+// 			const cookie = cookies[i].trim();
+// 			if (cookie.substring(0, name.length + 1) === (name + '=')) {
+// 				cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+// 				break;
+// 			}
+// 		}
+// 	}
+// 	return cookieValue;
+// }
 
 async function pongHandler() {
     const html = await fetch("/pong/").then((data) => data.text());
