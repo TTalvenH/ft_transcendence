@@ -5,7 +5,7 @@ let loginFormHTML;
 let registerFormHTML;
 const loginSuccess = '<i class="fa-regular fa-circle-check"></i> Login Success';
 const loginFail = '<i class="fa-regular fa-circle-xmark"></i> Login Fail';
-const registerSuccess = '<i class="fa-regular fa-circle-xmark"></i> Registeration Success';
+const registerSuccess = '<i class="fa-regular fa-circle-check"></i> Registeration Success';
 const registerFail = '<i class="fa-regular fa-circle-xmark"></i> Registeration Fail';
 const logoutSuccess = '<i class="fa-regular fa-circle-check"></i> You have been logged out';
 const logoutFail = '<i class="fa-regular fa-circle-xmark"></i> Logout Failed';
@@ -95,7 +95,6 @@ async function homeHandler() {
 }
 
 
-
 async function editProfileHandler() {
 	const userContainer = document.getElementById('userContainer');
 	const updateProfileHTML = await fetch("/users/update_profile.html").then((data) => data.text());
@@ -152,9 +151,13 @@ async function editProfileHandler() {
 function createFriendRow(friend) {
 	const friendBodyEl = document.getElementById('friendsBody');
 	const friendRow = document.createElement('tr');
+	const profileLink = document.createElement('a');
 	const friendName = document.createElement('td');
 	const friendStatus = document.createElement('td');
 	
+	profileLink.classList.add('profileLink');
+	profileLink.href = `/profile?username=${friend.username}`;
+	profileLink.onclick = function(event) { route(event); };
 	friendName.innerText = friend.username;
 	friendStatus.innerText = '•';
 	friendStatus.style.textAlign = 'center';
@@ -164,21 +167,40 @@ function createFriendRow(friend) {
 	} else {
 		friendStatus.style.color = 'red';
 	}
-	
-	friendRow.appendChild(friendName);
+	profileLink.appendChild(friendName);
+	friendRow.appendChild(profileLink);
 	friendRow.appendChild(friendStatus);
 	friendBodyEl.appendChild(friendRow);
 }
 
 async function profileHandler() {
+	const urlParams = new URLSearchParams(window.location.search);
+	let username = urlParams.get('username');
+	if (!username) {
+		username = JSON.parse(localStorage.getItem('currentUser')).username;
+		if (!username) {
+			history.pushState({}, "", "/");
+			handleLocation();
+			return;
+		}
+	} else if (username === JSON.parse(localStorage.getItem('currentUser')).username) {
+		history.pushState({}, "", "/profile");
+	}
+	const userData = JSON.parse(localStorage.getItem('currentUser'));
 	const userContainer = document.getElementById('userContainer');
 	const profileHTML = await fetch("/users/profile.html").then((data) => data.text());
 	userContainer.innerHTML = "";
 	userContainer.insertAdjacentHTML('beforeend', profileHTML);
-
-	const userData = JSON.parse(localStorage.getItem('currentUser'));
-	console.log(userData);
-	const response = await fetch(`/users/get-user-profile/${userData.username}/`, {
+	const editProfileButton = document.getElementById('editProfile');
+	const addFriendDiv = document.getElementById('addFriendDiv');
+	if (username === userData.username) {
+		editProfileButton.style.display = 'flex';
+		addFriendDiv.style.display = 'flex';
+	} else {
+		editProfileButton.style.display = 'none';
+		addFriendDiv.style.display = 'none';
+	}
+	const response = await fetch(`/users/get-user-profile/${username}/`, {
 		method: 'GET',
 		headers: {
 			'Authorization': 'Bearer ' + userData.accessToken
@@ -214,27 +236,32 @@ async function profileHandler() {
 		})
 	} else {
 		showToast(somethingWentWrong, true);
+		history.pushState({}, "", "/");
+		handleLocation();
+		return;
 	}
 	const addFriendButton = document.getElementById('addFriendButton');
 	addFriendButton.addEventListener('click', async (event) => {
 		event.preventDefault();
 		const friendInput = document.getElementById('friendInput');
-		const response = await fetch(`/users/add-friend/${friendInput.value}/`, {
-			method: 'POST',
-			headers: {
-				'Authorization': 'Bearer ' + userData.accessToken
-			}
-			});
-		if (response.ok) {
-			const data = await response.json();
-			console.log(data);
-			createFriendRow(data);
-			showToast(addFriendSuccess, false);
-		} else {
-			if (response.status === 400) {
-				showToast(addFriendAlreadyFriend, true);
+		if (friendInput.value) {
+			const response = await fetch(`/users/add-friend/${friendInput.value}/`, {
+				method: 'POST',
+				headers: {
+					'Authorization': 'Bearer ' + userData.accessToken
+				}
+				});
+			if (response.ok) {
+				const data = await response.json();
+				console.log(data);
+				createFriendRow(data);
+				showToast(addFriendSuccess, false);
 			} else {
-				showToast(addFriendFail, true);
+				if (response.status === 400) {
+					showToast(addFriendAlreadyFriend, true);
+				} else {
+					showToast(addFriendFail, true);
+				}
 			}
 		}
 	});
@@ -327,7 +354,8 @@ async function pongHandler() {
 
 async function handleLocation() {
 	handleSidePanel();
-	const path = window.location.pathname;
+	const url = new URL(window.location.href);
+	const path = url.pathname;
 	const handler = routes[path] || routes["/404"];
 	await handler();
 }

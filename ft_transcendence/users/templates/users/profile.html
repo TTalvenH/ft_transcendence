@@ -3,7 +3,7 @@
 <div class="container userProfile smoothAppear" id="userProfile">
 	<div class="row gy-5" id="profileRow">
 		<div class="col-4">
-			<div class="editProfileButton">
+			<div id="editProfile" class="editProfileButton">
 				<a href="/edit-profile" onclick="route(event)">
 					<button>
 						<img src="{% static 'images/edit-profile.png' %}" alt="...">
@@ -29,7 +29,7 @@
 					</tbody>
 				</table>
 			</div>
-			<div class="addFriend">
+			<div id="addFriendDiv" class="addFriend">
 				<input type="search" id="friendInput" name="q" placeholder="Add Friend...">
 				<button id="addFriendButton">+</button>
 			</div>

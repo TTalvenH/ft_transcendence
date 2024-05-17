@@ -44,14 +44,13 @@ from django.contrib.auth import authenticate, login, logout
 
 @api_view(['POST'])
 def loginUser(request):
-	# user = get_object_or_404(CustomUser, username=request.data['username'])
 	user = authenticate(request, username=request.data['username'], password=request.data['password'])
 	if not user:
 		return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 	
 	# if not user.check_password(request.data['password']):
 	# 	return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
-	login(request, user)
+	# login(request, user)
 	user.update_last_active()
 	token = create_jwt_pair_for_user(user)
 	serializer = UserSerializer(instance=user)
@@ -134,7 +133,6 @@ def updateUserPorfile(request):
 	# Serialize the user data
 	serializer = UserProfileSerializer(instance=user, data=request.data, partial=True)
 	if (serializer.is_valid()):
-		print('its trueee')
 		serializer.save()
 
 	# Return the serialized user data
@@ -145,9 +143,9 @@ def updateUserPorfile(request):
 @permission_classes([IsAuthenticated])
 def addFriend(request, username):
 	# Retrieve user from the database
-	user = get_object_or_404(CustomUser, username=username)
-	if request.user.friends.filter(username=username).exists():
+	if username == request.user.username or request.user.friends.filter(username=username).exists():
 		return Response(status=status.HTTP_400_BAD_REQUEST)
+	user = get_object_or_404(CustomUser, username=username)
 	# Add the user to the friend list
 	request.user.friends.add(user)
 
