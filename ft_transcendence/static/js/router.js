@@ -32,10 +32,10 @@ async function profileHandler() {
 
 async function loginHandler() {
     const registerBox = document.getElementById('registerBox');
-    if (registerBox)
-        registerBox.remove();
-    if (!loginFormHTML)
+    if (registerBox) registerBox.remove();
+    if (!loginFormHTML) {
         loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
+    }
     document.getElementById('ui').insertAdjacentHTML('beforeend', loginFormHTML);
 
     // Add event listener to the login form
@@ -59,28 +59,25 @@ async function loginHandler() {
                 // Check if 2FA is enabled for the user
                 if (data.otp_required) {
                     // Display the OTP input field
-					let qr_prompt_response;
-                    qr_prompt_response = await fetch("/users/qr-prompt").then((data) => data.text());
-					document.getElementById('ui').insertAdjacentHTML('beforeend', qr_prompt_response);
-					console.log(qr_prompt_response);
-                    alert('2FA is enabled. Please enter your OTP.');
+                    loginFormHTML = await fetch("/users/qr_prompt.html").then((data) => data.text());
+                    document.getElementById('ui').insertAdjacentHTML('beforeend', loginFormHTML);
 
-                   // Add event listener for OTP form submission
-				   const otpForm = document.getElementById('otpForm');
-				   otpForm.addEventListener('submit', async (event) => {
-					   event.preventDefault();
+                    // Add event listener for OTP form submission
+                    const otpForm = document.getElementById('otpForm');
+                    otpForm.addEventListener('submit', async (event) => {
+                        event.preventDefault();
 
-					   // Get OTP form data
-					   let otpFormData = new FormData(otpForm);
+                        // Get OTP form data
+                        let otpFormData = new FormData(otpForm);
 
-					   // Send OTP form data to the backend
-					   let otpResponse = await fetch('/users/validate-otp', {
-						   method: 'POST',
-						   body: otpFormData
-					   });
+                        // Send OTP form data to the backend
+                        let otpResponse = await fetch('/users/validate-otp', {
+                            method: 'POST',
+                            body: otpFormData
+                        });
 
-                        if (response.ok) {
-                            const result = await response.json();
+                        if (otpResponse.ok) { // Correct response check
+                            const result = await otpResponse.json();
                             alert('Login successful!');
                             // Redirect to another page or handle the response as needed
                         } else {
@@ -97,11 +94,12 @@ async function loginHandler() {
                 alert('Login failed!');
             }
         } catch (error) {
-            console.error('Error could not login', error);
+            console.error('Error during login', error);
             alert('An error occurred during login. Please try again later.');
         }
     });
 }
+
 
 
 // async function loginHandler() {
