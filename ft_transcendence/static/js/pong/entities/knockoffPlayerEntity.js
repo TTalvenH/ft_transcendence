@@ -10,8 +10,8 @@ export class KnockoffPlayerEntity {
 
 		// Movement
 		this.velocity = new THREE.Vector3(0, 0, 0,);
-		this.acceleration = 0;
-		this.friction = 0;
+		this.acceleration = 0.1;
+		this.friction = 0.01;
 		this.speed = 0.09;
 
 		// Input keys
@@ -29,9 +29,11 @@ export class KnockoffPlayerEntity {
 		this.object = new THREE.Object3D();
 		this.mesh1 = new THREE.Mesh(this.geometry1, this.material2);
 		this.mesh2 = new THREE.Mesh(this.geometry2, this.material1);
+		this.pointLight = new THREE.PointLight( color, this.lightIntensity, 10);
 
 		this.object.add(this.mesh1);
 		this.object.add(this.mesh2);
+		this.object.add(this.pointLight);
 		// init object data
 		this.material1.emissive.set(color);
 		this.material1.color.set(color);
@@ -45,9 +47,6 @@ export class KnockoffPlayerEntity {
 		
 		this.flickerTime = 0;
 		this.isFlickering = false;
-		
-		this.acceleration = 0.1;
-		this.friction = 0.1;
 
 		this.object.position.copy(this.position);
 	}	
@@ -88,18 +87,8 @@ export class KnockoffPlayerEntity {
 		else
 			this.velocity.lerp( new THREE.Vector3(0, 0, 0), this.friction * deltaTime );
 
-		let newPosition = this.position.clone().add( this.velocity.clone().multiplyScalar(deltaTime) );
-		let minY = -2.45;
-		let maxY = 2.45;
-		if (newPosition.y >= minY && newPosition.y <= maxY)
-		{
-			this.position = newPosition;
-			this.mesh.position.copy( this.position );
-			this.mesh.position.copy( this.position );
-		}
-		this.mesh.position.copy( this.position );
-		this.mesh.position.copy( this.position );
-		this.collisionBox.copy( this.mesh.geometry.boundingBox ).applyMatrix4( this.mesh.matrixWorld );
+		this.position = this.position.clone().add( this.velocity.clone().multiplyScalar(deltaTime) );
+		this.object.position.copy( this.position );
 		}
 
 	render(scene) {	

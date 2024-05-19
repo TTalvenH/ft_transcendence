@@ -75,17 +75,26 @@ export class Pong
 		this.pongEntities['NeonBox3'] = new NeonBoxEntity(new THREE.Vector3(-5, 0, 0), 0.1, 6.1, 0.04, true, COLORS.SKYBLUE);
 		this.pongEntities['NeonBox4'] = new NeonBoxEntity(new THREE.Vector3(5, 0, 0), 0.1, 6.1, 0.04, true, COLORS.FOLLY);
 		this.pongEntities['Ball'] = new BallEntity();
+		this.pongEntities['Plane'] = new PlaneEntity(new THREE.Vector3(0, 0, -0.25), 0x3A0CA3, 0, window.innerWidth, window.innerHeight);
 		
 		// Knockoff
 		this.knockoffEntities['Player1'] = new KnockoffPlayerEntity(new THREE.Vector3(4, 0, 0), COLORS.FOLLY);
 		this.knockoffEntities['Player2'] = new KnockoffPlayerEntity(new THREE.Vector3(-4, 0, 0), COLORS.SKYBLUE);
+		this.knockoffEntities['NeonBox1'] = new NeonBoxEntity(new THREE.Vector3(0, -3, -0.25), 10, 0.01, 0.01, false, COLORS.INDIGO);
+		this.knockoffEntities['NeonBox2'] = new NeonBoxEntity(new THREE.Vector3(0, 3, -0.25), 10, 0.01, 0.01, false, COLORS.INDIGO);
+		this.knockoffEntities['NeonBox3'] = new NeonBoxEntity(new THREE.Vector3(-5, 0, -0.25), 0.01, 6, 0.01, false, COLORS.INDIGO);
+		this.knockoffEntities['NeonBox4'] = new NeonBoxEntity(new THREE.Vector3(5, 0, -0.25), 0.01, 6, 0.01, false, COLORS.INDIGO);
+		this.knockoffEntities['NeonBox5'] = new NeonBoxEntity(new THREE.Vector3(5, 3, -7.75), 0.01, 0.01, -15, false, COLORS.INDIGO);
+		this.knockoffEntities['NeonBox6'] = new NeonBoxEntity(new THREE.Vector3(5, -3, -7.75), 0.01, 0.01, -15, false, COLORS.INDIGO);
+		this.knockoffEntities['NeonBox7'] = new NeonBoxEntity(new THREE.Vector3(-5, 3, -7.75), 0.01, 0.01, -15, false, COLORS.INDIGO);
+		this.knockoffEntities['NeonBox8'] = new NeonBoxEntity(new THREE.Vector3(-5, -3, -7.75), 0.01, 0.01, -15, false, COLORS.INDIGO);
+		this.knockoffEntities['Floor'] = new PlaneEntity(new THREE.Vector3(0, 0, -0.25), COLORS.INDIGO, 0.01, 10, 6);
 
 		// Entities
 		this.entities['User1Name'] = new TextEntity("Guest1", new THREE.Vector3(6, 7.7, 0), this.font, COLORS.INDIGO);
 		this.entities['User2Name'] = new TextEntity("Guest2", new THREE.Vector3(-6, 7.7, 0), this.font, COLORS.INDIGO);
 		this.entities['Countdown'] = new TextEntity("", new THREE.Vector3(0, 0, 3), this.font, COLORS.INDIGO, this.camera);
 		this.entities['WinnerName'] = new TextEntity("", new THREE.Vector3(0, 0, 3), this.font, COLORS.INDIGO, this.camera);
-		this.entities['Plane'] = new PlaneEntity(new THREE.Vector3(0, 0, -0.25), window.innerWidth, window.innerHeight);
 		this.entities['Player1Health'] = new HealthBarEntity(new THREE.Vector3(5, 5.5, 0), this.pongEntities["Player1"]);
 		this.entities['Player2Health'] = new HealthBarEntity(new THREE.Vector3(-5, 5.5, 0), this.pongEntities["Player2"]);
 		
@@ -102,7 +111,6 @@ export class Pong
 				entity.render(this.scene);
 			}
 		}
-		// KnockoffEntities
 		for (const key in this.knockoffEntities) {
 			if (this.knockoffEntities.hasOwnProperty(key)) {
 				const entity = this.knockoffEntities[key];
@@ -118,7 +126,7 @@ export class Pong
 		this.interval = 1 / 120;
 		this.isWinnerLoopOn = false;
 		this.winnerText = "";
-		initEventListener(this.pongEntities, this.gameGlobals);		
+		initEventListener(this.allEntities, this.gameGlobals);		
 		Object.values(this.knockoffEntities).forEach(entity => {
 			entity.object.visible = false;
 		});
@@ -300,7 +308,7 @@ export class Pong
 			case GameStates.PAUSED:
 				return;
 			case GameStates.PLAYING:
-				collisionSystem(this.allEntities, deltaTime);
+				collisionSystem(this.allEntities, this.gameGlobals.game, deltaTime);
 				this.checkGameOver()
 				this.update(deltaTime);
 				break;

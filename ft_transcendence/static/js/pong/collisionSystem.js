@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-
+import { Game } from './pong.js';
 
 function handleDamage(wall, players, camera) {
     if (wall.isGoal === false) {
@@ -50,34 +50,70 @@ function handlePlayerCollision(ball, player) {
     }
 }
 
-export function collisionSystem(entities, deltaTime) {
-    const ball = entities.pongEntities["Ball"];
-    const walls = [
-        entities.pongEntities["NeonBox1"],
-        entities.pongEntities["NeonBox2"],
-        entities.pongEntities["NeonBox3"],
-        entities.pongEntities["NeonBox4"]
-    ];
-    const players = [entities.pongEntities["Player1"], entities.pongEntities["Player2"]];
-    const camera = entities.entities["Camera"];
-	// CCD steps
-    const numberOfSteps = 20;
-    const stepSize = deltaTime / numberOfSteps;
+export function collisionSystem(entities, game, deltaTime) {
+	if (game === Game.PONG) {
+		const ball = entities.pongEntities["Ball"];
+		const walls = [
+			entities.pongEntities["NeonBox1"],
+			entities.pongEntities["NeonBox2"],
+			entities.pongEntities["NeonBox3"],
+			entities.pongEntities["NeonBox4"]
+		];
+		const players = [entities.pongEntities["Player1"], entities.pongEntities["Player2"]];
+		const camera = entities.entities["Camera"];
+		// CCD steps
+		const numberOfSteps = 20;
+		const stepSize = deltaTime / numberOfSteps;
+	
+		for (let step = 0; step < numberOfSteps; step++) {
+			const nextPosition = ball.position.clone().add(ball.velocity.clone().multiplyScalar((step + 1) * stepSize));
+	
+			// Check for collisions with walls
+			for (const wall of walls) {
+				if (wall.collisionBox.intersectsSphere(new THREE.Sphere(nextPosition, ball.radius))) {
+					handleWallCollision(ball, wall, players, camera);
+				}
+			}
+			// Check for collisions with players
+			for (const player of players) {
+				if (player.collisionBox.intersectsSphere(new THREE.Sphere(nextPosition, ball.radius))) {
+					handlePlayerCollision(ball, player);
+				}
+			}
+		}
+	}
+	else if (game === Game.KNOCKOFF) {
+		const player1 = entities.knockoffEntities["Player1"];
+		const player2 = entities.knockoffEntities["Player2"];
+		const camera = entities.entities["Camera"];
 
-    for (let step = 0; step < numberOfSteps; step++) {
-        const nextPosition = ball.position.clone().add(ball.velocity.clone().multiplyScalar((step + 1) * stepSize));
-
-        // Check for collisions with walls
-        for (const wall of walls) {
-            if (wall.collisionBox.intersectsSphere(new THREE.Sphere(nextPosition, ball.radius))) {
-                handleWallCollision(ball, wall, players, camera);
-            }
-        }
-        // Check for collisions with players
-        for (const player of players) {
-            if (player.collisionBox.intersectsSphere(new THREE.Sphere(nextPosition, ball.radius))) {
-                handlePlayerCollision(ball, player);
-            }
-        }
-    }
+		// CCD steps
+		const numberOfSteps = 20;
+		const stepSize = deltaTime / numberOfSteps;
+	
+		for (let step = 0; step < numberOfSteps; step++) {
+			const nextPosition1 = player1.position.clone().add(player1.velocity.clone().multiplyScalar((step + 1) * stepSize));
+			const nextPosition2 = player2.position.clone().add(player2.velocity.clone().multiplyScalar((step + 1) * stepSize));
+			// Check for collisions with players
+			const distanceBetweenCenters = nextPosition1.distanceTo(nextPosition2);
+			if (distanceBetweenCenters < player1.radius + player2.radius) {
+				console.log("COLLISION");
+				let fasterPlayer = player1;
+				let slowerPlayer = player2;
+				if (player2.velocity.length() > player1.velocity.length()) {
+					fasterPlayer = player2;
+					slowerPlayer = player1;
+				}
+				const normal = slowerPlayer.position.clone().sub(fasterPlayer.position).normalize();
+				slowerPlayer.position.add(normal.clone().multiplyScalar(0.01));
+				fasterPlayer.position.add(normal.clone().multiplyScalar(-0.01));
+				const velocity = fasterPlayer.velocity.clone().add(slowerPlayer.velocity);
+				const bounceBack = velocity.length();
+				const bounceVelocity = normal.clone().multiplyScalar(bounceBack);
+				slowerPlayer.velocity.copy(bounceVelocity.clone().multiplyScalar(1));
+				fasterPlayer.velocity.copy(bounceVelocity.clone().multiplyScalar(-0.1));
+			}
+		}
+		
+	}
 }
