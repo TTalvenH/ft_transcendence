@@ -1,0 +1,8 @@
+
+.qr-code {
+	margin: 20px auto;
+}
+.qr-code img {
+	max-width: 100%;
+	height: auto;
+}
