@@ -100,25 +100,13 @@ async function editProfileHandler() {
 	const updateProfileHTML = await fetch("/users/update_profile.html").then((data) => data.text());
 	userContainer.innerHTML = "";
 	userContainer.insertAdjacentHTML('beforeend', updateProfileHTML);
-	const updateProfileForm = document.getElementById('updateProfileForm');
-	updateProfileForm.addEventListener('submit', async (event) => {
-		event.preventDefault();
-		const formData = new FormData(updateProfileForm);
-		const response = await fetch('/users/update-user', {
-			method: 'PUT',
-			body: formData
-		});
-		if (response.ok) {
-			showToast(profileSuccess, false);
-		} else {
-			showToast(somethingWentWrong, true);
-		}
-	});
 
 	const input = document.getElementById('imageInput');
 	const profileImage = document.getElementById('profileImage');
+	let selectedFile = null;
+
 	input.addEventListener('change', async (event) => {
-		var file = input.files[0];
+		selectedFile = input.files[0];
 		if (file) {
 			var reader = new FileReader();
 			reader.onload = function(e) {
@@ -130,6 +118,24 @@ async function editProfileHandler() {
 				}
 			}
 			reader.readAsDataURL(file);
+		}
+	});
+
+	const updateProfileForm = document.getElementById('updateProfileForm');
+	updateProfileForm.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		const formData = new FormData(updateProfileForm);
+		if (selectedFile) {
+			formData.append('image', selectedFile);
+		}
+		const response = await fetch('/users/update-user', {
+			method: 'PUT',
+			body: formData
+		});
+		if (response.ok) {
+			showToast(profileSuccess, false);
+		} else {
+			showToast(somethingWentWrong, true);
 		}
 	});
 
@@ -287,7 +293,6 @@ async function loginHandler() {
 				method: 'POST',
 				body: formData
             });
-
             if (response.ok) {
 				const data = await response.json();
 				currentUser.username = data.user.username;

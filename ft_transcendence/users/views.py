@@ -127,6 +127,7 @@ def getUserPorfile(request, username):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def updateUserPorfile(request):
+	print(request.data)
 	# Retrieve user from the database
 	user = get_object_or_404(CustomUser, id=request.user.id)
 
