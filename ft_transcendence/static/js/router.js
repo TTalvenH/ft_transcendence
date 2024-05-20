@@ -5,6 +5,7 @@ let loginFormHTML;
 let registerFormHTML;
 let uiHTML;
 let profileHTML;
+let currentUsername = null;
 
 const routes = {
 	"/": uiHandler,
@@ -29,76 +30,128 @@ async function profileHandler() {
 	document.getElementById('ui').insertAdjacentHTML('beforeend', profileHTML);
 }
 
-
 async function loginHandler() {
     const registerBox = document.getElementById('registerBox');
     if (registerBox) registerBox.remove();
-    if (!loginFormHTML) {
-        loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
+    
+    if (!window.loginFormHTML) {
+        window.loginFormHTML = await fetchHTML("/users/login.html");
     }
-    document.getElementById('ui').insertAdjacentHTML('beforeend', loginFormHTML);
+    
+    const uiElement = document.getElementById('ui');
+    uiElement.innerHTML = ''; // Clear the UI container
+    uiElement.insertAdjacentHTML('beforeend', window.loginFormHTML);
 
     // Add event listener to the login form
     const loginForm = document.getElementById('loginForm');
-    loginForm.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Prevent default form submission behavior
-
-        // Get form data
-        let formData = new FormData(loginForm);
-
-        try {
-            // Send form data to the backend
-            let response = await fetch('/users/login-user', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-
-                // Check if 2FA is enabled for the user
-                if (data.otp_required) {
-                    // Display the OTP input field
-                    loginFormHTML = await fetch("/users/qr_prompt.html").then((data) => data.text());
-                    document.getElementById('ui').insertAdjacentHTML('beforeend', loginFormHTML);
-
-                    // Add event listener for OTP form submission
-                    const otpForm = document.getElementById('otpForm');
-                    otpForm.addEventListener('submit', async (event) => {
-                        event.preventDefault();
-
-                        // Get OTP form data
-                        let otpFormData = new FormData(otpForm);
-
-                        // Send OTP form data to the backend
-                        let otpResponse = await fetch('/users/validate-otp', {
-                            method: 'POST',
-                            body: otpFormData
-                        });
-
-                        if (otpResponse.ok) { // Correct response check
-                            const result = await otpResponse.json();
-                            alert('Login successful!');
-                            // Redirect to another page or handle the response as needed
-                        } else {
-                            alert('Invalid OTP.');
-                        }
-                    });
-                } else {
-                    // Login successful without 2FA
-                    alert('Login successful!');
-                    // Redirect to another page or handle the response as needed
-                }
-            } else {
-                // Login failed
-                alert('Login failed!');
-            }
-        } catch (error) {
-            console.error('Error during login', error);
-            alert('An error occurred during login. Please try again later.');
-        }
-    });
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLoginSubmit);
+    }
 }
+
+async function fetchHTML(url) {
+    try {
+        const response = await fetch(url);
+        if (response.ok) {
+            return response.text();
+        } else {
+            console.error(`Error fetching ${url}: ${response.statusText}`);
+            alert(`Error loading form. Please try again later.`);
+            return '';
+        }
+    } catch (error) {
+        console.error('Fetch error:', error);
+        alert('An error occurred while loading the form. Please try again later.');
+        return '';
+    }
+}
+
+async function handleLoginSubmit(event) {
+    event.preventDefault();
+
+    const loginForm = event.target;
+    let formData = new FormData(loginForm);
+
+    try {
+        let response = await fetch('/users/login-user', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+			currentUsername = formData.get('username');
+            if (data.otp_required) {
+                // Remove login form before loading OTP form
+                loginForm.remove();
+                await loadOtpForm();
+            } else {
+                alert('Login successful!');
+                // Redirect or handle success
+            }
+        } else {
+            alert('Login failed!');
+        }
+    } catch (error) {
+        console.error('Error during login:', error);
+        alert('An error occurred during login. Please try again later.');
+    }
+}
+
+async function loadOtpForm() {
+    if (!window.otpFormHTML) {
+        window.otpFormHTML = await fetchHTML("/users/qr_prompt.html");
+    }
+    
+    const uiElement = document.getElementById('ui');
+    uiElement.innerHTML = ''; // Clear the UI container
+    uiElement.insertAdjacentHTML('beforeend', window.otpFormHTML);
+
+    const otpForm = document.getElementById('otpForm');
+    if (otpForm) {
+        otpForm.addEventListener('submit', handleOtpSubmit);
+    }
+
+    // Optionally, insert user data into the OTP form if needed
+    // Example: if the OTP form needs the username, you can do:
+    // const usernameField = document.getElementById('usernameField');
+    // if (usernameField && currentUsername) {
+    //     usernameField.value = currentUsername.username;
+    // }
+}
+
+async function handleOtpSubmit(event) {
+    event.preventDefault();
+
+    const otpForm = event.target;
+    let otpFormData = new FormData(otpForm);
+
+    // Optionally, append user data to the OTP form data if needed
+    if (currentUsername) {
+		otpFormData.append('username', currentUsername);
+	}
+
+    try {
+        let otpResponse = await fetch('/users/validate-otp', {
+            method: 'POST',
+            body: otpFormData
+        });
+
+        if (otpResponse.ok) {
+            const result = await otpResponse.json();
+            alert('Login successful!');
+            // Redirect or handle success
+        } else {
+            alert('Invalid OTP.');
+        }
+    } catch (error) {
+        console.error('Error during OTP validation:', error);
+        alert('An error occurred during OTP validation. Please try again later.');
+    }
+}
+
+
+
 
 
 
@@ -112,7 +165,7 @@ async function loginHandler() {
 //     // Add event listener to the registration form
 //     const loginForm = document.getElementById('loginForm');
 //     loginForm.addEventListener('submit', async (event) => {
-//         event.preventDefault(); // Prevent default form submission behavior
+//         event.prev entDefault(); // Prevent default form submission behavior
 
 //         // Get form data
 //         let formData = new FormData(loginForm);

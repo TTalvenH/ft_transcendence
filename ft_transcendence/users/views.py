@@ -112,6 +112,7 @@ def setup_otp(user):
 @api_view(['POST'])
 def loginUser(request):
 	user = get_object_or_404(CustomUser, username=request.data['username'])
+	print(request.data)
 
 	if not user.check_password(request.data['password']):
 		return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_404_NOT_FOUND)
