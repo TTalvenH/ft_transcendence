@@ -43,13 +43,14 @@ function showToast(msg, error) {
 		toastDiv.remove();
 	}, 2000)
 }
+
 let currentUsername = null;
 
 const routes = {
 	"/": homeHandler,
 	"/pong": pongHandler,
-	"/login": loginHandler,
-	"/register": registerHandler,
+	"/login": loginHandler2,
+	"/register": registerHandler2,
 	"/profile": profileHandler,
 	"/edit-profile": editProfileHandler,
 	"/log-out": logOutHandler,
@@ -97,8 +98,19 @@ async function homeHandler() {
 
 
 async function editProfileHandler() {
+	const userData = JSON.parse(localStorage.getItem('currentUser'));
 	const userContainer = document.getElementById('userContainer');
-	const updateProfileHTML = await fetch("/users/update_profile.html").then((data) => data.text());
+	const updateProfileResponse = await fetch("/users/update_profile.html", {
+		method: 'GET',
+		headers: {
+			'Authorization': 'Bearer ' + userData.accessToken,
+		},
+	})
+	if (!updateProfileResponse.ok) {
+		showToast(somethingWentWrong, true);
+		return;
+	}
+	const updateProfileHTML = await updateProfileResponse.text();
 	userContainer.innerHTML = "";
 	userContainer.insertAdjacentHTML('beforeend', updateProfileHTML);
 
@@ -108,7 +120,7 @@ async function editProfileHandler() {
 
 	input.addEventListener('change', async (event) => {
 		selectedFile = input.files[0];
-		if (file) {
+		if (selectedFile) {
 			var reader = new FileReader();
 			reader.onload = function(e) {
 				// Replace the image source with the selected image
@@ -118,23 +130,36 @@ async function editProfileHandler() {
 					profileImage.style.display = 'block';
 				}
 			}
-			reader.readAsDataURL(file);
+			reader.readAsDataURL(selectedFile);
 		}
 	});
 
 	const updateProfileForm = document.getElementById('updateProfileForm');
 	updateProfileForm.addEventListener('submit', async (event) => {
 		event.preventDefault();
+		const userData = JSON.parse(localStorage.getItem('currentUser'));
 		const formData = new FormData(updateProfileForm);
 		if (selectedFile) {
 			formData.append('image', selectedFile);
 		}
-		const response = await fetch('/users/update-user', {
+		const response = await fetch('/users/update-user-profile', {
 			method: 'PUT',
+			headers: {
+				'Authorization': 'Bearer ' + userData.accessToken
+			},
 			body: formData
 		});
 		if (response.ok) {
+			const data = await response.json();
+			currentUser.username = data.user.username;
+			currentUser.id = data.user.id;
+			currentUser.accessToken = data.tokens.access;
+			currentUser.refreshToken = data.tokens.refresh;
+			currentUser.lastActive = data.user.last_active;
+			localStorage.setItem('currentUser', JSON.stringify(currentUser));
 			showToast(profileSuccess, false);
+			history.pushState({}, "", "/profile");
+			handleLocation();
 		} else {
 			showToast(somethingWentWrong, true);
 		}
@@ -181,6 +206,7 @@ function createFriendRow(friend) {
 }
 
 async function profileHandler() {
+	const userData = JSON.parse(localStorage.getItem('currentUser'));
 	const urlParams = new URLSearchParams(window.location.search);
 	let username = urlParams.get('username');
 	if (!username) {
@@ -190,12 +216,26 @@ async function profileHandler() {
 			handleLocation();
 			return;
 		}
-	} else if (username === JSON.parse(localStorage.getItem('currentUser')).username) {
+	} else if (username === userData.username) {
 		history.pushState({}, "", "/profile");
 	}
-	const userData = JSON.parse(localStorage.getItem('currentUser'));
 	const userContainer = document.getElementById('userContainer');
-	const profileHTML = await fetch("/users/profile.html").then((data) => data.text());
+	let profileHTML;
+	const profileResponse = await fetch("/users/profile.html", {
+		method: 'GET',
+		headers: {
+			'Authorization': 'Bearer ' + userData.accessToken
+		},
+	})
+	if (profileResponse.ok) {
+		profileHTML = await profileResponse.text();
+	} else {
+		showToast(somethingWentWrong, true);
+		history.pushState({}, "", "/");
+		handleLocation();
+		return;
+	}
+
 	userContainer.innerHTML = "";
 	userContainer.insertAdjacentHTML('beforeend', profileHTML);
 	const editProfileButton = document.getElementById('editProfile');
@@ -217,7 +257,8 @@ async function profileHandler() {
 		const data = await response.json();
 		console.log(data);
 		data.friends.forEach(createFriendRow);
-
+		const userName = document.getElementById('username');
+		userName.innerText = data.username;
 		const matchBodyEl = document.getElementById('matchHistoryBody');
 		data.match_history.forEach((match) => {
 			const matchRow = document.createElement('tr');
@@ -434,7 +475,8 @@ async function loginHandler2() {
         } catch (error) {
             showToast(somethingWentWrong, true);
         }
-});
+	});
+}
 
 
 
@@ -615,6 +657,7 @@ async function pongHandler() {
 async function handleLocation() {
 	handleSidePanel();
 	const url = new URL(window.location.href);
+	currentRoute = url;
 	const path = url.pathname;
 	const handler = routes[path] || routes["/404"];
 	await handler();

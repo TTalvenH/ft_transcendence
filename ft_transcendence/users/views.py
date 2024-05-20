@@ -16,6 +16,8 @@ from django.conf import settings
 import pyotp
 from io import BytesIO
 from string import Template
+from .decorators import update_last_active
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 # Create your views here.
 @api_view(['GET'])
@@ -27,14 +29,20 @@ def register(request):
 	return render(request, 'users/register.html')
 
 @api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@update_last_active
 def updateProfile(request):
 	return render(request, 'users/update_profile.html')
 
 @api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@update_last_active
 def userProfileTemplate(request):
 	return render(request, 'users/profile.html')
 
 @api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@update_last_active
 def qrPrompt(request):
 	return render(request, 'users/qr_prompt.html')
 
@@ -183,8 +191,6 @@ def validateOtpAndLogin(request):
 # email, which is taken from request.user.email. This is only accessible if
 # the user is authenticated, as specified by the IsAuthenticated permission.
 
-from rest_framework_simplejwt.authentication import JWTAuthentication
-
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
@@ -207,6 +213,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
+@update_last_active
 @permission_classes([IsAuthenticated])
 def getUser(request, user_id):
     # Extract user ID from the token
@@ -227,6 +234,7 @@ def getUser(request, user_id):
 
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
+@update_last_active
 @permission_classes([IsAuthenticated])
 def getUserPorfile(request, username):
     # Retrieve user from the database
@@ -240,6 +248,7 @@ def getUserPorfile(request, username):
 
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])
+@update_last_active
 @permission_classes([IsAuthenticated])
 def updateUserPorfile(request):
 	print(request.data)
@@ -247,15 +256,17 @@ def updateUserPorfile(request):
 	user = get_object_or_404(CustomUser, id=request.user.id)
 
 	# Serialize the user data
-	serializer = UserProfileSerializer(instance=user, data=request.data, partial=True)
-	if (serializer.is_valid()):
-		serializer.save()
-
+	profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True)
+	if (profile_serializer.is_valid()):
+		profile_serializer.save()
+	user_serializer = UserSerializer(instance=user)
+	jwt_token = create_jwt_pair_for_user(user)
 	# Return the serialized user data
-	return Response(serializer.data)
+	return Response({'user': user_serializer.data, 'tokens': jwt_token})
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
+@update_last_active
 @permission_classes([IsAuthenticated])
 def addFriend(request, username):
 	# Retrieve user from the database
@@ -264,12 +275,14 @@ def addFriend(request, username):
 	user = get_object_or_404(CustomUser, username=username)
 	# Add the user to the friend list
 	request.user.friends.add(user)
+	user.friends.add(request.user)
 
 	# Return the serialized user data
 	return Response(FriendSerializer(instance=user).data)
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
+@update_last_active
 @permission_classes([IsAuthenticated])
 def add_matchHistory(request, match_id):
 	# Retrieve user from the database
@@ -282,6 +295,7 @@ def add_matchHistory(request, match_id):
 	return Response(MatchHistorySerializer(instance=match).data)
 
 @api_view(['GET'])
+@update_last_active
 def get_matchHistory(request):
 	# Retrieve user from the database
 	match = PongMatch.objects.all()
@@ -293,7 +307,7 @@ def get_matchHistory(request):
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
+@update_last_active
 @permission_classes([IsAuthenticated])
 def logOut(request):
-	logout(request)
 	return Response(status=status.HTTP_200_OK)
