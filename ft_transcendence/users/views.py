@@ -40,38 +40,36 @@ def qrPrompt(request):
 
 @api_view(['POST'])
 def createUser(request):
-    """
-    This function is an api_view that can be accessed with a POST request.
-    It uses RegisterUserSerializer to validate the request data.
-    If the data is valid, it creates a new user with the given data,
-    gets the user object, and returns a Response containing the serialized user data.
-    If the data is invalid, it returns a Response with error messages.
-    """
-    serializer = RegisterUserSerializer(data=request.data)
-    if serializer.is_valid():
-        user = serializer.save()
+	"""
+	This function is an api_view that can be accessed with a POST request.
+	It uses RegisterUserSerializer to validate the request data.
+	If the data is valid, it creates a new user with the given data,
+	gets the user object, and returns a Response containing the serialized user data.
+	If the data is invalid, it returns a Response with error messages.
+	"""
+	serializer = RegisterUserSerializer(data=request.data)
+	if serializer.is_valid():
+		user = serializer.save()
+		print(request.data)
 
-        # If OTP is enabled, set up OTP for the user
-        enable_otp = request.data.get('enable_otp')
-        otp_data = {}
-        if enable_otp == 'true':
-            otp_data = setup_otp(user)
-            if not otp_data['created']:
-                return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+		# If OTP is enabled, set up OTP for the user
+		enable_otp = request.data.get('enable_otp')
+		otp_data = {}
+		if enable_otp == 'true':
+			otp_data = setup_otp(user)
+			if not otp_data['created']:
+				return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Construct the response data
-        response_data = {
-            'user': serializer.data,
-            'otp': otp_data
-        }
-        return Response(response_data, status=status.HTTP_201_CREATED)
-    else:
-        # Debug: print out the errors
-        print(serializer.errors)
-
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
+		# Construct the response data
+		response_data = {
+			'user': serializer.data,
+			'otp': otp_data
+		}
+		return Response(response_data, status=status.HTTP_201_CREATED)
+	else:
+		# Debug: print out the errors
+		print(serializer.errors)
+	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 from django.contrib.auth import authenticate, login, logout
 
