@@ -1,6 +1,6 @@
 {% load static %}
 
-<div class="container userProfile smoothAppear" id="userProfile">
+{% comment %} <div class="container userProfile smoothAppear" id="userProfile">
 	<div class="row gy-5" id="profileRow">
 		<div class="col-4">
 			<div id="editProfile" class="editProfileButton">
@@ -48,6 +48,94 @@
 						</tr>
 					</thead>
 					<tbody id="matchHistoryBody">
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="col-1">
+			<a href="/" onclick="route(event)">
+				<button class="cancelButton">X</button>
+			</a>
+		</div>
+	</div>
+</div> {% endcomment %}
+
+<div class="container userProfile smoothAppear" id="userProfile">
+	<div class="row gy-5" id="profileRow">
+		<div class="col-4">
+			<div id="editProfile" class="editProfileButton">
+				<a href="/edit-profile" onclick="route(event)">
+					<button>
+						<img src="{% static 'images/edit-profile.png' %}" alt="...">
+					</button>
+				</a>
+			</div>
+			<div class="profilePicture">
+				<img src="{{ profile_image }}" alt="Profile Picture">
+			</div>
+			<div class="profileInfo">
+				<h3 id="username" style="color: white;">{{ username }}</h3>
+			</div>
+			<div class="table-responsive" style="max-height: 280px;">
+				<table class="tableClass">
+					<thead>
+						<tr>
+							<th scope="col">Friends</th>
+							<th style="text-align: center;" scope="col">Status</th>
+						</tr>
+					</thead>
+					<tbody id="friendsBody">
+						{% for friend in friends %}
+							<tr>
+								<td>
+									<a class="profileLink" href="/profile?username={{ friend.username }}" onclick="route(event)">
+										{{ friend.username }}
+									</a>
+								</td>
+								{% if friend.is_active %}
+									<td style="text-align: center; color: #70d170;">•</td>  <!-- Update status dynamically -->
+								{% else %}
+									<td style="text-align: center; color: red;">•</td>
+								{% endif %}
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			<div id="addFriendDiv" class="addFriend">
+				<input type="search" id="friendInput" name="q" placeholder="Add Friend...">
+				<button id="addFriendButton">+</button>
+			</div>
+		</div>
+		<div class="col-7">
+			<h1 style="color: white;">
+				Match History
+			</h1>
+			<div class="table-responsive" style="max-height: 475px; width: 460px;">
+				<table class="tableClass">
+					<thead>
+						<tr>
+							<th scope="col">Opponent</th>
+							<th scope="col">Score</th>
+							<th scope="col">Date</th>
+						</tr>
+					</thead>
+					<tbody id="matchHistoryBody">
+						{% for match in match_history %}
+							<tr>
+								{% if match.player1Name == username %}
+									<td>{{ match.player2Name }}</td>
+								{% else %}
+									<td>{{ match.player1Name }}</td>
+								{% endif %}
+								{% if match.winner == username %}
+									<td style="color: #70d170;">{{ match.player1Hp }} - {{ match.player2Hp }}</td>
+								{% else %}
+									<td style="color: red;">{{ match.player1Hp }} - {{ match.player2Hp }}</td>
+								{% endif %}
+								<td>{{ match.dateTime }}</td>
+							</tr>
+						{% endfor %}
 					</tbody>
 				</table>
 			</div>

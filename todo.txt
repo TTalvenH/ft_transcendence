@@ -1,4 +1,4 @@
 
-make the user buttons only show when logged in
+change the user class to not have varialbles and instead save userinfo to localstorage
 
-fetch user data and fill the user profile with that
+when you update userinfo make sure the match history updates correctly

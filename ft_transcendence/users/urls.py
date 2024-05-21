@@ -4,7 +4,7 @@ from . import views
 urlpatterns = [
 	path('login.html', views.login_template),
 	path('register.html', views.register),
-	path('profile.html', views.userProfileTemplate),
+	path('profile.html/<str:username>/', views.userProfileTemplate),
 	path('qr_prompt.html', views.qrPrompt),
 	path('update_profile.html', views.updateProfile),
 	path('create-user', views.createUser, name="create-user"),

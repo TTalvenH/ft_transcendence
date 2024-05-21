@@ -15,13 +15,26 @@ const addFriendSuccess = '<i class="fa-regular fa-circle-check"></i>  Friend add
 const addFriendFail = '<i class="fa-regular fa-circle-xmark"></i>  User not found';
 const addFriendAlreadyFriend = '<i class="fa-regular fa-circle-xmark"></i>  User already a friend';
 
+
 class User {
-	constructor() {
-		this.username = "";
-		this.id = -1;
-		this.accessToken = "";
-		this.refreshToken = "";
-		this.lastActive = -1;
+	setUser(data) {
+		const user = {
+			username: data.user.username,
+			id: data.user.id,
+			accessToken: data.tokens.access,
+			refreshToken: data.tokens.refreshToken,
+			lastActive: data.user.last_active
+		}
+		// Convert the user object to a JSON string
+		localStorage.setItem('currentUser', JSON.stringify(user));
+	}
+
+	getUser() {
+		return JSON.parse(localStorage.getItem('currentUser'));
+	}
+
+	removeUser() {
+		localStorage.removeItem('currentUser');
 	}
 };
 
@@ -57,7 +70,7 @@ const routes = {
 };
 
 function handleSidePanel() {
-	const userData = JSON.parse(localStorage.getItem('currentUser'));
+	const userData = currentUser.getMainUser();
 	const loginButton = document.getElementById('loginButton');
 	const logoutButton = document.getElementById('logoutButton');
 	const profileButton = document.getElementById('profileButton');
@@ -74,7 +87,8 @@ function handleSidePanel() {
 }
 
 async function logOutHandler() {
-	const userData = JSON.parse(localStorage.getItem('currentUser'));
+	const userData = currentUser.getUser();
+	console.log('userdata = ' + userData.accessToken);
 	const response = await fetch("/users/log-out-view", {
 		method: 'POST',
 		headers: {
@@ -82,7 +96,7 @@ async function logOutHandler() {
 		},
 	});
 	if (response.ok) {
-		localStorage.removeItem('currentUser');
+		currentUser.removeUser();
 		history.pushState({}, "", "/");
 		handleLocation();
 		showToast(logoutSuccess, false);
@@ -136,31 +150,32 @@ async function editProfileHandler() {
 
 	const updateProfileForm = document.getElementById('updateProfileForm');
 	updateProfileForm.addEventListener('submit', async (event) => {
-		event.preventDefault();
-		const userData = JSON.parse(localStorage.getItem('currentUser'));
-		const formData = new FormData(updateProfileForm);
-		if (selectedFile) {
-			formData.append('image', selectedFile);
+		try {
+			event.preventDefault();
+			const userData = currentUser.getUser();
+			const formData = new FormData(updateProfileForm);
+			if (selectedFile) {
+				formData.append('image', selectedFile);
+			}
+			const response = await fetch('/users/update-user-profile', {
+				method: 'PUT',
+				headers: {
+					'Authorization': 'Bearer ' + userData.accessToken
+				},
+				body: formData
+			});
+			if (response.ok) {
+				const data = await response.json();
+				currentUser.setUser(data);
+				showToast(profileSuccess, false);
+				history.pushState({}, "", "/profile");
+				handleLocation();
+			} else {
+				showToast(somethingWentWrong, true);
+				//todo make specific update fail message
+			}	
 		}
-		const response = await fetch('/users/update-user-profile', {
-			method: 'PUT',
-			headers: {
-				'Authorization': 'Bearer ' + userData.accessToken
-			},
-			body: formData
-		});
-		if (response.ok) {
-			const data = await response.json();
-			currentUser.username = data.user.username;
-			currentUser.id = data.user.id;
-			currentUser.accessToken = data.tokens.access;
-			currentUser.refreshToken = data.tokens.refresh;
-			currentUser.lastActive = data.user.last_active;
-			localStorage.setItem('currentUser', JSON.stringify(currentUser));
-			showToast(profileSuccess, false);
-			history.pushState({}, "", "/profile");
-			handleLocation();
-		} else {
+		catch (error) {
 			showToast(somethingWentWrong, true);
 		}
 	});
@@ -206,11 +221,11 @@ function createFriendRow(friend) {
 }
 
 async function profileHandler() {
-	const userData = JSON.parse(localStorage.getItem('currentUser'));
+	const userData = currentUser.getUser();
 	const urlParams = new URLSearchParams(window.location.search);
 	let username = urlParams.get('username');
 	if (!username) {
-		username = JSON.parse(localStorage.getItem('currentUser')).username;
+		username = userData.username;
 		if (!username) {
 			history.pushState({}, "", "/");
 			handleLocation();
@@ -221,7 +236,7 @@ async function profileHandler() {
 	}
 	const userContainer = document.getElementById('userContainer');
 	let profileHTML;
-	const profileResponse = await fetch("/users/profile.html", {
+	const profileResponse = await fetch(`/users/profile.html/${username}/`, {
 		method: 'GET',
 		headers: {
 			'Authorization': 'Bearer ' + userData.accessToken
@@ -247,47 +262,47 @@ async function profileHandler() {
 		editProfileButton.style.display = 'none';
 		addFriendDiv.style.display = 'none';
 	}
-	const response = await fetch(`/users/get-user-profile/${username}/`, {
-		method: 'GET',
-		headers: {
-			'Authorization': 'Bearer ' + userData.accessToken
-		},
-	});
-	if (response.ok) {
-		const data = await response.json();
-		console.log(data);
-		data.friends.forEach(createFriendRow);
-		const userName = document.getElementById('username');
-		userName.innerText = data.username;
-		const matchBodyEl = document.getElementById('matchHistoryBody');
-		data.match_history.forEach((match) => {
-			const matchRow = document.createElement('tr');
-			const opponent = document.createElement('td');
-			const score = document.createElement('td');
-			const date = document.createElement('td');
-			if (match.player1Name === userData.username) {
-				opponent.innerText = match.player2Name;
-			} else {
-				opponent.innerText = match.player1Name;
-			}
-			score.innerText = match.player1Hp + ' - ' + match.player2Hp;
-			if (match.winner === userData.username) {
-				score.style.color = '#70d170';
-			} else {
-				score.style.color = 'red';
-			}
-			date.innerText = match.dateTime;
-			matchRow.appendChild(opponent);
-			matchRow.appendChild(score);
-			matchRow.appendChild(date);
-			matchBodyEl.appendChild(matchRow);
-		})
-	} else {
-		showToast(somethingWentWrong, true);
-		history.pushState({}, "", "/");
-		handleLocation();
-		return;
-	}
+	// const response = await fetch(`/users/get-user-profile/${username}/`, {
+	// 	method: 'GET',
+	// 	headers: {
+	// 		'Authorization': 'Bearer ' + userData.accessToken
+	// 	},
+	// });
+	// if (response.ok) {
+	// 	const data = await response.json();
+	// 	console.log(data);
+	// 	data.friends.forEach(createFriendRow);
+	// 	const userName = document.getElementById('username');
+	// 	userName.innerText = data.username;
+	// 	const matchBodyEl = document.getElementById('matchHistoryBody');
+	// 	data.match_history.forEach((match) => {
+	// 		const matchRow = document.createElement('tr');
+	// 		const opponent = document.createElement('td');
+	// 		const score = document.createElement('td');
+	// 		const date = document.createElement('td');
+	// 		if (match.player1Name === userData.username) {
+	// 			opponent.innerText = match.player2Name;
+	// 		} else {
+	// 			opponent.innerText = match.player1Name;
+	// 		}
+	// 		score.innerText = match.player1Hp + ' - ' + match.player2Hp;
+	// 		if (match.winner === userData.username) {
+	// 			score.style.color = '#70d170';
+	// 		} else {
+	// 			score.style.color = 'red';
+	// 		}
+	// 		date.innerText = match.dateTime;
+	// 		matchRow.appendChild(opponent);
+	// 		matchRow.appendChild(score);
+	// 		matchRow.appendChild(date);
+	// 		matchBodyEl.appendChild(matchRow);
+	// 	})
+	// } else {
+	// 	showToast(somethingWentWrong, true);
+	// 	history.pushState({}, "", "/");
+	// 	handleLocation();
+	// 	return;
+	// }
 	const addFriendButton = document.getElementById('addFriendButton');
 	addFriendButton.addEventListener('click', async (event) => {
 		event.preventDefault();
@@ -457,15 +472,7 @@ async function loginHandler2() {
             });
             if (response.ok) {
 				const data = await response.json();
-				currentUser.username = data.user.username;
-				currentUser.id = data.user.id;
-				currentUser.accessToken = data.tokens.access;
-				currentUser.refreshToken = data.tokens.refresh;
-				currentUser.lastActive = data.user.last_active;
-				console.log(currentUser);
-				localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                // Registration successful
-                // Redirect to another page or handle the response as needed
+				currentUser.setUser(data);
 				showToast(loginSuccess, false);
 				history.pushState({}, "", "/");
 				handleLocation();
@@ -657,8 +664,8 @@ async function pongHandler() {
 async function handleLocation() {
 	handleSidePanel();
 	const url = new URL(window.location.href);
-	currentRoute = url;
 	const path = url.pathname;
+	currentRoute = window.location.href;
 	const handler = routes[path] || routes["/404"];
 	await handler();
 }
@@ -669,8 +676,7 @@ window.route = (event) => {
     event.preventDefault();
     const href = event.currentTarget.href;
     if (href !== currentRoute) { // Check if the new route is different from the current one
-        currentRoute = href;
-        window.history.pushState({}, "", currentRoute);
+        window.history.pushState({}, "", href);
         handleLocation();
     }
 };

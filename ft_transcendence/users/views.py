@@ -32,13 +32,28 @@ def register(request):
 @authentication_classes([JWTAuthentication])
 @update_last_active
 def updateProfile(request):
-	return render(request, 'users/update_profile.html')
+	user = request.user
+	context = {
+		'username': user.username,
+		'profile_image': user.image.url if user.image else 'static/images/plankton.jpg',
+		'email': user.email,
+		'display_name': user.display_name
+	}
+	return render(request, 'users/update_profile.html', context)
 
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @update_last_active
-def userProfileTemplate(request):
-	return render(request, 'users/profile.html')
+def userProfileTemplate(request, username):
+	user = get_object_or_404(CustomUser, username=username)
+	context = {
+		'username': user.username,
+		'profile_image': user.image.url if user.image else 'static/images/plankton.jpg',
+		'friends': FriendSerializer(instance=user.friends.all(), many=True).data,
+		'match_history': MatchHistorySerializer(instance=user.match_history.all(), many=True).data
+	}
+	print(context)
+	return render(request, 'users/profile.html', context)
 
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
@@ -246,6 +261,8 @@ def getUserPorfile(request, username):
     # Return the serialized user data
     return Response(serializer.data)
 
+from rest_framework.parsers import MultiPartParser
+
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])
 @update_last_active
@@ -257,12 +274,16 @@ def updateUserPorfile(request):
 
 	# Serialize the user data
 	profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True)
-	if (profile_serializer.is_valid()):
+
+	parser_classes = (MultiPartParser)
+
+	if profile_serializer.is_valid():
 		profile_serializer.save()
-	user_serializer = UserSerializer(instance=user)
-	jwt_token = create_jwt_pair_for_user(user)
-	# Return the serialized user data
-	return Response({'user': user_serializer.data, 'tokens': jwt_token})
+		user_serializer = UserSerializer(instance=user)
+		jwt_token = create_jwt_pair_for_user(user)
+		return Response({'user': user_serializer.data, 'tokens': jwt_token})
+
+	return Response(profile_serializer.errors, status=400)
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
