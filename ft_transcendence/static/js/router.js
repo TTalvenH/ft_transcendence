@@ -49,7 +49,7 @@ const routes = {
 	"/": homeHandler,
 	"/pong": pongHandler,
 	"/login": loginHandler,
-	"/register": registerHandler2,
+	"/register": registerHandler,
 	"/profile": profileHandler,
 	"/edit-profile": editProfileHandler,
 	"/log-out": logOutHandler,
@@ -94,7 +94,6 @@ async function homeHandler() {
 	const userContainer = document.getElementById('userContainer');
 	userContainer.innerHTML = "";
 }
-
 
 async function editProfileHandler() {
 	const userContainer = document.getElementById('userContainer');
@@ -392,7 +391,7 @@ async function handleOtpSubmit(event) {
     }
 }
 
-async function registerHandler2() {
+async function registerHandler() {
 	const userContainer = document.getElementById('userContainer');
 	userContainer.innerHTML = "";
 	if (!registerFormHTML) // we only fetch once and then save it locally
@@ -437,8 +436,6 @@ async function registerHandler2() {
     });
 }
 
-
-
 async function pongHandler() {
     const html = await fetch("/pong/").then((data) => data.text());
 	document.getElementById('ui').style.display = 'none'; // Using display
@@ -465,7 +462,6 @@ window.route = (event) => {
         handleLocation();
     }
 };
-
 
 window.pong.gameLoop();
 window.onpopstate = handleLocation;
