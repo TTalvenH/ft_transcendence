@@ -16,6 +16,7 @@ const addFriendFail = '<i class="fa-regular fa-circle-xmark"></i>  User not foun
 const addFriendAlreadyFriend = '<i class="fa-regular fa-circle-xmark"></i>  User already a friend';
 const circle_xmark = '<i class="fa-regular fa-circle-xmark"></i>';
 const circle_check = '<i class="fa-regular fa-circle-check"></i>';
+const verificationFailed = '<i class="fa-regular fa-circle-xmark"></i> Verification failed';
 
 
 class User {
@@ -63,8 +64,8 @@ let currentUsername = null;
 const routes = {
 	"/": homeHandler,
 	"/pong": pongHandler,
-	"/login": loginHandler2,
-	"/register": registerHandler2,
+	"/login": loginHandler,
+	"/register": registerHandler,
 	"/profile": profileHandler,
 	"/edit-profile": editProfileHandler,
 	"/log-out": logOutHandler,
@@ -386,6 +387,13 @@ async function handleLoginSubmit(event) {
                 loginForm.remove();
                 await loadOtpForm();
             }
+			else {
+				showToast(loginSuccess, false);
+				history.pushState({}, "", "/");
+				handleLocation();
+			}
+				
+
 		}
 		else {
 			showToast(loginFail, true);
@@ -518,53 +526,81 @@ async function loginHandler2() {
 
 
 async function registerHandler() {
-	const userContainer = document.getElementById('userContainer');
-	userContainer.innerHTML = "";
-	if (!registerFormHTML) // we only fetch once and then save it locally
-		registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
+    const userContainer = document.getElementById('userContainer');
+    userContainer.innerHTML = "";
+
+    if (!registerFormHTML) { // we only fetch once and then save it locally
+        registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
+    }
+
     userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
+
     // Add event listener to the registration form
     const registerForm = document.getElementById('registerForm');
     registerForm.addEventListener('submit', async (event) => {
         event.preventDefault(); // Prevent default form submission behavior
+        
         // Get form data
-		const formData = new FormData(registerForm);
+        const formData = new FormData(registerForm);
+        
         try {
             // Send form data to the backend
             const response = await fetch('/users/create-user', {
                 method: 'POST',
                 body: formData
             });
-			if (response.ok) {
-				const result = await response.json();
-				if (result.otp && result.otp.html) {
-					userContainer.innerHTML = '';
-					const qrHTML = result.otp.html;
-					document.getElementById('userContainer').insertAdjacentHTML('beforeend', qrHTML);
-					
-					// Get the Done button and add event listener
-					const otpDone = document.querySelector('#userContainer .button');
-					otpDone.addEventListener('click', function() {
-						console.log("Done button pressed");
-						userContainer.innerHTML = '';
-						showToast(registerSuccess, false);
-						history.pushState({}, "", "/");
-						handleLocation();
-					});
-				}
-			}
-        	else {
-				const data = await response.json();
-				if (data)
-					showToast(circle_xmark + data.detail, true);
-				else
-					showToast(somethingWentWrong, true);
+
+            if (response.ok) {
+                const result = await response.json();
+                
+                if (result.otp && result.otp.html) {
+                    userContainer.innerHTML = '';
+                    const qrHTML = result.otp.html;
+                    document.getElementById('userContainer').insertAdjacentHTML('beforeend', qrHTML);
+
+                    // Get the verify form and add event listener
+                    const otpForm = document.getElementById('otpForm');
+                    otpForm.addEventListener('submit', async (event) => {
+                        event.preventDefault();
+                        
+                        // Call to verify-otp endpoint
+                        const otpFormData = new FormData(otpForm);
+                        const username = result.username; // Use the username from the result
+
+                        otpFormData.append('username', username);
+
+                        const verifyResponse = await fetch('/verify-otp/', {
+                            method: 'POST',
+                            body: otpFormData
+                        });
+                        
+                        const verifyResult = await verifyResponse.json();
+                        
+                        if (verifyResponse.ok) {
+                            userContainer.innerHTML = '';
+                            showToast(registerSuccess, false);
+                            history.pushState({}, "", "/");
+                            handleLocation();
+                        } else {
+                            alert(verifyResult.detail || 'Verification failed');
+                        }
+                    });
+                } else {
+                    showToast(registerSuccess, false);
+                    history.pushState({}, "", "/");
+                    handleLocation();
+                }
+            } else {
+                const errorResult = await response.json();
+                showToast(circle_xmark + (errorResult.detail || 'Something went wrong'), true);
             }
         } catch (error) {
             showToast(somethingWentWrong, true);
         }
     });
 }
+
+
 
 async function pongHandler() {
     const html = await fetch("/pong/").then((data) => data.text());

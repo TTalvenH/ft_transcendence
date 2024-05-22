@@ -101,14 +101,13 @@ from django.contrib.auth import authenticate, login, logout
 def setup_otp(user):
 	device, created = TOTPDevice.objects.get_or_create(user=user, name='default')
 
-	if not created:
-		return {'detail': 'OTP device already exists.', 'created': False}
+	# if not created:
+	# 	return {'detail': 'OTP device already exists.', 'created': False}
 
 	# Generate a unique key for the user
 	key = pyotp.random_base32()
 	device.key = key
 	device.save()
-
 
 	user.otp_enabled = True
 	user.save()
@@ -123,6 +122,7 @@ def setup_otp(user):
 
 	# Read the HTML template from a file
 	template_path = '/Users/atuliara/Desktop/new/ft_transcendence/users/templates/users/qr.html'
+
 	try:
 		with open(template_path, 'r') as file:
 			html_template = Template(file.read())
@@ -142,7 +142,6 @@ def setup_otp(user):
 @api_view(['POST'])
 def loginUser(request):
 	user = get_object_or_404(CustomUser, username=request.data['username'])
-	print(request.data)
 
 	if not user.check_password(request.data['password']):
 		return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_404_NOT_FOUND)
@@ -152,6 +151,7 @@ def loginUser(request):
 	if user.otp_enabled:
 		return Response(response_data, status=status.HTTP_200_OK)
 
+	user.update_last_active()
 	token = create_jwt_pair_for_user(user)
 	serializer = UserSerializer(instance=user)
 	response_data.update({'tokens': token, 'user': serializer.data})
@@ -193,6 +193,24 @@ def validateOtpAndLogin(request):
 	serializer = UserSerializer(instance=user)
 
 	return Response({'tokens': token, 'user': serializer.data}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def verify_otp(request):
+	user = get_object_or_404(CustomUser, username=request.data['username'])
+
+	otp = request.data.get('otp')
+	if not otp:
+		return Response({'detail': 'OTP required.'}, status=status.HTTP_401_UNAUTHORIZED)
+	try:
+		device = TOTPDevice.objects.get(user=user, name='default')
+		totp = pyotp.TOTP(device.key)
+
+		if not totp.verify(otp):
+			return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
+	except TOTPDevice.DoesNotExist:
+		return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
+		
+	return Response(status=status.HTTP_200_OK)
 
 
 
