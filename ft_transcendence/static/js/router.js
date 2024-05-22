@@ -14,24 +14,38 @@ const profileSuccess = '<i class="fa-regular fa-circle-check"></i>  Profile upda
 const addFriendSuccess = '<i class="fa-regular fa-circle-check"></i>  Friend added successfully';
 const addFriendFail = '<i class="fa-regular fa-circle-xmark"></i>  User not found';
 const addFriendAlreadyFriend = '<i class="fa-regular fa-circle-xmark"></i>  User already a friend';
+const circle_xmark = '<i class="fa-regular fa-circle-xmark"></i>';
+const circle_check = '<i class="fa-regular fa-circle-check"></i>';
+
 
 class User {
-	constructor() {
-		this.username = "";
-		this.id = -1;
-		this.accessToken = "";
-		this.refreshToken = "";
-		this.lastActive = -1;
+	setUser(data) {
+		const user = {
+			username: data.user.username,
+			id: data.user.id,
+			accessToken: data.tokens.access,
+			refreshToken: data.tokens.refreshToken,
+			lastActive: data.user.last_active
+		}
+		// Convert the user object to a JSON string
+		localStorage.setItem('currentUser', JSON.stringify(user));
+	}
+
+	getUser() {
+		return JSON.parse(localStorage.getItem('currentUser'));
+	}
+
+	removeUser() {
+		localStorage.removeItem('currentUser');
 	}
 };
 
 let currentUser = new User();
 
 function showToast(msg, error) {
-	console.log(msg);
 	let toastBox = document.getElementById('toastBox');
-	console.log(toastBox);
 	let toastDiv = document.createElement('div');
+
 	toastDiv.classList.add('toast');
 	toastDiv.innerHTML = msg;
 	console.log(toastDiv);
@@ -43,20 +57,21 @@ function showToast(msg, error) {
 		toastDiv.remove();
 	}, 2000)
 }
+
 let currentUsername = null;
 
 const routes = {
 	"/": homeHandler,
 	"/pong": pongHandler,
-	"/login": loginHandler,
-	"/register": registerHandler,
+	"/login": loginHandler2,
+	"/register": registerHandler2,
 	"/profile": profileHandler,
 	"/edit-profile": editProfileHandler,
 	"/log-out": logOutHandler,
 };
 
 function handleSidePanel() {
-	const userData = JSON.parse(localStorage.getItem('currentUser'));
+	const userData = currentUser.getUser();
 	const loginButton = document.getElementById('loginButton');
 	const logoutButton = document.getElementById('logoutButton');
 	const profileButton = document.getElementById('profileButton');
@@ -73,7 +88,8 @@ function handleSidePanel() {
 }
 
 async function logOutHandler() {
-	const userData = JSON.parse(localStorage.getItem('currentUser'));
+	const userData = currentUser.getUser();
+	console.log('userdata = ' + userData.accessToken);
 	const response = await fetch("/users/log-out-view", {
 		method: 'POST',
 		headers: {
@@ -81,7 +97,7 @@ async function logOutHandler() {
 		},
 	});
 	if (response.ok) {
-		localStorage.removeItem('currentUser');
+		currentUser.removeUser();
 		history.pushState({}, "", "/");
 		handleLocation();
 		showToast(logoutSuccess, false);
@@ -96,8 +112,19 @@ async function homeHandler() {
 }
 
 async function editProfileHandler() {
+	const userData = JSON.parse(localStorage.getItem('currentUser'));
 	const userContainer = document.getElementById('userContainer');
-	const updateProfileHTML = await fetch("/users/update_profile.html").then((data) => data.text());
+	const updateProfileResponse = await fetch("/users/update_profile.html", {
+		method: 'GET',
+		headers: {
+			'Authorization': 'Bearer ' + userData.accessToken,
+		},
+	})
+	if (!updateProfileResponse.ok) {
+		showToast(somethingWentWrong, true);
+		return;
+	}
+	const updateProfileHTML = await updateProfileResponse.text();
 	userContainer.innerHTML = "";
 	userContainer.insertAdjacentHTML('beforeend', updateProfileHTML);
 
@@ -107,7 +134,7 @@ async function editProfileHandler() {
 
 	input.addEventListener('change', async (event) => {
 		selectedFile = input.files[0];
-		if (file) {
+		if (selectedFile) {
 			var reader = new FileReader();
 			reader.onload = function(e) {
 				// Replace the image source with the selected image
@@ -117,24 +144,41 @@ async function editProfileHandler() {
 					profileImage.style.display = 'block';
 				}
 			}
-			reader.readAsDataURL(file);
+			reader.readAsDataURL(selectedFile);
 		}
 	});
 
 	const updateProfileForm = document.getElementById('updateProfileForm');
 	updateProfileForm.addEventListener('submit', async (event) => {
-		event.preventDefault();
-		const formData = new FormData(updateProfileForm);
-		if (selectedFile) {
-			formData.append('image', selectedFile);
+		try {
+			event.preventDefault();
+			const userData = currentUser.getUser();
+			const formData = new FormData(updateProfileForm);
+			if (selectedFile) {
+				formData.append('image', selectedFile);
+			}
+			const response = await fetch('/users/update-user-profile', {
+				method: 'PUT',
+				headers: {
+					'Authorization': 'Bearer ' + userData.accessToken
+				},
+				body: formData
+			});
+			if (response.ok) {
+				const data = await response.json();
+				currentUser.setUser(data);
+				showToast(profileSuccess, false);
+				history.pushState({}, "", "/profile");
+				handleLocation();
+			} else {
+				const data = await response.json();
+				if (data)
+					showToast(circle_xmark + data.detail, true);
+				else
+					showToast(somethingWentWrong, true);
+			}	
 		}
-		const response = await fetch('/users/update-user', {
-			method: 'PUT',
-			body: formData
-		});
-		if (response.ok) {
-			showToast(profileSuccess, false);
-		} else {
+		catch (error) {
 			showToast(somethingWentWrong, true);
 		}
 	});
@@ -180,21 +224,36 @@ function createFriendRow(friend) {
 }
 
 async function profileHandler() {
+	const userData = currentUser.getUser();
 	const urlParams = new URLSearchParams(window.location.search);
 	let username = urlParams.get('username');
 	if (!username) {
-		username = JSON.parse(localStorage.getItem('currentUser')).username;
-		if (!username) {
+		if (!userData) {
 			history.pushState({}, "", "/");
 			handleLocation();
 			return;
 		}
-	} else if (username === JSON.parse(localStorage.getItem('currentUser')).username) {
+		username = userData.username;
+	} else if (username === userData.username) {
 		history.pushState({}, "", "/profile");
 	}
-	const userData = JSON.parse(localStorage.getItem('currentUser'));
 	const userContainer = document.getElementById('userContainer');
-	const profileHTML = await fetch("/users/profile.html").then((data) => data.text());
+	let profileHTML;
+	const profileResponse = await fetch(`/users/profile.html/${username}/`, {
+		method: 'GET',
+		headers: {
+			'Authorization': 'Bearer ' + userData.accessToken
+		},
+	})
+	if (profileResponse.ok) {
+		profileHTML = await profileResponse.text();
+	} else {
+		showToast(somethingWentWrong, true);
+		history.pushState({}, "", "/");
+		handleLocation();
+		return;
+	}
+
 	userContainer.innerHTML = "";
 	userContainer.insertAdjacentHTML('beforeend', profileHTML);
 	const editProfileButton = document.getElementById('editProfile');
@@ -206,46 +265,47 @@ async function profileHandler() {
 		editProfileButton.style.display = 'none';
 		addFriendDiv.style.display = 'none';
 	}
-	const response = await fetch(`/users/get-user-profile/${username}/`, {
-		method: 'GET',
-		headers: {
-			'Authorization': 'Bearer ' + userData.accessToken
-		},
-	});
-	if (response.ok) {
-		const data = await response.json();
-		console.log(data);
-		data.friends.forEach(createFriendRow);
-
-		const matchBodyEl = document.getElementById('matchHistoryBody');
-		data.match_history.forEach((match) => {
-			const matchRow = document.createElement('tr');
-			const opponent = document.createElement('td');
-			const score = document.createElement('td');
-			const date = document.createElement('td');
-			if (match.player1Name === userData.username) {
-				opponent.innerText = match.player2Name;
-			} else {
-				opponent.innerText = match.player1Name;
-			}
-			score.innerText = match.player1Hp + ' - ' + match.player2Hp;
-			if (match.winner === userData.username) {
-				score.style.color = '#70d170';
-			} else {
-				score.style.color = 'red';
-			}
-			date.innerText = match.dateTime;
-			matchRow.appendChild(opponent);
-			matchRow.appendChild(score);
-			matchRow.appendChild(date);
-			matchBodyEl.appendChild(matchRow);
-		})
-	} else {
-		showToast(somethingWentWrong, true);
-		history.pushState({}, "", "/");
-		handleLocation();
-		return;
-	}
+	// const response = await fetch(`/users/get-user-profile/${username}/`, {
+	// 	method: 'GET',
+	// 	headers: {
+	// 		'Authorization': 'Bearer ' + userData.accessToken
+	// 	},
+	// });
+	// if (response.ok) {
+	// 	const data = await response.json();
+	// 	console.log(data);
+	// 	data.friends.forEach(createFriendRow);
+	// 	const userName = document.getElementById('username');
+	// 	userName.innerText = data.username;
+	// 	const matchBodyEl = document.getElementById('matchHistoryBody');
+	// 	data.match_history.forEach((match) => {
+	// 		const matchRow = document.createElement('tr');
+	// 		const opponent = document.createElement('td');
+	// 		const score = document.createElement('td');
+	// 		const date = document.createElement('td');
+	// 		if (match.player1Name === userData.username) {
+	// 			opponent.innerText = match.player2Name;
+	// 		} else {
+	// 			opponent.innerText = match.player1Name;
+	// 		}
+	// 		score.innerText = match.player1Hp + ' - ' + match.player2Hp;
+	// 		if (match.winner === userData.username) {
+	// 			score.style.color = '#70d170';
+	// 		} else {
+	// 			score.style.color = 'red';
+	// 		}
+	// 		date.innerText = match.dateTime;
+	// 		matchRow.appendChild(opponent);
+	// 		matchRow.appendChild(score);
+	// 		matchRow.appendChild(date);
+	// 		matchBodyEl.appendChild(matchRow);
+	// 	})
+	// } else {
+	// 	showToast(somethingWentWrong, true);
+	// 	history.pushState({}, "", "/");
+	// 	handleLocation();
+	// 	return;
+	// }
 	const addFriendButton = document.getElementById('addFriendButton');
 	addFriendButton.addEventListener('click', async (event) => {
 		event.preventDefault();
@@ -369,27 +429,93 @@ async function handleOtpSubmit(event) {
         });
 
         if (otpResponse.ok) {
-            const data = await otpResponse.json();
-			currentUser.username = data.user.username;
-			currentUser.id = data.user.id;
-			currentUser.accessToken = data.tokens.access;
-			currentUser.refreshToken = data.tokens.refresh;
-			currentUser.lastActive = data.user.last_active;
-			console.log(currentUser);
-			localStorage.setItem('currentUser', JSON.stringify(currentUser));
-			// Redirect to another page or handle the response as needed
-			showToast(loginSuccess, false);
-			history.pushState({}, "", "/");
-			handleLocation();
-		}
-        else {
-			showToast(loginFail, true);
+            const result = await otpResponse.json();
+            alert('Login successful!');
+            // Redirect or handle success
+        } else {
+            alert('Invalid OTP.');
         }
     } catch (error) {
         console.error('Error during OTP validation:', error);
         alert('An error occurred during OTP validation. Please try again later.');
     }
 }
+
+async function loginHandler2() {
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
+	if (!loginFormHTML)
+		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
+	userContainer.insertAdjacentHTML('beforeend', loginFormHTML);
+    // Add event listener to the registration form
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Prevent default form submission behavior
+
+        // Get form data
+        const formData = new FormData(loginForm);
+        
+        try {
+            // Send form data to the backend
+            const response = await fetch('/users/login-user', {
+				method: 'POST',
+				body: formData
+            });
+            if (response.ok) {
+				const data = await response.json();
+				currentUser.setUser(data);
+				showToast(loginSuccess, false);
+				history.pushState({}, "", "/");
+				handleLocation();
+            } else {
+                showToast(loginFail, true);
+            }
+        } catch (error) {
+            showToast(somethingWentWrong, true);
+        }
+	});
+}
+
+
+
+
+// async function loginHandler() {
+// 	const registerBox = document.getElementById('registerBox');
+// 	if (registerBox)
+// 		registerBox.remove();
+// 	if (!loginFormHTML)
+// 		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
+//     document.getElementById('ui').insertAdjacentHTML('beforeend', loginFormHTML);
+//     // Add event listener to the registration form
+//     const loginForm = document.getElementById('loginForm');
+//     loginForm.addEventListener('submit', async (event) => {
+//         event.prev entDefault(); // Prevent default form submission behavior
+
+//         // Get form data
+//         let formData = new FormData(loginForm);
+        
+//         try {
+//             // Send form data to the backend
+//             const response = await fetch('/users/login-user', {
+//                 method: 'POST',
+//                 body: formData
+//             });
+
+//             if (response.ok) {
+//                 // Registration successful
+//                 alert('Login successful!');
+//                 // Redirect to another page or handle the response as needed
+//             } else {
+//                 // Registration failed
+//                 alert('Login failed!');
+//             }
+//         } catch (error) {
+//             console.error('Error couldnt login', error);
+//             alert('An error occurred during registration. Please try again later.');
+//         }
+//     });
+// }
+
 
 async function registerHandler() {
 	const userContainer = document.getElementById('userContainer');
@@ -428,7 +554,11 @@ async function registerHandler() {
 				}
 			}
         	else {
-                showToast(registerFail, true);
+				const data = await response.json();
+				if (data)
+					showToast(circle_xmark + data.detail, true);
+				else
+					showToast(somethingWentWrong, true);
             }
         } catch (error) {
             showToast(somethingWentWrong, true);
@@ -447,6 +577,7 @@ async function handleLocation() {
 	handleSidePanel();
 	const url = new URL(window.location.href);
 	const path = url.pathname;
+	currentRoute = window.location.href;
 	const handler = routes[path] || routes["/404"];
 	await handler();
 }
@@ -457,8 +588,7 @@ window.route = (event) => {
     event.preventDefault();
     const href = event.currentTarget.href;
     if (href !== currentRoute) { // Check if the new route is different from the current one
-        currentRoute = href;
-        window.history.pushState({}, "", currentRoute);
+        window.history.pushState({}, "", href);
         handleLocation();
     }
 };

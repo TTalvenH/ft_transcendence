@@ -6,14 +6,15 @@
 	<form id="loginForm" autocomplete="off">
 		{% csrf_token %}
 		<div class="inputBox">
-			<input type="username" name="username" required onkeyup="this.setAttribute('value', this.value);" value="">
+			<input type="username" name="username" required onkeyup="this.setAttribute('value', this.value);" value="" autocomplete="one-time-code">
 			<label>Username</label>
 		</div>
 		<div class="inputBox">
 			<input type="password" name="password" required value=""
 					onkeyup="this.setAttribute('value', this.value);"
 					pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-					title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters">
+					title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+					autocomplete="one-time-code">
 			<label>Password</label>
 		</div>
 		<button class="button" type="submit">SIGN IN</button>
@@ -24,19 +25,3 @@
 		</a>
 	</div>
   </div>
-
-  {% comment %} <div class="box">
-    <h2>Login</h2>
-    <form method="post" enctype="multipart/form-data" id="loginForm">
-        {% csrf_token %}
-		<div class="inputBox">
-       		{{ form.username }}
-			<label>Username</label>
-		</div>
-		<div class="inputBox">
-			{{ form.password }}
-		 	<label>Password</label>
-		</div>
-        <input type="submit" name="sign-up" value="Sign Up">
-    </form>
-</div> {% endcomment %}

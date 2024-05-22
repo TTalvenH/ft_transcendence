@@ -5,3 +5,5 @@ djangorestframework
 djangorestframework-simplejwt
 Pillow
 pyotp
+django_otp
+qrcode
