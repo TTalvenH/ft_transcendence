@@ -6,3 +6,7 @@ from rest_framework.decorators import api_view
 @api_view(['GET'])
 def pong(request):
 	return render(request, 'pong/pong.html')
+
+@api_view(['GET'])
+def game_menu_template(request):
+	return render(request, 'pong/gameMenu.html')

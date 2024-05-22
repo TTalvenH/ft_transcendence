@@ -20,7 +20,7 @@
 	border-radius: 0.625rem;
 
     /* Neon glow effect */
-    box-shadow: 0 0 10px #f141f1, 0 0 20px #f141f1, 0 0 30px #f141f1, 0 0 40px #f141f1;
+    box-shadow: 0 0 30px #f141f1;
 
     /* Apply the blur to the pseudo-element */
     filter: blur(2px);

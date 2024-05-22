@@ -7,7 +7,7 @@
 	height: 50px;
 	border-radius: 0.625rem;
 	color: #fff;
-	transition: transform 0.5s;
+	transition: transform 0.3s;
 }
 
 
@@ -18,12 +18,14 @@
 }
 
 .cancelButton {
+	top: 25px;
+	right: 25px;
+	position: absolute;
 	background: none;
 	border: none;
 	color: #ffffff;
 	cursor: pointer;
 	transition: 0.3s;
-	margin-left: 70px;
 }
 
 .cancelButton:hover {
@@ -32,13 +34,14 @@
 }
 
 .saveButton {
+	position: absolute;
+	bottom: 25px;
+	right: 25px;
 	background: none;
 	border: none;
 	color: #ffffff;
 	cursor: pointer;
 	transition: 0.3s;
-	margin-left: 70px;
-	margin-top: 470px;
 	transform: scale(1.3);
 }
 
@@ -93,8 +96,8 @@
 .editProfileButton {
 	position: absolute;
 	width: 35px;
-	margin-left: 650px;
-	margin-top: -2px;
+	top: 23px;
+	right: 55px;
 }
 
 .editProfileButton img {
@@ -109,4 +112,33 @@
 
 .editProfileButton button:hover {
 	transform: scale(1.6);
+}
+
+.notRegistered {
+	position: absolute;
+	background: none;
+	color: white;
+	border: none;
+	align-items: center;
+	justify-content: center;
+	right: 50px;
+	bottom: 50px;
+}
+
+.notRegistered button {
+	width: 100%;
+	height: 100%;
+	background: none;
+	border: none;
+	transition: 0.3s;
+	color: white;
+}
+
+.notRegistered button:hover {
+	transform: scale(1.3);
+}
+
+.profileLink {
+	color: white;
+	text-decoration: none;
 }

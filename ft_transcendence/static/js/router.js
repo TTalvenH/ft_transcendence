@@ -64,7 +64,7 @@ const routes = {
 	"/": homeHandler,
 	"/pong": pongHandler,
 	"/login": loginHandler2,
-	"/register": registerHandler2,
+	"/register": temp_registerHandler,
 	"/profile": profileHandler,
 	"/edit-profile": editProfileHandler,
 	"/log-out": logOutHandler,
@@ -567,10 +567,25 @@ async function registerHandler() {
 }
 
 async function pongHandler() {
-    const html = await fetch("/pong/").then((data) => data.text());
-	document.getElementById('ui').style.display = 'none'; // Using display
-	document.getElementById('ui').style.visibility = 'hidden';
-	window.pong.gameGlobals.gameState = GameStates.PLAYING;
+	const userData = currentUser.getUser();
+	const userContainer = document.getElementById('userContainer');
+	const sidePanel = document.getElementById('sidePanel');
+	const ui = document.getElementById('ui');
+	userContainer.innerHTML = "";
+	sidePanel.style.display = 'none'; // Using display
+	const response = await fetch("/pong/gameMenu.html", {
+		method: "GET",
+		headers: {
+			'Authorization': `Bearer ${userData.accessToken}`,
+		}
+	});
+	if (response.ok) {
+		const html = await response.text();
+		userContainer.insertAdjacentHTML('beforeend', html);
+	} else {
+		showToast(somethingWentWrong, true);
+	}
+	// window.pong.gameGlobals.gameState = GameStates.PLAYING;
 }
 
 async function handleLocation() {
@@ -650,3 +665,39 @@ handleLocation();
 // 		console.error('Register form not found');
 // 	}
 // }
+
+async function temp_registerHandler() {
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
+	if (!registerFormHTML) // we only fetch once and then save it locally
+		registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
+	userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
+	// Add event listener to the registration form
+	const registerForm = document.getElementById('registerForm');
+	registerForm.addEventListener('submit', async (event) => {
+		event.preventDefault(); // Prevent default form submission behavior
+		// Get form data
+		const formData = new FormData(registerForm);
+		try {
+			// Send form data to the backend
+			const response = await fetch('/users/create-user', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (response.ok) {
+				showToast(registerSuccess, false);
+				history.pushState({}, "", "/");
+				handleLocation();
+			} else {
+				const data = await response.json();
+				if (data)
+					showToast(circle_xmark + data.detail, true);
+				else
+					showToast(somethingWentWrong, true);
+			}
+		} catch (error) {
+			showToast(somethingWentWrong, true);
+		}
+	});
+}

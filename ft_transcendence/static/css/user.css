@@ -24,7 +24,7 @@
     z-index: -1;
 	border-radius: 0.625rem;
 
-    box-shadow: 0 0 10px #f141f1, 0 0 20px #f141f1, 0 0 30px #f141f1, 0 0 40px #f141f1;
+    box-shadow: 0 0 30px #f141f1;
 
 
     filter: blur(2px);
