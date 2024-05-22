@@ -14,6 +14,8 @@ const profileSuccess = '<i class="fa-regular fa-circle-check"></i>  Profile upda
 const addFriendSuccess = '<i class="fa-regular fa-circle-check"></i>  Friend added successfully';
 const addFriendFail = '<i class="fa-regular fa-circle-xmark"></i>  User not found';
 const addFriendAlreadyFriend = '<i class="fa-regular fa-circle-xmark"></i>  User already a friend';
+const circle_xmark = '<i class="fa-regular fa-circle-xmark"></i>';
+const circle_check = '<i class="fa-regular fa-circle-check"></i>';
 
 
 class User {
@@ -41,10 +43,9 @@ class User {
 let currentUser = new User();
 
 function showToast(msg, error) {
-	console.log(msg);
 	let toastBox = document.getElementById('toastBox');
-	console.log(toastBox);
 	let toastDiv = document.createElement('div');
+
 	toastDiv.classList.add('toast');
 	toastDiv.innerHTML = msg;
 	console.log(toastDiv);
@@ -70,7 +71,7 @@ const routes = {
 };
 
 function handleSidePanel() {
-	const userData = currentUser.getMainUser();
+	const userData = currentUser.getUser();
 	const loginButton = document.getElementById('loginButton');
 	const logoutButton = document.getElementById('logoutButton');
 	const profileButton = document.getElementById('profileButton');
@@ -171,8 +172,11 @@ async function editProfileHandler() {
 				history.pushState({}, "", "/profile");
 				handleLocation();
 			} else {
-				showToast(somethingWentWrong, true);
-				//todo make specific update fail message
+				const data = await response.json();
+				if (data)
+					showToast(circle_xmark + data.detail, true);
+				else
+					showToast(somethingWentWrong, true);
 			}	
 		}
 		catch (error) {
@@ -225,12 +229,12 @@ async function profileHandler() {
 	const urlParams = new URLSearchParams(window.location.search);
 	let username = urlParams.get('username');
 	if (!username) {
-		username = userData.username;
-		if (!username) {
+		if (!userData) {
 			history.pushState({}, "", "/");
 			handleLocation();
 			return;
 		}
+		username = userData.username;
 	} else if (username === userData.username) {
 		history.pushState({}, "", "/profile");
 	}
@@ -601,7 +605,11 @@ async function registerHandler2() {
 				history.pushState({}, "", "/");
 				handleLocation();
             } else {
-                showToast(registerFail, true);
+				const data = await response.json();
+				if (data)
+					showToast(circle_xmark + data.detail, true);
+				else
+					showToast(somethingWentWrong, true);
             }
         } catch (error) {
             showToast(somethingWentWrong, true);

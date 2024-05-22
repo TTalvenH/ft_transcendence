@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .forms import CreateUserForm, LoginForm
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes, parser_classes
 from rest_framework.permissions import IsAuthenticated
 from .models import CustomUser, PongMatch
 from .serializers import UserSerializer, RegisterUserSerializer, UserProfileSerializer, MatchHistorySerializer, FriendSerializer
@@ -63,36 +63,38 @@ def qrPrompt(request):
 
 @api_view(['POST'])
 def createUser(request):
-    """
-    This function is an api_view that can be accessed with a POST request.
-    It uses RegisterUserSerializer to validate the request data.
-    If the data is valid, it creates a new user with the given data,
-    gets the user object, and returns a Response containing the serialized user data.
-    If the data is invalid, it returns a Response with error messages.
-    """
-    serializer = RegisterUserSerializer(data=request.data)
-    if serializer.is_valid():
-        user = serializer.save()
+	"""
+	This function is an api_view that can be accessed with a POST request.
+	It uses RegisterUserSerializer to validate the request data.
+	If the data is valid, it creates a new user with the given data,
+	gets the user object, and returns a Response containing the serialized user data.
+	If the data is invalid, it returns a Response with error messages.
+	"""
+	serializer = RegisterUserSerializer(data=request.data)
+	if serializer.is_valid():
+		user = serializer.save()
 
-        # If OTP is enabled, set up OTP for the user
-        enable_otp = request.data.get('enable_otp')
-        otp_data = {}
-        if enable_otp == 'true':
-            otp_data = setup_otp(user)
-            if not otp_data['created']:
-                return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+		# If OTP is enabled, set up OTP for the user
+		enable_otp = request.data.get('enable_otp')
+		otp_data = {}
+		if enable_otp == 'true':
+			otp_data = setup_otp(user)
+			if not otp_data['created']:
+				return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Construct the response data
-        response_data = {
-            'user': serializer.data,
-            'otp': otp_data
-        }
-        return Response(response_data, status=status.HTTP_201_CREATED)
-    else:
-        # Debug: print out the errors
-        print(serializer.errors)
+		# Construct the response data
+		response_data = {
+			'user': serializer.data,
+			'otp': otp_data
+		}
+		return Response(response_data, status=status.HTTP_201_CREATED)
 
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+	detail = {'detail': 'Invalid data'}
+	if serializer.errors.get('username'):
+		detail = {'detail': 'Username taken'}
+	elif serializer.errors.get('email'):
+		detail = {'detail': 'Email taken'}
+	return Response(detail, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -267,23 +269,29 @@ from rest_framework.parsers import MultiPartParser
 @authentication_classes([JWTAuthentication])
 @update_last_active
 @permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser])
 def updateUserPorfile(request):
 	print(request.data)
 	# Retrieve user from the database
 	user = get_object_or_404(CustomUser, id=request.user.id)
 
 	# Serialize the user data
-	profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True)
-
-	parser_classes = (MultiPartParser)
-
+	profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True, context={'request': request})
 	if profile_serializer.is_valid():
 		profile_serializer.save()
 		user_serializer = UserSerializer(instance=user)
 		jwt_token = create_jwt_pair_for_user(user)
 		return Response({'user': user_serializer.data, 'tokens': jwt_token})
-
-	return Response(profile_serializer.errors, status=400)
+	detail = {'detail': 'Invalid data'}
+	if profile_serializer.errors.get('username'):
+		detail = {'detail': 'Username taken'}
+	elif profile_serializer.errors.get('email'):
+		detail = {'detail': 'Email taken'}
+	elif profile_serializer.errors.get('display_name'):
+		detail = {'detail': 'Display name taken'}
+	elif profile_serializer.errors.get('password'):
+		detail = {'detail': 'Missing required fields'}
+	return Response(detail, status=400)
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])

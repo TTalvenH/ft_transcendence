@@ -95,11 +95,47 @@ class MatchHistorySerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
 	friends = FriendSerializer(many=True)  # Use the nested serializer
 	match_history = MatchHistorySerializer(many=True)
-
+	old_password = serializers.CharField(
+		write_only=True,
+		required=False,
+	)
+	new_password = serializers.CharField(
+		write_only=True,
+		required=False,
+		validators=[validate_password]
+	)
+	confirm_password = serializers.CharField(
+		write_only=True,
+		required=False
+	)
 	class Meta:
 		model = CustomUser
-		fields = ['id', 'image', 'username', 'friends', 'match_history', 'last_active']
+		fields = ['id', 'image', 'username', 'friends', 'match_history', 'last_active', 'old_password', 'new_password', 'confirm_password']
 		read_only_fields = ['id', 'friends', 'match_history', 'last_active']
 		extra_kwargs = {
 			'username': {'required': False}  # Make username field optional for partial updates
 		}
+	def validate(self, attrs):
+		user = self.context['request'].user
+		
+		if 'new_password' in attrs and 'confirm_password' in attrs and 'old_password' in attrs:
+			if not user.check_password(attrs.get('old_password', '')):
+				raise serializers.ValidationError({"old_password": "Wrong password."})
+			if attrs['new_password'] != attrs['confirm_password']:
+				raise serializers.ValidationError({"password": "Password fields didn't match."})
+		elif 'new_password' in attrs or 'confirm_password' in attrs or 'old_password' in attrs:
+			raise serializers.ValidationError({"password": "Missing required field."})
+		return attrs
+	
+	def update(self, instance, validated_data):
+		new_password = validated_data.pop('new_password', None)
+		validated_data.pop('confirm_password', None)
+		validated_data.pop('old_password', None)
+
+		instance = super().update(instance, validated_data)
+
+		if new_password:
+			instance.set_password(new_password)
+			instance.save()
+
+		return instance
