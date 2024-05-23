@@ -17,6 +17,55 @@ const addFriendAlreadyFriend = '<i class="fa-regular fa-circle-xmark"></i>  User
 const circle_xmark = '<i class="fa-regular fa-circle-xmark"></i>';
 const circle_check = '<i class="fa-regular fa-circle-check"></i>';
 
+class Router {
+	constructor() {
+		this.routes = [];
+	}
+	get(path, handler) {
+		// Check if path and handler are provided
+		if (!path || !handler) throw new Error('path and handler are required');
+		// Check if path is a string
+		if (typeof path !== 'string') throw new TypeError('path must be a string');
+		// Check if handler is a function
+		if (typeof handler !== 'function') throw new TypeError('handler must be a function');
+		this.routes.forEach(route => {
+			if (route.path === path) throw new Error(`Route with path ${path} already exists`);
+		});
+		const route = {
+			path,
+			handler
+		};
+		this.routes.push(route);
+	}
+	init() {
+		this.routes.some(route => {
+			let regEx = new RegExp(`^${route.path}$`);
+			let path = window.location.pathname;
+
+			if (path.match(regEx)) {
+				handleSidePanel();
+				let req = { path };
+				return route.handler(this, req);
+			}
+		});
+	}
+}
+
+const router = new Router();
+
+router.get('/', homeHandler);
+
+router.get('/login', loginHandler2);
+
+router.get('/register', registerHandler);
+
+router.get('/log-out', logOutHandler);
+
+router.get('/edit-profile', editProfileHandler);
+
+router.get('/pong', pongHandler);
+
+router.get('/profile', profileHandler);
 
 class User {
 	setUser(data) {
@@ -87,6 +136,11 @@ function handleSidePanel() {
 
 }
 
+function addGameOptions() {
+	alert("add game options");
+	console.log("test")
+}
+
 async function logOutHandler() {
 	const userData = currentUser.getUser();
 	console.log('userdata = ' + userData.accessToken);
@@ -98,9 +152,9 @@ async function logOutHandler() {
 	});
 	if (response.ok) {
 		currentUser.removeUser();
-		history.pushState({}, "", "/");
-		handleLocation();
 		showToast(logoutSuccess, false);
+		history.pushState({}, "", "/");
+		router.init();
 	} else {
 		showToast(logoutFail, true);
 	}
@@ -466,7 +520,8 @@ async function loginHandler2() {
 				currentUser.setUser(data);
 				showToast(loginSuccess, false);
 				history.pushState({}, "", "/");
-				handleLocation();
+				router.init();
+				// handleLocation();
             } else {
                 showToast(loginFail, true);
             }
@@ -602,15 +657,21 @@ let currentRoute = "";
 window.route = (event) => {
     event.preventDefault();
     const href = event.currentTarget.href;
+	console.log('href = ' + href)
+	console.log('currentRoute = ' + currentRoute)
     if (href !== currentRoute) { // Check if the new route is different from the current one
         window.history.pushState({}, "", href);
-        handleLocation();
+		currentRoute = href;
+		console.log(href)
+		router.init();
+
+        // handleLocation();
     }
 };
 
 window.pong.gameLoop();
-window.onpopstate = handleLocation;
-handleLocation();
+// window.onpopstate = handleLocation;
+// handleLocation();
 
 
 // async function registerHandler() {
@@ -665,6 +726,8 @@ handleLocation();
 // 		console.error('Register form not found');
 // 	}
 // }
+
+router.init();
 
 async function temp_registerHandler() {
 	const userContainer = document.getElementById('userContainer');
