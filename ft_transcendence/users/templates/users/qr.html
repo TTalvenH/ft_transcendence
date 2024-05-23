@@ -1,14 +1,13 @@
 <div class="box smoothAppear" id="qrBox">
     <h2>Scan this QR Code with your Authenticator App</h2>
     <div class="qr-code">
-        <img src="data:image/png;base64,$qr_code_url" alt="OTP QR Code">
+        <img src="data:image/png;base64,{{ qr_code_url }}" alt="OTP QR Code">
     </div>
     <form id="otpForm">
-		{% crsf_token %}
+        {% csrf_token %}
         <div class="inputBox">
             <input type="text" name="otp" required placeholder="Enter OTP Code">
         </div>
         <button class="button" type="submit">Verify</button>
     </form>
 </div>
-

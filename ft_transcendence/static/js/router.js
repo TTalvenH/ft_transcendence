@@ -537,68 +537,80 @@ async function registerHandler() {
 
     // Add event listener to the registration form
     const registerForm = document.getElementById('registerForm');
-    registerForm.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Prevent default form submission behavior
-        
-        // Get form data
-        const formData = new FormData(registerForm);
-        
-        try {
-            // Send form data to the backend
-            const response = await fetch('/users/create-user', {
-                method: 'POST',
-                body: formData
-            });
+    if (registerForm) {
+        registerForm.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission behavior
+            
+            // Get form data
+            const formData = new FormData(registerForm);
+            
+            try {
+                // Send form data to the backend
+                const response = await fetch('/users/create-user', {
+                    method: 'POST',
+                    body: formData
+                });
 
-            if (response.ok) {
-                const result = await response.json();
-                
-                if (result.otp && result.otp.html) {
-                    userContainer.innerHTML = '';
-                    const qrHTML = result.otp.html;
-                    document.getElementById('userContainer').insertAdjacentHTML('beforeend', qrHTML);
+                if (response.ok) {
+                    const result = await response.json();
 
-                    // Get the verify form and add event listener
-                    const otpForm = document.getElementById('otpForm');
-                    otpForm.addEventListener('submit', async (event) => {
-                        event.preventDefault();
+                    if (result.otp && result.qr_html) {
+                        userContainer.innerHTML = '';
                         
-                        // Call to verify-otp endpoint
-                        const otpFormData = new FormData(otpForm);
-                        const username = result.username; // Use the username from the result
+                        // Insert the rendered HTML received from the backend
+                        userContainer.insertAdjacentHTML('beforeend', result.qr_html);
 
-                        otpFormData.append('username', username);
+                        // Get the verify form and add event listener
+                        const otpForm = document.getElementById('otpForm');
+                        if (otpForm) {
+                            otpForm.addEventListener('submit', async (event) => {
+                                event.preventDefault();
+                                
+                                // Call to verify-otp endpoint
+                                const otpFormData = new FormData(otpForm);
+                                const username = result.user.username; // Use the username from the result
 
-                        const verifyResponse = await fetch('/verify-otp/', {
-                            method: 'POST',
-                            body: otpFormData
-                        });
-                        
-                        const verifyResult = await verifyResponse.json();
-                        
-                        if (verifyResponse.ok) {
-                            userContainer.innerHTML = '';
-                            showToast(registerSuccess, false);
-                            history.pushState({}, "", "/");
-                            handleLocation();
+                                otpFormData.append('username', username);
+
+                                const verifyResponse = await fetch('/users/verify-otp', {
+                                    method: 'POST',
+                                    body: otpFormData
+                                });
+                                
+                                const verifyResult = await verifyResponse.json();
+                                
+                                if (verifyResponse.ok) {
+                                    userContainer.innerHTML = '';
+                                    showToast('Registration successful', false);
+                                    history.pushState({}, "", "/");
+                                    handleLocation();
+                                } else {
+                                    alert(verifyResult.detail || 'Verification failed');
+                                }
+                            });
                         } else {
-                            alert(verifyResult.detail || 'Verification failed');
+                            console.error('OTP form not found');
                         }
-                    });
+                    } else {
+                        showToast('Registration successful', false);
+                        history.pushState({}, "", "/");
+                        handleLocation();
+                    }
                 } else {
-                    showToast(registerSuccess, false);
-                    history.pushState({}, "", "/");
-                    handleLocation();
+                    const errorResult = await response.json();
+                    showToast(`Error: ${errorResult.detail || 'Something went wrong'}`, true);
                 }
-            } else {
-                const errorResult = await response.json();
-                showToast(circle_xmark + (errorResult.detail || 'Something went wrong'), true);
+            } catch (error) {
+                showToast('Something went wrong', true);
             }
-        } catch (error) {
-            showToast(somethingWentWrong, true);
-        }
-    });
+        });
+    } else {
+        console.error('Registration form not found');
+    }
 }
+
+
+
 
 
 

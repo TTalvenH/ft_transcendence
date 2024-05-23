@@ -18,6 +18,12 @@ from io import BytesIO
 from string import Template
 from .decorators import update_last_active
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.http import HttpRequest
+from django.template.loader import render_to_string
+from django.contrib.auth import authenticate
+
+
+
 
 # Create your views here.
 @api_view(['GET'])
@@ -56,95 +62,99 @@ def userProfileTemplate(request, username):
 	return render(request, 'users/profile.html', context)
 
 @api_view(['GET'])
-@authentication_classes([JWTAuthentication])
-@update_last_active
 def qrPrompt(request):
 	return render(request, 'users/qr_prompt.html')
 
-@api_view(['POST'])
-def createUser(request):
-	"""
-	This function is an api_view that can be accessed with a POST request.
-	It uses RegisterUserSerializer to validate the request data.
-	If the data is valid, it creates a new user with the given data,
-	gets the user object, and returns a Response containing the serialized user data.
-	If the data is invalid, it returns a Response with error messages.
-	"""
-	serializer = RegisterUserSerializer(data=request.data)
-	if serializer.is_valid():
-		user = serializer.save()
+@api_view(['GET'])
+def renderQr(request):
+    return render(request, 'users/qr.html')
 
-		# If OTP is enabled, set up OTP for the user
-		enable_otp = request.data.get('enable_otp')
-		otp_data = {}
-		if enable_otp == 'true':
-			otp_data = setup_otp(user)
-			if not otp_data['created']:
-				return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
-
-		# Construct the response data
-		response_data = {
-			'user': serializer.data,
-			'otp': otp_data
-		}
-		return Response(response_data, status=status.HTTP_201_CREATED)
-
-	detail = {'detail': 'Invalid data'}
-	if serializer.errors.get('username'):
-		detail = {'detail': 'Username taken'}
-	elif serializer.errors.get('email'):
-		detail = {'detail': 'Email taken'}
-	return Response(detail, status=status.HTTP_400_BAD_REQUEST)
-
-from django.contrib.auth import authenticate, login, logout
 
 def setup_otp(user):
-	device, created = TOTPDevice.objects.get_or_create(user=user, name='default')
+    device, created = TOTPDevice.objects.get_or_create(user=user, name='default')
 
-	# if not created:
-	# 	return {'detail': 'OTP device already exists.', 'created': False}
+    key = pyotp.random_base32()
+    device.key = key
+    device.save()
 
-	# Generate a unique key for the user
-	key = pyotp.random_base32()
-	device.key = key
-	device.save()
+    user.otp_enabled = True
+    user.save()
 
-	user.otp_enabled = True
-	user.save()
-	# Generate the QR code URL
-	uri = pyotp.totp.TOTP(key).provisioning_uri(name=user.username, issuer_name="pong")
+    uri = pyotp.totp.TOTP(key).provisioning_uri(name=user.username, issuer_name="pong")
 
-	# Create the QR code image
-	qr = qrcode.make(uri)
-	buffered = BytesIO()
-	qr.save(buffered, format="PNG")
-	img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+    qr = qrcode.make(uri)
+    buffered = BytesIO()
+    qr.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
-	# Read the HTML template from a file
-	template_path = '/Users/atuliara/Desktop/new/ft_transcendence/users/templates/users/qr.html'
+    context = {
+        'qr_code_url': img_str,
+        'otp_secret': key,
+    }
 
-	try:
-		with open(template_path, 'r') as file:
-			html_template = Template(file.read())
-	except FileNotFoundError:
-		return {'detail': 'Template file not found.', 'created': False}
+    return {
+        'detail': 'OTP device created successfully.',
+        'created': True,
+        'context': context,
+        'provisioning_uri': uri
+    }
 
-	# Inject the base64 QR code and OTP secret into the HTML template
-	html = html_template.safe_substitute(qr_code_url=img_str, otp_secret=key)
+@api_view(['POST'])
+def createUser(request):
+    serializer = RegisterUserSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.save()
 
-	return {
-		'detail': 'OTP device created successfully.',
-		'created': True,
-		'html': html,
-		'provisioning_uri': uri
-	}
+        # If OTP is enabled, set up OTP for the user
+        enable_otp = request.data.get('enable_otp')
+        otp_data = {}
+        if enable_otp == 'true':
+            otp_data = setup_otp(user)
+            if not otp_data['created']:
+                return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Construct the response data
+        response_data = {
+            'user': serializer.data,
+            'otp': otp_data
+        }
+
+ 		 # Convert DRF request to Django HttpRequest
+        django_request = HttpRequest()
+        django_request.method = 'GET'
+        django_request.user = request.user
+
+        # Manually include CSRF token in the context
+        csrf_token = get_token(request)
+        context = {
+            **otp_data['context'],
+            'csrf_token': csrf_token,
+        }
+
+        # Render the QR code HTML with CSRF token
+        qr_html = render_to_string('users/qr.html', context, request=django_request)
+
+        # Construct the response data
+        response_data = {
+            'user': serializer.data,
+            'otp': otp_data,
+            'qr_html': qr_html  # Include the rendered HTML in the response
+        }
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
+
+    detail = {'detail': 'Invalid data'}
+    if serializer.errors.get('username'):
+        detail = {'detail': 'Username taken'}
+    elif serializer.errors.get('email'):
+        detail = {'detail': 'Email taken'}
+    return Response(detail, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def loginUser(request):
-	user = get_object_or_404(CustomUser, username=request.data['username'])
-
-	if not user.check_password(request.data['password']):
-		return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_404_NOT_FOUND)
+	user = authenticate(request, username=request.data['username'], password=request.data['password'])
+	if not user:
+		return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 	response_data = {'otp_required': user.otp_enabled}
 
@@ -196,21 +206,22 @@ def validateOtpAndLogin(request):
 
 @api_view(['POST'])
 def verify_otp(request):
-	user = get_object_or_404(CustomUser, username=request.data['username'])
+    user = get_object_or_404(CustomUser, username=request.data.get('username'))
 
-	otp = request.data.get('otp')
-	if not otp:
-		return Response({'detail': 'OTP required.'}, status=status.HTTP_401_UNAUTHORIZED)
-	try:
-		device = TOTPDevice.objects.get(user=user, name='default')
-		totp = pyotp.TOTP(device.key)
+    otp = request.data.get('otp')
+    if not otp:
+        return Response({'detail': 'OTP required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-		if not totp.verify(otp):
-			return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
-	except TOTPDevice.DoesNotExist:
-		return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
-		
-	return Response(status=status.HTTP_200_OK)
+    try:
+        device = TOTPDevice.objects.get(user=user, name='default')
+        totp = pyotp.TOTP(device.key)
+
+        if not totp.verify(otp):
+            return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
+    except TOTPDevice.DoesNotExist:
+        return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+    return Response({'detail': 'OTP verified successfully.'}, status=status.HTTP_200_OK)
 
 
 
