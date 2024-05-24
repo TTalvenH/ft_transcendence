@@ -1,4 +1,5 @@
 from django.urls import path, include
+from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
 
 urlpatterns = [
@@ -19,4 +20,5 @@ urlpatterns = [
 	path('log-out-view', views.logOut, name="log-out"),
 	path('add-matchHistory/<int:match_id>/', views.add_matchHistory, name="add-matchHistory"),
 	path('get-matchHistory', views.get_matchHistory, name="get-matchHistory"),
+	path('token/refresh_token', TokenRefreshView.as_view(), name="refresh_token"),
 ]

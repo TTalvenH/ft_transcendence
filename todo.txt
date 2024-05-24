@@ -1,4 +1,2 @@
 
-change the user class to not have varialbles and instead save userinfo to localstorage
-
 when you update userinfo make sure the match history updates correctly

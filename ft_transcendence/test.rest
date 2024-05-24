@@ -83,3 +83,11 @@ POST http://127.0.0.1:8000/users/update-user-profile
 Content-Type: application/json
 
 { "username": "lolled123"}
+
+
+###
+
+POST http://127.0.0.1:8000/users/token/refresh_token
+Content-Type: application/json
+
+{ "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcxNjYzNjQ5NSwiaWF0IjoxNzE2NTUwMDk1LCJqdGkiOiI2ZmY2N2NlZDViZWE0NDBjYmVjNDVmYTI0N2ZhNmUxNiIsInVzZXJfaWQiOjQ0fQ.Lpw_-CMyfPt-wFh7XTwdgKlCvClJL8Ae1pBjADE5A_M"}

@@ -20,6 +20,7 @@ const circle_check = '<i class="fa-regular fa-circle-check"></i>';
 class Router {
 	constructor() {
 		this.routes = [];
+		this.latestRefresh = 0;
 	}
 	get(path, handler) {
 		// Check if path and handler are provided
@@ -38,6 +39,10 @@ class Router {
 		this.routes.push(route);
 	}
 	init() {
+		if (currentUser.getUser() && Date.now() - currentUser.latestRefresh > 15*60*1000) {
+			console.log('refreshing token');
+			currentUser.refreshToken();
+		}
 		this.routes.some(route => {
 			let regEx = new RegExp(`^${route.path}$`);
 			let path = window.location.pathname;
@@ -73,10 +78,17 @@ class User {
 			username: data.user.username,
 			id: data.user.id,
 			accessToken: data.tokens.access,
-			refreshToken: data.tokens.refreshToken,
 			lastActive: data.user.last_active
 		}
+
+		this.latestRefresh = Date.now();
 		// Convert the user object to a JSON string
+		const expirationDate = new Date();
+		expirationDate.setDate(expirationDate.getDate() + 5);
+
+		// Convert the user object to a JSON string
+		document.cookie = `refresh=${data.tokens.refresh}; expires=${expirationDate.toUTCString()}; path=/;`;
+		console.log(document.cookie);
 		localStorage.setItem('currentUser', JSON.stringify(user));
 	}
 
@@ -86,6 +98,40 @@ class User {
 
 	removeUser() {
 		localStorage.removeItem('currentUser');
+	}
+
+	async refreshToken() {
+		let user = this.getUser();
+		console.log(user);
+		if (user) {
+			try {
+				const cookie = document.cookie.split('; ').find(row => row.startsWith('refresh='));
+				const refreshToken = cookie ? cookie.split('=')[1] : null;
+				const body = refreshToken ? JSON.stringify({refresh: refreshToken}) : null;
+				const response = await fetch('http://127.0.0.1:8000/users/token/refresh_token', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: body
+				})
+				if (response.ok) {
+					const data = await response.json();
+					user.accessToken = data.access;
+					localStorage.setItem('currentUser', JSON.stringify(user));
+					this.latestRefresh = Date.now();
+				}
+				else {
+					this.removeUser();
+					showToast(circle_xmark + 'Session Has Expired', true);
+					window.pushState({}, "", "/");
+					router.init();
+				}
+			} catch (error) {
+				console.log('error == ' + error);
+				showToast(somethingWentWrong, true);
+			}
+		}
 	}
 };
 

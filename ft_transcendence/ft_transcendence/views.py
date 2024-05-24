@@ -6,3 +6,4 @@ def index(request):
 
 def	ui(request):
 	return render(request, 'sidePanel.html')
+
