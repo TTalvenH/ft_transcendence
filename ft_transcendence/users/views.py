@@ -118,32 +118,33 @@ def createUser(request):
     return Response(detail, status=status.HTTP_400_BAD_REQUEST)
 
 def setup_otp(user):
-    device, created = TOTPDevice.objects.get_or_create(user=user, name='default')
+	device, created = TOTPDevice.objects.get_or_create(user=user, name='default')
 
-    key = pyotp.random_base32()
-    device.key = key
-    device.save()
+	key = pyotp.random_base32()
+	device.key = key
+	device.save()
 
-    user.otp_enabled = True
-    user.save()
+	user.otp_enabled = True
+	user.save()
 
-    uri = pyotp.totp.TOTP(key).provisioning_uri(name=user.username, issuer_name="pong")
+	uri = pyotp.totp.TOTP(key).provisioning_uri(name=user.username, issuer_name="pong")
 
-    qr = qrcode.make(uri)
-    buffered = BytesIO()
-    qr.save(buffered, format="PNG")
-    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+	qr = qrcode.make(uri)
+	buffered = BytesIO()
+	qr.save(buffered, format="PNG")
+	img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
 
-    context = {
-        'qr_code_url': img_str,
-    }
+	context = {
+		'qr_code_url': img_str,
+	}
 
-    return {
-        'detail': 'OTP device created successfully.',
-        'created': True,
-        'context': context,
-        'provisioning_uri': uri
-    }
+	user.otp_verified = True
+	return {
+		'detail': 'OTP device created successfully.',
+		'created': True,
+		'context': context,
+		'provisioning_uri': uri
+	}
 
 @api_view(['POST'])
 def loginUser(request):
@@ -151,15 +152,15 @@ def loginUser(request):
 	if not user:
 		return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-	response_data = {'otp_required': user.otp_enabled}
+	otp_verified = user.otp_verified
+	serializer = UserSerializer(instance=user)
+	response_data = {'otp_required': user.otp_enabled, 'otp_verified': user.otp_verified, 'user': serializer.data}
 
 	if user.otp_enabled and user.otp_verified:
 		return Response(response_data, status=status.HTTP_200_OK)
 
 	user.update_last_active()
 	token = create_jwt_pair_for_user(user)
-	serializer = UserSerializer(instance=user)
-	otp_verified = user.otp_verified
 	response_data.update({'tokens': token, 'user': serializer.data, 'otp_verified': otp_verified})
 
 	return Response(response_data, status=status.HTTP_200_OK)

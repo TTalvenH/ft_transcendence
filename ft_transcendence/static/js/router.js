@@ -383,6 +383,7 @@ async function handleLoginSubmit(event) {
         });
         if (response.ok) {
             loginData = await response.json();
+			console.log(loginData.user.username);
             currentUsername = formData.get('username');
 			if (loginData.otp_required && !loginData.otp_verified) {
 				showToast(loginSuccess, false);
@@ -434,7 +435,6 @@ async function handleOtpSubmit(event) {
     const otpForm = event.target;
     let otpFormData = new FormData(otpForm);
 
-    // Optionally, append user data to the OTP form data if needed
     if (currentUsername) {
 		otpFormData.append('username', currentUsername);
 	}
@@ -446,7 +446,9 @@ async function handleOtpSubmit(event) {
         });
 
         if (otpResponse.ok) {
+			const otpData = await otpResponse.json();
 			showToast(loginSuccess, false);
+			currentUser.setUser(otpData);
 			history.pushState({}, "", "/");
 			handleLocation();
         } else {
