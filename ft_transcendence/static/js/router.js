@@ -17,7 +17,8 @@ const addFriendAlreadyFriend = '<i class="fa-regular fa-circle-xmark"></i>  User
 const circle_xmark = '<i class="fa-regular fa-circle-xmark"></i>';
 const circle_check = '<i class="fa-regular fa-circle-check"></i>';
 const verificationFailed = '<i class="fa-regular fa-circle-xmark"></i> Verification failed';
-
+const notVerified = '<i class="fa-regular fa-circle-xmark"></i> OTP was activated but not verified';
+const reActivate = '<i class="fa-regular fa-circle-xmark"></i> Please setup 2FA in profile settings';
 
 class User {
 	setUser(data) {
@@ -56,10 +57,8 @@ function showToast(msg, error) {
 	}
 	setTimeout(() => {
 		toastDiv.remove();
-	}, 2000)
+	}, 4000)
 }
-
-let currentUsername = null;
 
 const routes = {
 	"/": homeHandler,
@@ -85,7 +84,6 @@ function handleSidePanel() {
 		profileButton.style.display = 'none';
 		loginButton.style.display = 'block';
 	}
-
 }
 
 async function logOutHandler() {
@@ -336,12 +334,11 @@ async function profileHandler() {
 
 async function loginHandler() {
     const registerBox = document.getElementById('registerBox');
-    if (registerBox) registerBox.remove();
-    
+    if (registerBox) 
+		registerBox.remove();
     if (!window.loginFormHTML) {
         window.loginFormHTML = await fetchHTML("/users/login.html");
     }
-    
     const userContainer = document.getElementById('userContainer');
     userContainer.innerHTML = ''; // Clear the UI container
     userContainer.insertAdjacentHTML('beforeend', window.loginFormHTML);
@@ -352,6 +349,8 @@ async function loginHandler() {
         loginForm.addEventListener('submit', handleLoginSubmit);
     }
 }
+
+// could remove this
 
 async function fetchHTML(url) {
     try {
@@ -371,6 +370,8 @@ async function fetchHTML(url) {
 }
 
 let loginData = null;
+let currentUsername = null;
+
 async function handleLoginSubmit(event) {
     event.preventDefault();
     const loginForm = event.target;
@@ -383,7 +384,16 @@ async function handleLoginSubmit(event) {
         if (response.ok) {
             loginData = await response.json();
             currentUsername = formData.get('username');
-            if (loginData.otp_required) {
+			if (loginData.otp_required && !loginData.otp_verified)
+			{
+				showToast(loginSuccess, false);
+				history.pushState({}, "", "/");
+				showToast(notVerified, true);
+				showToast(reActivate, true);
+				currentUser.setUser(loginData);
+				handleLocation();
+			}
+            else if (loginData.otp_required && loginData.otp_verified) {
                 loginForm.remove();
                 await loadOtpForm();
             }
@@ -392,14 +402,14 @@ async function handleLoginSubmit(event) {
 				history.pushState({}, "", "/");
 				handleLocation();
 			}
-				
-
 		}
 		else {
-			showToast(loginFail, true);
+			const errorData = await response.json()
+			showToast(errorData, true);
 		}
-	}
-	 catch (error) {
+		}
+	catch (error) {
+		console.log(error);
         showToast(somethingWentWrong, true);
     }
 }
@@ -437,11 +447,11 @@ async function handleOtpSubmit(event) {
         });
 
         if (otpResponse.ok) {
-            const result = await otpResponse.json();
-            alert('Login successful!');
-            // Redirect or handle success
+			showToast(loginSuccess, false);
+			history.pushState({}, "", "/");
+			handleLocation();
         } else {
-            alert('Invalid OTP.');
+			showToast(verificationFailed, true);
         }
     } catch (error) {
         console.error('Error during OTP validation:', error);
@@ -449,174 +459,99 @@ async function handleOtpSubmit(event) {
     }
 }
 
-async function loginHandler2() {
-	const userContainer = document.getElementById('userContainer');
-	userContainer.innerHTML = "";
-	if (!loginFormHTML)
-		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
-	userContainer.insertAdjacentHTML('beforeend', loginFormHTML);
-    // Add event listener to the registration form
-    const loginForm = document.getElementById('loginForm');
-    loginForm.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Prevent default form submission behavior
-
-        // Get form data
-        const formData = new FormData(loginForm);
-        
-        try {
-            // Send form data to the backend
-            const response = await fetch('/users/login-user', {
-				method: 'POST',
-				body: formData
-            });
-            if (response.ok) {
-				const data = await response.json();
-				currentUser.setUser(data);
-				showToast(loginSuccess, false);
-				history.pushState({}, "", "/");
-				handleLocation();
-            } else {
-                showToast(loginFail, true);
-            }
-        } catch (error) {
-            showToast(somethingWentWrong, true);
-        }
-	});
-}
-
-
-
-
-// async function loginHandler() {
-// 	const registerBox = document.getElementById('registerBox');
-// 	if (registerBox)
-// 		registerBox.remove();
-// 	if (!loginFormHTML)
-// 		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
-//     document.getElementById('ui').insertAdjacentHTML('beforeend', loginFormHTML);
-//     // Add event listener to the registration form
-//     const loginForm = document.getElementById('loginForm');
-//     loginForm.addEventListener('submit', async (event) => {
-//         event.prev entDefault(); // Prevent default form submission behavior
-
-//         // Get form data
-//         let formData = new FormData(loginForm);
-        
-//         try {
-//             // Send form data to the backend
-//             const response = await fetch('/users/login-user', {
-//                 method: 'POST',
-//                 body: formData
-//             });
-
-//             if (response.ok) {
-//                 // Registration successful
-//                 alert('Login successful!');
-//                 // Redirect to another page or handle the response as needed
-//             } else {
-//                 // Registration failed
-//                 alert('Login failed!');
-//             }
-//         } catch (error) {
-//             console.error('Error couldnt login', error);
-//             alert('An error occurred during registration. Please try again later.');
-//         }
-//     });
-// }
-
-
 async function registerHandler() {
     const userContainer = document.getElementById('userContainer');
     userContainer.innerHTML = "";
 
-    if (!registerFormHTML) { // we only fetch once and then save it locally
+    if (!registerFormHTML) {
         registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
     }
 
     userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
 
-    // Add event listener to the registration form
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
-        registerForm.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Prevent default form submission behavior
-            
-            // Get form data
-            const formData = new FormData(registerForm);
-            
-            try {
-                // Send form data to the backend
-                const response = await fetch('/users/create-user', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-
-                    if (result.otp && result.qr_html) {
-                        userContainer.innerHTML = '';
-                        
-                        // Insert the rendered HTML received from the backend
-                        userContainer.insertAdjacentHTML('beforeend', result.qr_html);
-
-                        // Get the verify form and add event listener
-                        const otpForm = document.getElementById('otpForm');
-                        if (otpForm) {
-                            otpForm.addEventListener('submit', async (event) => {
-                                event.preventDefault();
-                                
-                                // Call to verify-otp endpoint
-                                const otpFormData = new FormData(otpForm);
-                                const username = result.user.username; // Use the username from the result
-
-                                otpFormData.append('username', username);
-
-                                const verifyResponse = await fetch('/users/verify-otp', {
-                                    method: 'POST',
-                                    body: otpFormData
-                                });
-                                
-                                const verifyResult = await verifyResponse.json();
-                                
-                                if (verifyResponse.ok) {
-                                    userContainer.innerHTML = '';
-                                    showToast('Registration successful', false);
-                                    history.pushState({}, "", "/");
-                                    handleLocation();
-                                } else {
-                                    alert(verifyResult.detail || 'Verification failed');
-                                }
-                            });
-                        } else {
-                            console.error('OTP form not found');
-                        }
-                    } else {
-                        showToast('Registration successful', false);
-                        history.pushState({}, "", "/");
-                        handleLocation();
-                    }
-                } else {
-                    const errorResult = await response.json();
-                    showToast(`Error: ${errorResult.detail || 'Something went wrong'}`, true);
-                }
-            } catch (error) {
-                showToast('Something went wrong', true);
-            }
-        });
+        registerForm.addEventListener('submit', handleRegisterSubmit);
     } else {
         console.error('Registration form not found');
     }
 }
 
+async function handleRegisterSubmit(event) {
+    event.preventDefault();
+    
+    const registerForm = event.target;
+    const formData = new FormData(registerForm);
+    
+    try {
+        const response = await fetch('/users/create-user', {
+            method: 'POST',
+            body: formData
+        });
 
+        if (response.ok) {
+            const result = await response.json();
+            await handleRegistrationResponse(result);
+        } else {
+            const errorResult = await response.json();
+            showToast(`Error: ${errorResult.detail || 'Something went wrong'}`, true);
+        }
+    } catch (error) {
+        showToast('Something went wrong', true);
+    }
+}
 
+async function handleRegistrationResponse(result) {
+    const userContainer = document.getElementById('userContainer');
+    if (result.otp && result.qr_html) {
+        userContainer.innerHTML = '';
+        userContainer.insertAdjacentHTML('beforeend', result.qr_html);
 
+        const otpForm = document.getElementById('otpForm');
+        if (otpForm) {
+            otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmit(event, result.user.username));
+        } else {
+            console.error('OTP form not found');
+        }
+    } else {
+        showToast('Registration successful', false);
+        history.pushState({}, "", "/");
+        handleLocation();
+    }
+}
 
+async function handleOtpVerificationSubmit(event, username) {
+    event.preventDefault();
+    
+    const otpForm = event.target;
+    const otpFormData = new FormData(otpForm);
+    otpFormData.append('username', username);
+
+    try {
+        const verifyResponse = await fetch('/users/verify-otp', {
+            method: 'POST',
+            body: otpFormData
+        });
+        
+        const verifyResult = await verifyResponse.json();
+        
+        if (verifyResponse.ok) {
+            const userContainer = document.getElementById('userContainer');
+            userContainer.innerHTML = '';
+            showToast('Registration successful', false);
+            history.pushState({}, "", "/");
+            handleLocation();
+        } else {
+            alert(verifyResult.detail || 'Verification failed');
+        }
+    } catch (error) {
+        showToast('Something went wrong', true);
+    }
+}
 
 async function pongHandler() {
     const html = await fetch("/pong/").then((data) => data.text());
-	document.getElementById('ui').style.display = 'none'; // Using display
+	document.getElementById('ui').style.display = 'none';
 	document.getElementById('ui').style.visibility = 'hidden';
 	window.pong.gameGlobals.gameState = GameStates.PLAYING;
 }
@@ -644,57 +579,3 @@ window.route = (event) => {
 window.pong.gameLoop();
 window.onpopstate = handleLocation;
 handleLocation();
-
-
-// async function registerHandler() {
-// 	const loginBox = document.getElementById('loginBox');
-// 	if (loginBox) {
-// 		loginBox.remove();
-// 	}
-
-// 	if (!registerFormHTML) {
-// 		registerFormHTML = await fetch("/users/register.html").then(response => {
-// 			if (!response.ok) throw new Error('Failed to fetch registration form');
-// 			return response.text();
-// 		});
-// 	}
-
-// 	const userContainer = document.getElementById('userContainer');
-// 	userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
-
-// 	const registerForm = document.getElementById('registerForm');
-// 	if (registerForm) {
-// 		registerForm.addEventListener('submit', async (event) => {
-// 			event.preventDefault();
-
-// 			const formData = new FormData(registerForm);
-
-// 			try {
-// 				const response = await fetch('/users/create-user', {
-// 					method: 'POST',
-// 					body: formData
-// 				});
-
-// 				if (response.ok) {
-// 					const result = await response.json();
-// 					console.log(result.otp);
-// 					if (result.otp && result.otp.html) {
-// 						userContainer.innerHTML = '';
-// 						const qrHTML = result.otp.html;
-// 						document.getElementById('userContainer').insertAdjacentHTML('beforeend', qrHTML);
-// 					} else {
-// 						alert('Registration successful');
-// 					}
-// 				} else {
-// 					const errorData = await response.json();
-// 					alert(`Registration failed: ${errorData.detail}`);
-// 				}
-// 			} catch (error) {
-// 				console.error('Error registering user:', error);
-// 				alert('An error occurred during registration. Please try again later.');
-// 			}
-// 		});
-// 	} else {
-// 		console.error('Register form not found');
-// 	}
-// }

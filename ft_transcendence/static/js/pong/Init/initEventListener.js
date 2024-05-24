@@ -21,16 +21,16 @@ export function initEventListener(entities, gameGlobals)
 			case "s":
 				player2.keyDown = true;
 				break;
-			case "p":
-				if (gameGlobals.gameState === GameStates.PAUSED || gameGlobals.gameState === GameStates.MENU)
-				{
-					gameGlobals.gameState = GameStates.PLAYING;
-				}
-				else if (gameGlobals.gameState === GameStates.PLAYING)
-				{
-					gameGlobals.gameState = GameStates.PAUSED;
-				}
-				break;
+			// case "p":
+			// 	if (gameGlobals.gameState === GameStates.PAUSED || gameGlobals.gameState === GameStates.MENU)
+			// 	{
+			// 		gameGlobals.gameState = GameStates.PLAYING;
+			// 	}
+			// 	else if (gameGlobals.gameState === GameStates.PLAYING)
+			// 	{
+			// 		gameGlobals.gameState = GameStates.PAUSED;
+			// 	}
+			// 	break;
 		}
 	});
 	

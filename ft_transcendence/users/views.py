@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import CustomUser, PongMatch
 from .serializers import UserSerializer, RegisterUserSerializer, UserProfileSerializer, MatchHistorySerializer, FriendSerializer
 from .tokens import create_jwt_pair_for_user
+
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from rest_framework.permissions import IsAuthenticated
 import qrcode
@@ -21,9 +22,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.contrib.auth import authenticate
-
-
-
+from django.middleware.csrf import get_token
 
 # Create your views here.
 @api_view(['GET'])
@@ -89,7 +88,6 @@ def setup_otp(user):
 
     context = {
         'qr_code_url': img_str,
-        'otp_secret': key,
     }
 
     return {
@@ -158,38 +156,23 @@ def loginUser(request):
 
 	response_data = {'otp_required': user.otp_enabled}
 
-	if user.otp_enabled:
+	if user.otp_enabled and user.otp_verified:
 		return Response(response_data, status=status.HTTP_200_OK)
 
 	user.update_last_active()
 	token = create_jwt_pair_for_user(user)
 	serializer = UserSerializer(instance=user)
-	response_data.update({'tokens': token, 'user': serializer.data})
+	otp_verified = user.otp_verified
+	response_data.update({'tokens': token, 'user': serializer.data, 'otp_verified': otp_verified})
 
 	return Response(response_data, status=status.HTTP_200_OK)
-
-@api_view(['POST'])
-def loginUser2(request):
-	user = authenticate(request, username=request.data['username'], password=request.data['password'])
-	if not user:
-		return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
-	
-	# if not user.check_password(request.data['password']):
-	# 	return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
-	# login(request, user)
-	user.update_last_active()
-	token = create_jwt_pair_for_user(user)
-	serializer = UserSerializer(instance=user)
-	return Response({'tokens': token, 'user': serializer.data})
 
 @api_view(['POST'])
 def validateOtpAndLogin(request):
 	user = get_object_or_404(CustomUser, username=request.data['username'])
 
-	# if not user.check_password(request.data['password']):
-	# 	return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_404_NOT_FOUND)
-
 	otp = request.data.get('otp')
+
 	if not otp:
 		return Response({'detail': 'OTP required.'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -206,22 +189,23 @@ def validateOtpAndLogin(request):
 
 @api_view(['POST'])
 def verify_otp(request):
-    user = get_object_or_404(CustomUser, username=request.data.get('username'))
+	user = get_object_or_404(CustomUser, username=request.data.get('username'))
 
-    otp = request.data.get('otp')
-    if not otp:
-        return Response({'detail': 'OTP required.'}, status=status.HTTP_400_BAD_REQUEST)
+	otp = request.data.get('otp')
+	if not otp:
+		return Response({'detail': 'OTP required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    try:
-        device = TOTPDevice.objects.get(user=user, name='default')
-        totp = pyotp.TOTP(device.key)
+	try:
+		device = TOTPDevice.objects.get(user=user, name='default')
+		totp = pyotp.TOTP(device.key)
 
-        if not totp.verify(otp):
-            return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
-    except TOTPDevice.DoesNotExist:
-        return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-    return Response({'detail': 'OTP verified successfully.'}, status=status.HTTP_200_OK)
+		if not totp.verify(otp):
+			return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
+	except TOTPDevice.DoesNotExist:
+		return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
+	user.otp_verified = True
+	user.save()
+	return Response({'detail': 'OTP verified successfully.'}, status=status.HTTP_200_OK)
 
 
 
