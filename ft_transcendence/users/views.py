@@ -7,7 +7,6 @@ from rest_framework.permissions import IsAuthenticated
 from .models import CustomUser, PongMatch
 from .serializers import UserSerializer, RegisterUserSerializer, UserProfileSerializer, MatchHistorySerializer, FriendSerializer
 from .tokens import create_jwt_pair_for_user
-
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from rest_framework.permissions import IsAuthenticated
 import qrcode
@@ -24,7 +23,6 @@ from django.template.loader import render_to_string
 from django.contrib.auth import authenticate
 from django.middleware.csrf import get_token
 
-# Create your views here.
 @api_view(['GET'])
 def login_template(request):
 	return render(request, 'users/login.html')
@@ -67,35 +65,6 @@ def qrPrompt(request):
 @api_view(['GET'])
 def renderQr(request):
     return render(request, 'users/qr.html')
-
-
-def setup_otp(user):
-    device, created = TOTPDevice.objects.get_or_create(user=user, name='default')
-
-    key = pyotp.random_base32()
-    device.key = key
-    device.save()
-
-    user.otp_enabled = True
-    user.save()
-
-    uri = pyotp.totp.TOTP(key).provisioning_uri(name=user.username, issuer_name="pong")
-
-    qr = qrcode.make(uri)
-    buffered = BytesIO()
-    qr.save(buffered, format="PNG")
-    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
-
-    context = {
-        'qr_code_url': img_str,
-    }
-
-    return {
-        'detail': 'OTP device created successfully.',
-        'created': True,
-        'context': context,
-        'provisioning_uri': uri
-    }
 
 @api_view(['POST'])
 def createUser(request):
@@ -148,6 +117,34 @@ def createUser(request):
         detail = {'detail': 'Email taken'}
     return Response(detail, status=status.HTTP_400_BAD_REQUEST)
 
+def setup_otp(user):
+    device, created = TOTPDevice.objects.get_or_create(user=user, name='default')
+
+    key = pyotp.random_base32()
+    device.key = key
+    device.save()
+
+    user.otp_enabled = True
+    user.save()
+
+    uri = pyotp.totp.TOTP(key).provisioning_uri(name=user.username, issuer_name="pong")
+
+    qr = qrcode.make(uri)
+    buffered = BytesIO()
+    qr.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+    context = {
+        'qr_code_url': img_str,
+    }
+
+    return {
+        'detail': 'OTP device created successfully.',
+        'created': True,
+        'context': context,
+        'provisioning_uri': uri
+    }
+
 @api_view(['POST'])
 def loginUser(request):
 	user = authenticate(request, username=request.data['username'], password=request.data['password'])
@@ -170,9 +167,7 @@ def loginUser(request):
 @api_view(['POST'])
 def validateOtpAndLogin(request):
 	user = get_object_or_404(CustomUser, username=request.data['username'])
-
 	otp = request.data.get('otp')
-
 	if not otp:
 		return Response({'detail': 'OTP required.'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -181,7 +176,8 @@ def validateOtpAndLogin(request):
 
 	if not totp.verify(otp):
 		return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
-
+	
+	user.update_last_active()
 	token = create_jwt_pair_for_user(user)
 	serializer = UserSerializer(instance=user)
 

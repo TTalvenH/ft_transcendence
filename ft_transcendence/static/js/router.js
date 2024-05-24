@@ -350,7 +350,7 @@ async function loginHandler() {
     }
 }
 
-// could remove this
+// could remove this function
 
 async function fetchHTML(url) {
     try {
@@ -384,13 +384,12 @@ async function handleLoginSubmit(event) {
         if (response.ok) {
             loginData = await response.json();
             currentUsername = formData.get('username');
-			if (loginData.otp_required && !loginData.otp_verified)
-			{
+			if (loginData.otp_required && !loginData.otp_verified) {
 				showToast(loginSuccess, false);
-				history.pushState({}, "", "/");
 				showToast(notVerified, true);
-				showToast(reActivate, true);
+				showToast(reActivate, false);
 				currentUser.setUser(loginData);
+				history.pushState({}, "", "/");
 				handleLocation();
 			}
             else if (loginData.otp_required && loginData.otp_verified) {
