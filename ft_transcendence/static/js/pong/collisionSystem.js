@@ -90,14 +90,19 @@ export function collisionSystem(entities, game, deltaTime) {
 		// CCD steps
 		const numberOfSteps = 20;
 		const stepSize = deltaTime / numberOfSteps;
-	
+		
+		if (player1.spawnTimer > 0 || player2.spawnTimer > 0) {
+			return;
+		}
+
 		for (let step = 0; step < numberOfSteps; step++) {
 			const nextPosition1 = player1.position.clone().add(player1.velocity.clone().multiplyScalar((step + 1) * stepSize));
 			const nextPosition2 = player2.position.clone().add(player2.velocity.clone().multiplyScalar((step + 1) * stepSize));
 			// Check for collisions with players
 			const distanceBetweenCenters = nextPosition1.distanceTo(nextPosition2);
 			if (distanceBetweenCenters < player1.radius + player2.radius) {
-				console.log("COLLISION");
+				player1.lightFlicker(0.55, 1, 7);
+				player2.lightFlicker(0.55, 1, 7);
 				let fasterPlayer = player1;
 				let slowerPlayer = player2;
 				if (player2.velocity.length() > player1.velocity.length()) {

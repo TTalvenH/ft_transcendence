@@ -35,8 +35,8 @@ export const	Game = Object.freeze({
 export class Pong
 {
 	constructor() {
-		this.gameGlobals = { gameState: GameStates.LOADING, game: Game.PONG };
-		this.currentGame = Game.PONG;
+		this.gameGlobals = { gameState: GameStates.LOADING, game: Game.KNOCKOFF };
+		this.currentGame = this.gameGlobals.game;
 		const loadingManager = new THREE.LoadingManager();
 		const loader = new FontLoader(loadingManager);
 		loader.load('static/fonts/jersey10-regular.json', (font) => {
@@ -78,7 +78,7 @@ export class Pong
 		this.pongEntities['Plane'] = new PlaneEntity(new THREE.Vector3(0, 0, -0.25), 0x3A0CA3, 0, window.innerWidth, window.innerHeight);
 		
 		// Knockoff
-		this.knockoffEntities['Player1'] = new KnockoffPlayerEntity(new THREE.Vector3(4, 0, 0), COLORS.FOLLY);
+		this.knockoffEntities['Player1'] = new KnockoffPlayerEntity(new THREE.Vector3(4, 0, 0.0001), COLORS.FOLLY);
 		this.knockoffEntities['Player2'] = new KnockoffPlayerEntity(new THREE.Vector3(-4, 0, 0), COLORS.SKYBLUE);
 		this.knockoffEntities['NeonBox1'] = new NeonBoxEntity(new THREE.Vector3(0, -3, -0.25), 10, 0.01, 0.01, false, COLORS.INDIGO);
 		this.knockoffEntities['NeonBox2'] = new NeonBoxEntity(new THREE.Vector3(0, 3, -0.25), 10, 0.01, 0.01, false, COLORS.INDIGO);
@@ -95,8 +95,8 @@ export class Pong
 		this.entities['User2Name'] = new TextEntity("Guest2", new THREE.Vector3(-6, 7.7, 0), this.font, COLORS.INDIGO);
 		this.entities['Countdown'] = new TextEntity("", new THREE.Vector3(0, 0, 3), this.font, COLORS.INDIGO, this.camera);
 		this.entities['WinnerName'] = new TextEntity("", new THREE.Vector3(0, 0, 3), this.font, COLORS.INDIGO, this.camera);
-		this.entities['Player1Health'] = new HealthBarEntity(new THREE.Vector3(5, 5.5, 0), this.pongEntities["Player1"]);
-		this.entities['Player2Health'] = new HealthBarEntity(new THREE.Vector3(-5, 5.5, 0), this.pongEntities["Player2"]);
+		this.entities['Player1Health'] = new HealthBarEntity(new THREE.Vector3(5, 5.5, 0), this.knockoffEntities["Player1"]);
+		this.entities['Player2Health'] = new HealthBarEntity(new THREE.Vector3(-5, 5.5, 0), this.knockoffEntities["Player2"]);
 		
 		// Render all entities
 		for (const key in this.pongEntities) {
@@ -127,7 +127,7 @@ export class Pong
 		this.isWinnerLoopOn = false;
 		this.winnerText = "";
 		initEventListener(this.allEntities, this.gameGlobals);		
-		Object.values(this.knockoffEntities).forEach(entity => {
+		Object.values(this.pongEntities).forEach(entity => {
 			entity.object.visible = false;
 		});
 	}
@@ -175,8 +175,12 @@ export class Pong
 	}
 
 	resetGame(deltaTime) {
-		const player1 = this.pongEntities["Player1"];
-		const player2 = this.pongEntities["Player2"];
+		const pongPlayer1 = this.pongEntities["Player1"];
+		const pongPlayer2 = this.pongEntities["Player2"];
+		const knockoffPlayer1 = this.knockoffEntities["Player1"];
+		const knockoffPlayer2 = this.knockoffEntities["Player2"];
+		const healthBar1 = this.entities["Player1Health"];
+		const healthBar2 = this.entities["Player2Health"];
 		const ball = this.pongEntities["Ball"];
 		const camera = this.entities['Camera'];
 		const winnerName = this.entities['WinnerName'];
@@ -195,21 +199,34 @@ export class Pong
 		});
 
 		if (this.gameGlobals.game === Game.KNOCKOFF) {
+			healthBar1.setPlayerRef(knockoffPlayer1);
+			healthBar2.setPlayerRef(knockoffPlayer2);
 			Object.values(this.knockoffEntities).forEach(entity => {
 				entity.object.visible = true;
 			});
 		}
 		else if (this.gameGlobals.game === Game.PONG) {
+			healthBar1.setPlayerRef(pongPlayer1);
+			healthBar2.setPlayerRef(pongPlayer2);
 			Object.values(this.pongEntities).forEach(entity => {
 				entity.object.visible = true;
 			});
 		}
 
 		winnerName.setText("");
-		player1.position.copy(player1.initPosition);
-		player1.hitPoints = player1.initHitPoints;
-		player2.position.copy(player2.initPosition);
-		player2.hitPoints = player2.initHitPoints;
+		pongPlayer1.position.copy(pongPlayer1.initPosition);
+		pongPlayer1.hitPoints = pongPlayer1.initHitPoints;
+		pongPlayer2.position.copy(pongPlayer2.initPosition);
+		pongPlayer2.hitPoints = pongPlayer2.initHitPoints;
+		knockoffPlayer1.position.copy(knockoffPlayer1.initPosition);
+		knockoffPlayer1.object.rotation.set(0, 0, 0);
+		knockoffPlayer1.hitPoints = knockoffPlayer1.initHitPoints;
+		knockoffPlayer1.velocity.set(0, 0, 0);
+		knockoffPlayer2.position.copy(knockoffPlayer2.initPosition);
+		knockoffPlayer2.object.rotation.set(0, 0, 0);
+		knockoffPlayer2.hitPoints = knockoffPlayer2.initHitPoints;
+		knockoffPlayer2.velocity.set(0, 0, 0);
+
 		ball.position.copy(ball.initPosition);
 		ball.speed = ball.initSpeed;
 		ball.trail.forEach(trailMesh => {
@@ -222,13 +239,29 @@ export class Pong
 				entity.update(deltaTime);
 			}
 		}
+
+		for (const key in this.knockoffEntities) {
+			if (this.knockoffEntities.hasOwnProperty(key)) {
+				const entity = this.knockoffEntities[key];
+				entity.update(deltaTime);
+			}
+		}
+		healthBar1.update(deltaTime);
+		healthBar2.update(deltaTime);
 		camera.targetFov = 75;
 		this.gameGlobals.gameState = GameStates.MENU;
 	}
 
 	checkGameOver() {
-		const player1 = this.pongEntities["Player1"];
-		const player2 = this.pongEntities["Player2"];
+		let player1, player2;
+		if (this.gameGlobals.game === Game.PONG) {
+			player1 = this.pongEntities["Player1"];
+			player2 = this.pongEntities["Player2"];
+		}
+		else if (this.gameGlobals.game === Game.KNOCKOFF) {
+			player1 = this.knockoffEntities["Player1"];
+			player2 = this.knockoffEntities["Player2"];
+		}
 		const userName1 = this.entities["User1Name"];
 		const userName2 = this.entities["User2Name"];
 		const goal1 = this.pongEntities["NeonBox3"];

@@ -24,6 +24,10 @@ export class HealthBarEntity {
 		}
 	}	
 
+	setPlayerRef(player) {
+		this.playerRef = player;
+	}
+
 	render(scene) {
 		this.healthBars.forEach( bar => {
 			scene.add(bar);
