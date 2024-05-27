@@ -52,7 +52,6 @@ def userProfileTemplate(request, username):
 		'friends': FriendSerializer(instance=user.friends.all(), many=True).data,
 		'match_history': MatchHistorySerializer(instance=user.match_history.all(), many=True).data
 	}
-	print(context)
 	return render(request, 'users/profile.html', context)
 
 @api_view(['GET'])
@@ -142,8 +141,6 @@ def setup_otp(user):
 @api_view(['POST'])
 def loginUser(request):
 	user = get_object_or_404(CustomUser, username=request.data['username'])
-	print(request.data)
-
 	if not user.check_password(request.data['password']):
 		return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -268,8 +265,7 @@ from rest_framework.parsers import MultiPartParser
 @update_last_active
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser])
-def updateUserPorfile(request):
-	print(request.data)
+def updateUserProfile(request):
 	# Retrieve user from the database
 	user = get_object_or_404(CustomUser, id=request.user.id)
 
@@ -282,13 +278,11 @@ def updateUserPorfile(request):
 		return Response({'user': user_serializer.data, 'tokens': jwt_token})
 	detail = {'detail': 'Invalid data'}
 	if profile_serializer.errors.get('username'):
-		detail = {'detail': 'Username taken'}
+		detail = {'detail': 'Username taken.'}
 	elif profile_serializer.errors.get('email'):
-		detail = {'detail': 'Email taken'}
-	elif profile_serializer.errors.get('display_name'):
-		detail = {'detail': 'Display name taken'}
+		detail = {'detail': profile_serializer.errors.get('email')}
 	elif profile_serializer.errors.get('password'):
-		detail = {'detail': 'Missing required fields'}
+		detail = {'detail': 'Missing required fields.'}
 	return Response(detail, status=400)
 
 @api_view(['POST'])

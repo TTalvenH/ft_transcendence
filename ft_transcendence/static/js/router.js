@@ -257,6 +257,7 @@ async function editProfileHandler() {
 			if (selectedFile) {
 				formData.append('image', selectedFile);
 			}
+			console.log(formData);
 			const response = await fetch('/users/update-user-profile', {
 				method: 'PUT',
 				headers: {
@@ -288,10 +289,14 @@ async function editProfileHandler() {
 		const passwordFields = document.querySelectorAll('.passwordField');
 		if (event.target.checked) {
 			passwordFields.forEach((passwordField) => {
+				const passwordInput = passwordField.getElementsByTagName('input')[0];
+				passwordInput.setAttribute('required', '');
 				passwordField.style.display = 'block';
 			});
 		} else {
 			passwordFields.forEach((passwordField) => {
+				const passwordInput = passwordField.getElementsByTagName('input')[0];
+				passwordInput.removeAttribute('required', '');
 				passwordField.style.display = 'none';
 			});
 		}

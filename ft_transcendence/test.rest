@@ -16,7 +16,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/users/login-user
 Content-Type: application/json
 
-{ "username": "mulli", "password": "Testisalis123#"}
+{ "username": "asd", "password": "Testisalis123#"}
 
 ###
 
@@ -79,10 +79,31 @@ Content-Type: application/json
 
 ###
 
-POST http://127.0.0.1:8000/users/update-user-profile
-Content-Type: application/json
+PUT http://127.0.0.1:8000/users/update-user-profile
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzE2ODE1Mjk0LCJpYXQiOjE3MTY4MDgwOTQsImp0aSI6ImJkY2RlYWZiZGQyNTQ4ZDRiNTc1YmRlOTk0Y2E4ZmFjIiwidXNlcl9pZCI6NDR9.JFhPxLJwwbVofZZ6rMI72NZ3nc9YpTS6wxqv5v3nX2k
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryAX9B6r1qFav4WKCm
 
-{ "username": "lolled123"}
+------WebKitFormBoundaryAX9B6r1qFav4WKCm
+Content-Disposition: form-data; name="username"
+
+new_username
+------WebKitFormBoundaryAX9B6r1qFav4WKCm
+Content-Disposition: form-data; name="email"
+
+new_email@example.com
+------WebKitFormBoundaryAX9B6r1qFav4WKCm
+Content-Disposition: form-data; name="old_password"
+
+Testisalis123#
+------WebKitFormBoundaryAX9B6r1qFav4WKCm
+Content-Disposition: form-data; name="new_password"
+
+Uusisalis123#
+------WebKitFormBoundaryAX9B6r1qFav4WKCm
+Content-Disposition: form-data; name="confirm_password"
+
+Uusisalis123#
+------WebKitFormBoundaryAX9B6r1qFav4WKCm--
 
 
 ###
