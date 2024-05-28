@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Two-Factor Authentication</title>
+    <!-- Add any necessary CSS stylesheets or inline styles -->
+</head>
+<body>
+    <h1>Two-Factor Authentication</h1>
+    <form method="POST">
+        {% csrf_token %}
+        <!-- Add any necessary form fields for the 2FA process -->
+        <input type="text" name="code" placeholder="Enter the code">
+        <button type="submit">Verify</button>
+    </form>
+</body>
+</html>

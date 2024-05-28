@@ -1,0 +1,78 @@
+<div class="box smoothAppear" id="registerBox">
+    <a href="/" onclick="route(event)">
+        <button class="cancelButton">X</button>
+    </a>
+    <h2>Register</h2>
+    <form id="registerForm" autocomplete="off">
+        {% csrf_token %}
+        <div class="inputBox">
+            <input type="text" name="username" required onkeyup="this.setAttribute('value', this.value);" value="" autocomplete="one-time-code">
+            <label>Username</label>
+        </div>
+        <div class="inputBox">
+            <input type="email" name="email" required onkeyup="this.setAttribute('value', this.value);" value="" autocomplete="one-time-code">
+            <label>Email</label>
+        </div>
+        <div class="inputBox">
+            <input type="password" name="password" required value=""
+                   onkeyup="this.setAttribute('value', this.value);"
+                   pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                   title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+				   autocomplete="one-time-code">
+            <label>Password</label>
+        </div>
+        <div class="inputBox">
+            <input type="password" name="confirm_password" required value=""
+                   onkeyup="this.setAttribute('value', this.value);"
+                   pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                   title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+				   autocomplete="one-time-code">
+            <label>Confirm Password</label>
+        </div>
+        <div class="actionRow">
+			<button class="button" type="submit">SIGN UP</button>
+			<div class="inputBox checkboxBox">
+				<input type="checkbox" id="enable_otp" name="enable_otp" value="true">
+			</div>
+			<div class="checkboxlabel">
+				<label for="enable_otp">Enable Two-Factor-Auth</label>
+			</div>
+        </div>
+    </form>
+</div>
+
+
+<!-- <div class="box smoothAppear" id="registerBox">
+	<a href="/" onclick="route(event)">
+		<button class="cancelButton">X</button>
+	</a>
+    <h2>Register</h2>
+    <form id="registerForm" autocomplete="off">
+		{% csrf_token %}
+        <div class="inputBox">
+            <input type="text" name="username" required onkeyup="this.setAttribute('value', this.value);" value="" autocomplete="one-time-code">
+            <label>Username</label>
+        </div>
+        <div class="inputBox">
+            <input type="email" name="email" required onkeyup="this.setAttribute('value', this.value);" value="" autocomplete="one-time-code">
+            <label>Email</label>
+        </div>
+        <div class="inputBox">
+            <input type="password" name="password" required value=""
+                   onkeyup="this.setAttribute('value', this.value);"
+                   pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                   title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+				   autocomplete="one-time-code">
+            <label>Password</label>
+        </div>
+        <div class="inputBox">
+            <input type="password" name="confirm_password" required value=""
+                   onkeyup="this.setAttribute('value', this.value);"
+                   pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                   title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+				   autocomplete="one-time-code">
+            <label>Confirm Password</label>
+        </div>
+		<button class="button" type="submit">SIGN UP</button>
+    </form>
+</div> -->

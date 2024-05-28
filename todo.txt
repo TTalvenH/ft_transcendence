@@ -1,0 +1,4 @@
+
+when you update userinfo make sure the match history updates correctly
+
+rethink the match_history object

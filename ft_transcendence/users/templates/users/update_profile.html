@@ -1,0 +1,110 @@
+{% load static %}
+
+{% comment %} <div class="box smoothAppear" id="registerBox">
+	<h2>Edit Profile</h2>
+	<form id="updateProfileForm" enctype="multipart/form-data" autocomplete="off">
+		<div class="editProfilePicture">
+			<img id="profileImage" src="{% static 'images/plankton.jpg' %}" alt="...">
+			<button class="butn" id="chooseImage">
+				<input type="file" accept="image/*" id="imageInput" hidden>
+				<label for="imageInput">Choose Image</label>
+			</button>
+		</div>
+		<div class="inputBox">
+			<input autocomplete="off" type="text" name="username" required onkeyup="this.setAttribute('value', this.value);" value="">
+			<label>Change Username</label>
+		</div>
+		<div class="inputBox">
+			<input autocomplete="off" type="email" name="email" required onkeyup="this.setAttribute('value', this.value);" value="">
+			<label>Change Email</label>
+		</div>
+		<div class="form-check form-switch" style="color: white; margin-bottom: 20px;">
+			<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+			<label class="form-check-label" for="flexSwitchCheckDefault">Change Password</label>
+		</div>
+		<div class="inputBox passwordField" style="display: none;">
+			<input type="password" name="password" required value=""
+				onkeyup="this.setAttribute('value', this.value);"
+				pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+				title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+				autocomplete="off">
+			<label>Old Password</label>
+		</div>
+		<div class="inputBox passwordField" style="display: none;">
+			<input type="password" name="password" required value=""
+				onkeyup="this.setAttribute('value', this.value);"
+				pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+				title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+				autocomplete="off">
+			<label>New Password</label>
+		</div>
+		<div class="inputBox passwordField" style="display: none;">
+			<input type="password" name="password" required value=""
+				onkeyup="this.setAttribute('value', this.value);"
+				pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+				title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+				autocomplete="off">
+			<label>Confirm Password</label>
+		</div>
+		<button class="button" type="submit">UPDATE</button>
+	</form>
+</div> {% endcomment %}
+
+<div class="container userProfile smoothAppear" id="userProfile">
+	<div class="row gy-5" id="editProfile">
+		<div class="col-4">
+			<div class="editProfilePicture">
+				<img src="{{ profile_image }}" alt="..." id="profileImage">
+				<button class="butn" id="chooseImage">
+					<input type="file" accept="image/*" id="imageInput" hidden>
+					<label for="imageInput">Choose Image</label>
+				</button>
+			</div>
+		</div>
+		<div class="col-6">
+			<form id="updateProfileForm" style="margin-top: 20px;" autocomplete="off">
+				{% csrf_token %}
+				<div class="inputBox">
+					<input type="text" name="username" onkeyup="this.setAttribute('value', this.value);" value="{{ username }}" autocomplete="one-time-code">
+					<label>Change Username</label>
+				</div>
+				<div class="inputBox">
+					<input type="email" name="email" onkeyup="this.setAttribute('value', this.value);" value="{{ email }}" autocomplete="one-time-code">
+					<label>Change Email</label>
+				</div>
+				<div class="form-check form-switch" style="color: white; margin-bottom: 20px;">
+					<input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+					<label class="form-check-label" for="flexSwitchCheckDefault">Change Password</label>
+				</div>
+				<div class="inputBox passwordField" style="display: none;">
+					<input type="password" name="old_password" value=""
+						onkeyup="this.setAttribute('value', this.value);"
+						pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+						title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+						autocomplete="one-time-code">
+					<label>Old Password</label>
+				</div>
+				<div class="inputBox passwordField" style="display: none;">
+					<input type="password" name="new_password" value=""
+						onkeyup="this.setAttribute('value', this.value);"
+						pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+						title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+						autocomplete="one-time-code">
+					<label>New Password</label>
+				</div>
+				<div class="inputBox passwordField" style="display: none;">
+					<input type="password" name="confirm_password" value=""
+						onkeyup="this.setAttribute('value', this.value);"
+						pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+						title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+						autocomplete="one-time-code">
+					<label>Confirm Password</label>
+				</div>
+				<button type="submit" class="saveButton">✓</button>
+				<a href="/profile"onclick="route(event)">
+					<button class="cancelButton">X</button>
+				</a>
+			</form>
+		</div>
+	</div>
+</div>

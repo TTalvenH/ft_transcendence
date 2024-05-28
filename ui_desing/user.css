@@ -1,0 +1,103 @@
+
+.box {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	border: 2px solid #f141f1;
+	transform: translate(-50%, -50%);
+	width: 25rem;
+	padding: 2.5rem;
+	box-sizing: border-box;
+	background: rgba(233, 68, 225, 0.1);
+	border-radius: 0.625rem;
+}
+
+
+.box::before {
+    content: "";
+    position: absolute;
+    top: -2px; 
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: inherit;
+    z-index: -1;
+	border-radius: 0.625rem;
+
+    box-shadow: 0 0 10px #f141f1, 0 0 20px #f141f1, 0 0 30px #f141f1, 0 0 40px #f141f1;
+
+
+    filter: blur(2px);
+}
+  
+  .box h2 {
+	margin: 0 0 1.875rem;
+	padding: 0;
+	color: #fff;
+	text-align: center;
+  }
+  
+  .inputBox {
+	position: relative;
+  }
+  
+ .inputBox input {
+	width: 100%;
+	padding: 0.625rem 0;
+	font-size: 1rem;
+	color: #fff;
+	letter-spacing: 0.062rem;
+	margin-bottom: 1.875rem;
+	border: none;
+	border-bottom: 0.065rem solid #fff;
+	outline: none;
+	background: transparent;
+  }
+  
+.inputBox label {
+	position: absolute;
+	top: 0;
+	left: 0;
+	padding: 0.625rem 0;
+	font-size: 1rem;
+	color: #fff;
+	pointer-events: none;
+	transition: 0.5s;
+  }
+  
+.inputBox input:focus ~ label,
+.inputBox input:valid ~ label,
+.inputBox input:not([value=""]) ~ label {
+	top: -1.125rem;
+	left: 0;
+	color: #ffffff;
+	font-size: 0.75rem;
+  }
+  
+  .inputBox input[type="submit"] {
+	border: none;
+	outline: none;
+	color: #fff;
+	background-color: #03a9f4;
+	padding: 0.625rem 1.25rem;
+	cursor: pointer;
+	border-radius: 0.312rem;
+	font-size: 1rem;
+  }
+  
+  .inputBox input[type="submit"]:hover {
+	background-color: #1cb1f5;
+  }
+  
+
+.inputBox input:-webkit-autofill {
+    -webkit-text-fill-color: rgb(255, 255, 255); /* Change the text color */
+	-webkit-box-shadow: 0 0 0px 40rem rgb(92, 35, 89) inset;
+}
+
+.inputBox input:-webkit-autofill ~ label {
+	top: -2rem;
+    left: 0;
+    color: #ffffff;
+    font-size: 0.75rem;
+}

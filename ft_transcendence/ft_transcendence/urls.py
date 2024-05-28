@@ -14,12 +14,25 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.views.generic import TemplateView
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
+
+from rest_framework import routers
 from . import views
+from django.conf import settings
+from django.views.static import serve
+
+router = routers.DefaultRouter()
 
 urlpatterns = [
+	re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+	re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
     path('admin/', admin.site.urls),
 	path('', views.index),
-	path('pong/', include('pong.urls'))
+	path('sidepanel.html', views.ui),
+	path('pong/', include('pong.urls')),
+	path('users/', include('users.urls')),
+	path('', include('two_factor.urls')),
+    re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
 ]

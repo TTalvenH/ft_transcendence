@@ -1,28 +1,19 @@
 import * as THREE from 'three'
-import { GameStates  } from '../pong';
+import { GameStates  } from '../pong.js';
 
-export function initCamera()
-{
-	const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-	let distance = 7;
-	let angle = 45 * Math.PI / 180; // Convert angle to radians
-	camera.position.set(0, -distance * Math.cos(angle), distance * Math.sin(angle)); // Only rotate on the horizontal axis
-	return camera;
-}
-
-export class CameraEntity
-{
-	constructor(gameStateWrapper)
-	{
+export class CameraEntity {
+	constructor(gameGlobals) {
 		const fov = 75;
 		const width = window.innerWidth;
 		const height = window.innerHeight;
 
 		this.time = 0;
 		this.shakeTime = 0;
-		this.gameStateWrapper = gameStateWrapper;
+		this.gameGlobals = gameGlobals;
 		this.camera = new THREE.PerspectiveCamera(fov, width / height, 0.1, 1000);
+		this.lookAt = new THREE.Vector3(0, 0, 0);
+		this.targetLookAt = new THREE.Vector3(0, 0, 0);
+		this.targetFov = 75;
 
 		// init position
 		this.distance = 7;
@@ -30,10 +21,12 @@ export class CameraEntity
 		this.initPosition = new THREE.Vector3(0, -this.distance * Math.cos(this.angle), this.distance * Math.sin(this.angle));
 	}
 
-	shakeCamera(deltaTime, strength)
-	{
-        if (this.shakeTime > 0)
-		{
+	setTargetLookAt(position){
+		this.targetLookAt.copy(position);
+	}
+
+	shakeCamera(deltaTime, strength) {
+        if (this.shakeTime > 0) {
             // Generate a random offset within the range defined by 'strength'
             let offsetX = (Math.random() - 0.5) * strength;
             let offsetY = (Math.random() - 0.5) * strength;
@@ -49,8 +42,7 @@ export class CameraEntity
 		}
 	}
 
-	infinityLoop(deltaTime, speed, radius)
-	{
+	infinityLoop(deltaTime, speed, radius) {
 		// Calculate the new position of the camera
 		let x = radius * Math.sin(this.time);
 		let y = radius * Math.sin(this.time) * Math.cos(this.time);
@@ -59,45 +51,46 @@ export class CameraEntity
 
 		this.camera.position.lerp(new THREE.Vector3(x, y, 7), 0.1);
 	
-		// Make the camera look at the center of the scene
-		this.camera.lookAt(0, 0, 0);
-	
 		// Update 'time' to progress the animation
 		this.time += speed * deltaTime;
 	}
 
 
-	playingLoop(deltaTime)
-	{
-		if (this.shakeTime > 0)
-		{
+	playingLoop(deltaTime) {
+		if (this.shakeTime > 0) {
 			this.shakeCamera(deltaTime, 0.04);
 			this.shakeTime -= 0.01
 		}
-		if (this.camera.position.distanceTo(this.initPosition) > 0.01)
-		{
+		if (this.camera.position.distanceTo(this.initPosition) > 0.01) {
 			this.camera.position.lerp( this.initPosition, 0.008 * deltaTime);
-			this.camera.lookAt(0, 0, 0);
 		}
 	}
 
-	render(scene)
-	{
-
+	render(scene) {
 	}
 
-	update(deltaTime)
-	{
-		switch (this.gameStateWrapper.gameState)
-		{
+	update(deltaTime) {
+		switch (this.gameGlobals.gameState) {
 			case GameStates.MENU:
-				this.infinityLoop(deltaTime, 0.005, 6);
+				this.infinityLoop(deltaTime, 0.003, 6);
 				break;
 			case GameStates.PLAYING:
 				this.playingLoop(deltaTime);
 				break;
 			case GameStates.PAUSED:
 				break;
+			case GameStates.GAMEOVER:
+				this.infinityLoop(deltaTime, 0.01, 2);
+				break;
 		}
+		if (this.lookAt.distanceTo(this.targetLookAt) > 0.01) {
+			this.lookAt.lerp(this.targetLookAt, 0.018 * deltaTime);
+		}
+		
+		if (Math.abs(this.camera.fov - this.targetFov) > 0.1) {
+			this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, this.targetFov, 0.03 * deltaTime);
+			this.camera.updateProjectionMatrix();
+		}
+		this.camera.lookAt(this.lookAt);
 	}
 }
