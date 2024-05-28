@@ -769,6 +769,30 @@ async function pongHandler() {
 	} else {
 		showToast(somethingWentWrong, true);
 	}
+
+	const one_v_oneButton = document.getElementById('one_v_one');
+	// todo make a function out of this and cache html element
+	one_v_oneButton.addEventListener('click', async () => {
+		try {
+			const one_v_oneResponse = await fetch("/pong/1v1.html", {
+				method: "GET",
+				headers: {
+					'Authorization': `Bearer ${userData.accessToken}`,
+				}
+			});
+			if (one_v_oneResponse.ok) {
+				const one_v_oneHTML = await one_v_oneResponse.text();
+				userContainer.innerHTML = "";
+				userContainer.insertAdjacentHTML('beforeend', one_v_oneHTML);
+			} else {
+				console.log("watafak")
+				showToast(somethingWentWrong, true);
+			}
+		} catch (error) {
+			console.error(error);
+			showToast(somethingWentWrong, true);
+		}
+	})
 	// window.pong.gameGlobals.gameState = GameStates.PLAYING;
 }
 

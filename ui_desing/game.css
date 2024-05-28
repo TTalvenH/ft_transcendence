@@ -42,3 +42,37 @@
 .menuHeader h6 {
 	color: #fff;
 }
+
+.gameBox {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 400px;
+	height: 380px;
+	transform: translate(-50%, -50%);
+	background: rgba(100, 18, 96, 0.453);
+	border-radius: 0.625rem;
+	box-shadow: 0 0 30px #f141f1;
+	border: #f141f1 2px solid;
+}
+
+.gameBox h2 {
+	overflow: hidden;
+	margin: 40px;
+	padding: 0;
+	color: #fff;
+	text-align: center;
+}
+
+.gameBox h1 {
+	padding: 30px;
+	color: #fff;
+	text-align: center;
+}
+
+.choosePlayer {
+	position: absolute;
+	margin-bottom: 40px;
+	right: 50%;
+	transform: translateX(50%);
+}

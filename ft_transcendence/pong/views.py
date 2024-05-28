@@ -38,3 +38,8 @@ def endMatch(request):
 @api_view(['GET'])
 def game_menu_template(request):
 	return render(request, 'pong/gameMenu.html')
+
+
+@api_view(['GET'])
+def one_v_one_template(request):
+	return render(request, 'pong/1v1.html')
