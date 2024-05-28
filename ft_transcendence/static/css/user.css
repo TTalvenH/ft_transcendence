@@ -8,12 +8,14 @@
 	width: 25rem;
 	padding: 2.5rem;
 	box-sizing: border-box;
-	background: rgba(233, 68, 225, 0.1);
+	/* background: rgba(233, 68, 225, 0.1); */
+	background: rgba(100, 18, 96, 0.453);
 	border-radius: 0.625rem;
+	box-shadow: 0 0 30px #f141f1;
 }
 
 
-.box::before {
+/* .box::before {
     content: "";
     position: absolute;
     top: -2px; 
@@ -28,7 +30,7 @@
 
 
     filter: blur(2px);
-}
+} */
   
   .box h2 {
 	margin: 0 0 1.875rem;

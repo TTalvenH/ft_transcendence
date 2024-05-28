@@ -3,9 +3,11 @@
     border: 2px solid #f141f1;
     background-color: rgba(233, 68, 225, 0.1);
 	min-width: 150px;
-    height: 100vh;
+    /* height: 100vh; */
     z-index: 1;
 	border-radius: 0.625rem;
+	padding: 30px;
+	top: 30%;
 }
 
 #sidePanel::before {
