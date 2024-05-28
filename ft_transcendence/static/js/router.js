@@ -1,5 +1,3 @@
-import { GameStates } from "./pong/pong.js";
-
 //variables where we save the html content when it is first fetched
 let loginFormHTML;
 let registerFormHTML;
@@ -154,6 +152,25 @@ function showToast(msg, error) {
 }
 
 let currentUsername = null;
+
+import { GameStates, Pong } from "./pong/pong.js";
+import { pongStartHandler, pongMatchOverHandler } from "./routeHandlers/pongHandlers.js";
+
+const gameOverData = {
+	player1: {
+		name: "",
+		hitpoints: 0,
+	},
+	player2: {
+		name: "",
+		hitpoints: 0,
+	},
+	winner: "",
+	matchTimeLength: 0,
+	dateTime: 0,
+};
+
+export const gameOverEvent = new CustomEvent('endMatch', { detail: gameOverData });
 
 const routes = {
 	"/": homeHandler,
@@ -720,7 +737,9 @@ window.route = (event) => {
     }
 };
 
-window.pong.gameLoop();
+const pong = new Pong();
+
+pong.gameLoop();
 // window.onpopstate = handleLocation;
 // handleLocation();
 

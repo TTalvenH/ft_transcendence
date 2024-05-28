@@ -17,9 +17,13 @@ Including another URLconf
 from django.views.generic import TemplateView
 from django.contrib import admin
 from django.urls import path, include, re_path
+
+from rest_framework import routers
 from . import views
 from django.conf import settings
 from django.views.static import serve
+
+router = routers.DefaultRouter()
 
 urlpatterns = [
 	re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),

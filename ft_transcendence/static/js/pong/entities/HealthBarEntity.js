@@ -1,10 +1,8 @@
 import * as THREE from 'three'
 import * as COLORS from '../colors.js';
 
-export class HealthBarEntity
-{
-	constructor(position, player)
-	{
+export class HealthBarEntity {
+	constructor(position, player) {
 		this.playerRef = player;
 		this.position = position;
 		this.geometry = new THREE.CapsuleGeometry(0.2, 0.5, 3, 10);
@@ -24,25 +22,31 @@ export class HealthBarEntity
 			this.healthBars[i].position.copy(this.position);
 			this.healthBars[i].position.x += i * spacing - totalWidth / 2;
 		}
-
 	}	
 
-	render(scene)
-	{
+	setPlayerRef(player) {
+		this.playerRef = player;
+	}
+
+	render(scene) {
 		this.healthBars.forEach( bar => {
 			scene.add(bar);
 		})
 	}
 
-	update(deltaTime)
-	{
-		if (this.currentHealth > this.playerRef.hitPoints)
-		{
-			if (this.playerRef.position.x < 0)
-				this.healthBars[this.playerRef.hitPoints].material.emissive.set(0x000000);
-			else
-				this.healthBars[this.healthBars.length - 1 - this.playerRef.hitPoints].material.emissive.set(0x000000);
-			this.currentHealth--;
+	update(deltaTime) {
+		if (this.currentHealth === this.playerRef.hitPoints)
+			return;
+
+		for (let i = 0; i < this.healthBars.length; i++) {
+			this.healthBars[i].material.emissive.set(0x000000);
 		}
+		for (let i = 0; i < this.playerRef.hitPoints; i++) {
+			if (this.playerRef.position.x < 0)
+				this.healthBars[i].material.emissive.set(COLORS.AQUAMARINE);
+			else
+				this.healthBars[this.healthBars.length - 1 - i].material.emissive.set(COLORS.AQUAMARINE);
+		}
+		this.currentHealth = this.playerRef.hitPoints;
 	}
 }
