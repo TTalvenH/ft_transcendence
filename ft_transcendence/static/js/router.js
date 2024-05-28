@@ -543,7 +543,7 @@ async function handleOtpVerificationSubmit(event, username) {
             history.pushState({}, "", "/");
             handleLocation();
         } else {
-            alert(verifyResult.detail || 'Verification failed');
+            showToast(verificationFailed, true);
         }
     } catch (error) {
         showToast('Something went wrong', true);
