@@ -103,3 +103,25 @@
     color: #ffffff;
     font-size: 0.75rem;
 }
+
+.actionRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between; /* This ensures the content is spread between start and end */
+}
+
+.checkboxBox {
+    display: flex;
+    margin-left: auto; /* This will push the checkboxBox to the right */
+    margin-right: 10px;
+}
+
+.checkboxBox input {
+    margin-left: 5px;
+    margin-top: 15px;
+}
+
+.checkboxlabel {
+	margin-top: 9px;
+    color: #ffffff;
+}
