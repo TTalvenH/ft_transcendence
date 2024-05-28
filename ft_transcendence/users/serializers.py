@@ -55,17 +55,17 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 			raise serializers.ValidationError(
 				{"password": "Password fields didn't match."}
 			)
-		password = attrs['new_password']
+		password = attrs['password']
 		if len(password) < 8:
-			raise serializers.ValidationError({"new_password": "Password must be at least 8 characters long."})
+			raise serializers.ValidationError({"password": "Password must be at least 8 characters long."})
 		if not re.search(r'[A-Z]', password):
-			raise serializers.ValidationError({"new_password": "Password must contain at least one uppercase letter."})
+			raise serializers.ValidationError({"password": "Password must contain at least one uppercase letter."})
 		if not re.search(r'[a-z]', password):
-			raise serializers.ValidationError({"new_password": "Password must contain at least one lowercase letter."})
+			raise serializers.ValidationError({"password": "Password must contain at least one lowercase letter."})
 		if not re.search(r'\d', password):
-			raise serializers.ValidationError({"new_password": "Password must contain at least one number."})
+			raise serializers.ValidationError({"password": "Password must contain at least one number."})
 		if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-			raise serializers.ValidationError({"new_password": "Password must contain at least one special character."})
+			raise serializers.ValidationError({"password": "Password must contain at least one special character."})
 		return attrs
 
 	def create(self, validated_data):

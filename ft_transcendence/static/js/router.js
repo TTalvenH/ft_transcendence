@@ -153,8 +153,6 @@ function showToast(msg, error) {
 	}, 4000)
 }
 
-let currentUsername = null;
-
 import { GameStates, Pong } from "./pong/pong.js";
 import { pongStartHandler, pongMatchOverHandler } from "./routeHandlers/pongHandlers.js";
 
