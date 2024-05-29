@@ -296,6 +296,7 @@ async function editProfileHandler() {
 				showToast(profileSuccess, false);
 				history.pushState({}, "", "/profile");
 				handleLocation();
+
 			} else {
 				const data = await response.json();
 				if (data)
@@ -523,7 +524,7 @@ async function handleLoginSubmit(event) {
 				showToast(reActivate, false);
 				currentUser.setUser(loginData);
 				history.pushState({}, "", "/");
-				handleLocation();
+				router.init();
 			}
             else if (loginData.otp_required && loginData.otp_verified) {
                 loginForm.remove();
@@ -531,8 +532,9 @@ async function handleLoginSubmit(event) {
             }
 			else {
 				showToast(loginSuccess, false);
+				currentUser.setUser(loginData);
 				history.pushState({}, "", "/");
-				handleLocation();
+				router.init();
 			}
 		}
 		else {

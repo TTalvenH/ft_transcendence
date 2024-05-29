@@ -55,7 +55,7 @@
                     <label class="form-check-label" for="flexSwitch2FA">Two-Factor Authentication</label>
                 </div>
                 <!-- Hidden input for 2FA status -->
-                <input type="hidden" name="otp_enabled" id="otpEnabled" value="{{ user.otp_verified }}">
+                <input type="hidden" name="otp_enabled" id="otpEnabled" value="{{ user.otp_verified|yesno:"true,false" }}">
 
                 <button type="submit" class="saveButton">✓</button>
                 <a href="/profile" onclick="route(event)">

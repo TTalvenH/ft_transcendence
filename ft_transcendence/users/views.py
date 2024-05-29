@@ -281,11 +281,19 @@ def updateUserProfile(request):
 	# Retrieve user from the database
 	user = get_object_or_404(CustomUser, id=request.user.id)
 
-	print(request.data)
 	# Serialize the user data
 	profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True, context={'request': request})
 	if profile_serializer.is_valid():
 		profile_serializer.save()
+		# Handle the 2FA switch
+		otp_enabled_in_form = request.data.get('otp_enabled')
+		print('this is', otp_enabled_in_form)
+		if otp_enabled_in_form == 'false':
+			user.otp_enabled = False
+			user.otp_verified = False
+			TOTPDevice.objects.filter(user=user, name='default').delete()
+			user.save()
+
 		user_serializer = UserSerializer(instance=user)
 		jwt_token = create_jwt_pair_for_user(user)
 		return Response({'user': user_serializer.data, 'tokens': jwt_token})
