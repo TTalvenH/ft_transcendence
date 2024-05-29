@@ -1,0 +1,47 @@
+.toggleGame {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggleGame h1 {
+	position: absolute;
+	font-size: 2rem;
+	color: white;
+}
+
+.checkButton {
+    width: 200px;
+    height: 100px;
+    border-radius: 0.625rem;
+	border: 2px solid #27defa;
+    background-color: rgba(233, 68, 225, 0.1);
+    cursor: pointer;
+    position: relative;
+    transition: 0.3s;
+}
+
+.checkButton::before {
+    content: "";
+    position: absolute;
+    background-color: rgb(255, 41, 255);
+    width: 20px;
+    height: 90px;
+    border-radius: 0.625rem;
+    margin: 5px;
+    transition: 0.3s;
+}
+
+.gameToggle input:checked + .checkButton {
+    background-color: blue;
+}
+
+.gameToggle input:checked + .checkButton::before {
+    transform: translateX(170px);
+}
+
+.gameToggle input {
+    display: none;
+}

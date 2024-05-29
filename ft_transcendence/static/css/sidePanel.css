@@ -1,20 +1,22 @@
 #sidePanel{
     position: absolute;
     border: 2px solid #f141f1;
-    background-color: rgba(233, 68, 225, 0.1);
+    /* background-color: rgba(233, 68, 225, 0.1); */
+	background: rgba(100, 18, 96, 0.453);
+	box-shadow: 0 0 30px #f141f1;
 	min-width: 150px;
     /* height: 100vh; */
     z-index: 1;
 	border-radius: 0.625rem;
-	padding: 30px;
+	padding: 40px;
 	top: 50%;
 	transform: translateY(-50%);
 }
 
-#sidePanel::before {
+/* #sidePanel::before {
     content: "";
     position: absolute;
-    top: -2px; /* Adjust these values to match your border width */
+    top: -2px;
     left: -2px;
     right: -2px;
     bottom: -2px;
@@ -22,9 +24,7 @@
     z-index: -1;
 	border-radius: 0.625rem;
 
-    /* Neon glow effect */
     box-shadow: 0 0 30px #f141f1;
 
-    /* Apply the blur to the pseudo-element */
     filter: blur(2px);
-}
+} */

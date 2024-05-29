@@ -16,7 +16,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/users/login-user
 Content-Type: application/json
 
-{ "username": "asd", "password": "Testisalis123#"}
+{ "username": "mulli", "password": "Testisalis123#"}
 
 ###
 
@@ -111,4 +111,4 @@ Uusisalis123#
 POST http://127.0.0.1:8000/users/token/refresh_token
 Content-Type: application/json
 
-{ "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcxNjYzNjQ5NSwiaWF0IjoxNzE2NTUwMDk1LCJqdGkiOiI2ZmY2N2NlZDViZWE0NDBjYmVjNDVmYTI0N2ZhNmUxNiIsInVzZXJfaWQiOjQ0fQ.Lpw_-CMyfPt-wFh7XTwdgKlCvClJL8Ae1pBjADE5A_M"}
+{ "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcxNzQwNzIwNCwiaWF0IjoxNzE2OTc1MjA0LCJqdGkiOiI0Mzc3MjEzOWI3MmU0MDQzYWRiMmYyNzg0NDExNWMyMCIsInVzZXJfaWQiOjQ0fQ.Wgkz6ELoRp6LzCd5jfhsQuJHjd5oDYWImWRI67KZw2s"}

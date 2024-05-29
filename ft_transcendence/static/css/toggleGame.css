@@ -1,0 +1,68 @@
+.toggleGame {
+	width: 120px;
+	height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggleGame p {
+	position: absolute;
+	/* font-size: 2rem; */
+	color: white;
+	margin-top: 10px;
+}
+
+.checkButton {
+    width: 120px;
+	height: 50px;
+    border-radius: 0.625rem;
+	border: 2px solid #27defa;
+    background-color: rgba(233, 68, 225, 0.1);
+    cursor: pointer;
+    position: relative;
+    transition: 0.3s;
+}
+
+.checkButton::before {
+    content: "";
+    position: absolute;
+    background-color: rgb(255, 41, 255);
+    width: 10px;
+    height: 40px;
+    border-radius: 0.625rem;
+    margin: 3px;
+    transition: 0.3s;
+}
+
+.gameToggle input:checked + .checkButton {
+    background-color: blue;
+}
+
+.gameToggle input:checked + .checkButton::before {
+    transform: translateX(100px);
+}
+
+.gameToggle input {
+    display: none;
+}
+
+.hover {
+	display: none;
+}
+
+.pong, .hover {
+	color: white;
+	position: absolute;
+	transform: translate(-50%,-50%);
+	top: 50%;
+	left: 50%;
+}
+
+.gameToggle input:checked + .checkButton .pong {
+	display: none;
+}
+
+.gameToggle input:checked + .checkButton .hover {
+	display: block;
+}
