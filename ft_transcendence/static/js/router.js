@@ -60,7 +60,7 @@ const router = new Router();
 
 router.get('/', homeHandler);
 
-router.get('/login', loginHandler2);
+router.get('/login', loginHandler);
 
 router.get('/register', registerHandler);
 
@@ -236,7 +236,7 @@ async function editProfileHandler() {
 		headers: {
 			'Authorization': 'Bearer ' + userData.accessToken,
 		},
-	})
+	});
 	if (!updateProfileResponse.ok) {
 		showToast(somethingWentWrong, true);
 		return;
@@ -254,10 +254,8 @@ async function editProfileHandler() {
 		if (selectedFile) {
 			var reader = new FileReader();
 			reader.onload = function(e) {
-				// Replace the image source with the selected image
 				profileImage.src = e.target.result;
 				profileImage.onload = function() {
-					// Make sure the image is loaded before displaying it
 					profileImage.style.display = 'block';
 				}
 			}
@@ -266,6 +264,16 @@ async function editProfileHandler() {
 	});
 
 	const updateProfileForm = document.getElementById('updateProfileForm');
+	const otpEnabledInput = document.getElementById('otpEnabled');
+	const flexSwitch2FA = document.getElementById('flexSwitch2FA');
+
+	// Set the hidden input value based on the switch's initial state
+	otpEnabledInput.value = flexSwitch2FA.checked;
+
+	flexSwitch2FA.addEventListener('change', () => {
+		otpEnabledInput.value = flexSwitch2FA.checked;
+	});
+
 	updateProfileForm.addEventListener('submit', async (event) => {
 		try {
 			event.preventDefault();
@@ -274,7 +282,7 @@ async function editProfileHandler() {
 			if (selectedFile) {
 				formData.append('image', selectedFile);
 			}
-			console.log(formData);
+
 			const response = await fetch('/users/update-user-profile', {
 				method: 'PUT',
 				headers: {
@@ -319,6 +327,7 @@ async function editProfileHandler() {
 		}
 	});
 }
+
 
 function createFriendRow(friend) {
 	const friendBodyEl = document.getElementById('friendsBody');

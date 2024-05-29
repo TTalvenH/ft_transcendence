@@ -281,6 +281,7 @@ def updateUserProfile(request):
 	# Retrieve user from the database
 	user = get_object_or_404(CustomUser, id=request.user.id)
 
+	print(request.data)
 	# Serialize the user data
 	profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True, context={'request': request})
 	if profile_serializer.is_valid():
