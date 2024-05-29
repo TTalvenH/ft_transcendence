@@ -42,10 +42,11 @@ export class HealthBarEntity {
 			this.healthBars[i].material.emissive.set(0x000000);
 		}
 		for (let i = 0; i < this.playerRef.hitPoints; i++) {
-			if (this.playerRef.position.x < 0)
+			if (this.playerRef.initPosition.x < 0)
 				this.healthBars[i].material.emissive.set(COLORS.AQUAMARINE);
-			else
+			else {
 				this.healthBars[this.healthBars.length - 1 - i].material.emissive.set(COLORS.AQUAMARINE);
+			}
 		}
 		this.currentHealth = this.playerRef.hitPoints;
 	}

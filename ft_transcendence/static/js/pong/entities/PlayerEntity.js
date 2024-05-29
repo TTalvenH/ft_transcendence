@@ -12,7 +12,7 @@ export class PlayerEntity {
 		this.velocity = new THREE.Vector3(0, 0, 0,);
 		this.acceleration = 0.1;
 		this.friction = 0.1;
-		this.speed = 0.09;
+		this.speed = 0.07;
 
 		// Input keys
 		this.keyUp = false;

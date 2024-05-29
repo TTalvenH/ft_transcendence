@@ -15,7 +15,7 @@ export class KnockoffPlayerEntity {
 		this.launchSpeed = 0.0;
 		this.friction = 0.025;
 		this.gravity = 0.01;
-		this.speed = 0.006;
+		this.speed = 0.0045;
 		this.turnSpeed = 0.05;
 
 		// Input keys
@@ -90,22 +90,22 @@ export class KnockoffPlayerEntity {
 		// Input
 		const maxVelocity = 0.2;
 		const minVelocity = -0.2;
-		const exponent = 2;
+		const exponent = 2.0;
 		if (this.keyUp === true && !this.isFalling) {
-			this.launchDirection.y += this.turnSpeed; 
-			this.launchSpeed += this.speed * Math.pow((Math.abs(this.launchSpeed) - minVelocity) / (maxVelocity - minVelocity), exponent); 
+			this.launchDirection.y += this.turnSpeed * deltaTime; 
+			this.launchSpeed += this.speed * Math.pow((Math.abs(this.launchSpeed) - minVelocity) / (maxVelocity - minVelocity), exponent) * deltaTime; 
 		}
 		if (this.keyDown === true && !this.isFalling) {
-			this.launchDirection.y -= this.turnSpeed; 
-			this.launchSpeed += this.speed * Math.pow((Math.abs(this.launchSpeed) - minVelocity) / (maxVelocity - minVelocity), exponent); 
+			this.launchDirection.y -= this.turnSpeed * deltaTime; 
+			this.launchSpeed += this.speed * Math.pow((Math.abs(this.launchSpeed) - minVelocity) / (maxVelocity - minVelocity), exponent) * deltaTime; 
 		}
 		if (this.keyRight === true && !this.isFalling) {
-			this.launchDirection.x += this.turnSpeed; 
-			this.launchSpeed += this.speed * Math.pow((Math.abs(this.launchSpeed) - minVelocity) / (maxVelocity - minVelocity), exponent); 
+			this.launchDirection.x += this.turnSpeed * deltaTime; 
+			this.launchSpeed += this.speed * Math.pow((Math.abs(this.launchSpeed) - minVelocity) / (maxVelocity - minVelocity), exponent) * deltaTime; 
 		}
 		if (this.keyLeft === true && !this.isFalling) {
-			this.launchDirection.x -= this.turnSpeed; 
-			this.launchSpeed += this.speed * Math.pow((Math.abs(this.launchSpeed) - minVelocity) / (maxVelocity - minVelocity), exponent); 
+			this.launchDirection.x -= this.turnSpeed * deltaTime; 
+			this.launchSpeed += this.speed * Math.pow((Math.abs(this.launchSpeed) - minVelocity) / (maxVelocity - minVelocity), exponent) * deltaTime; 
 		}
 		
 		this.launchSpeed = THREE.MathUtils.clamp(this.launchSpeed, minVelocity, maxVelocity);
@@ -173,7 +173,6 @@ export class KnockoffPlayerEntity {
 				this.pointLight.intensity = 1;
 			}
 		}
-		console.log(this.spawnTimer);
 	}
 	render(scene) {	
 		this.scene = scene;
