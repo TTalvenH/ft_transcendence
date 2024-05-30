@@ -13,7 +13,7 @@ import { HealthBarEntity } from './entities/HealthBarEntity.js';
 import { CameraEntity } from './entities/CameraEntity.js';
 import { TextEntity } from './entities/TextEntity.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-import { gameOverEvent } from '../router.js';
+import { gameOverEvent, handleMatchEnd } from '../router.js';
 
 import * as COLORS from './colors.js';
 import { KnockoffPlayerEntity } from './entities/knockoffPlayerEntity.js';
@@ -137,7 +137,7 @@ export class Pong
 		const countDown = this.entities['Countdown'];
 		const camera = this.entities['Camera'];
 		let i = 3;
-		this.gameGlobals.gameState = GamStates.COUNTDOWN;
+		this.gameGlobals.gameState = GameStates.COUNTDOWN;
 
 		while (i >= 0) {
 			countDown.setText(i.toString());
@@ -163,14 +163,14 @@ export class Pong
 		this.isWinnerLoopOn = false;
 	}
 
-	startGame(userData) {
+	startGame(player1Name, player2Name) {
 		const user1Name = this.entities['User1Name']
 		const user2Name = this.entities['User2Name']
 		
-		user1Name.setText(userData.users[0]);
-		user2Name.setText(userData.users[1]);
-		user1Name.text = userData.users[0];
-		user2Name.text = userData.users[1];
+		user1Name.setText(player1Name);
+		user2Name.setText(player2Name);
+		user1Name.text = player1Name;
+		user2Name.text = player2Name;
 		this.startCountDown();
 	}
 
@@ -301,6 +301,7 @@ export class Pong
 		}
 
 		const gameOverData = {
+			game: this.gameGlobals.game,
 			player1: {
 				name: userName1.text,
 				hitpoints: player1.hitPoints,
@@ -317,13 +318,25 @@ export class Pong
 		goal1.material.emissiveIntensity = 1;
 		goal2.material.emissiveIntensity = 1;
 		gameOverEvent.detail.gameOverData = gameOverData;
-		document.dispatchEvent(gameOverEvent);
+		handleMatchEnd(gameOverData);
 		this.winnerLoop();
 		this.gameGlobals.gameState = GameStates.GAMEOVER;
 	}
 
 	changeGame() {
-		
+		if (this.gameGlobals.game === Game.PONG) {
+			this.gameGlobals.game = Game.KNOCKOFF;
+		}
+		else if (this.gameGlobals.game === Game.KNOCKOFF) {
+			this.gameGlobals.game = Game.PONG;
+		}
+	}
+
+	toggleButton(){
+		const gameToggle = document.getElementById('check');
+		if (this.gameGlobals.gameState !== GameStates.TRANSITIONING) {
+			gameToggle.disabled = false;	
+		}
 	}
 
 	hasGameChanged(){
@@ -375,6 +388,7 @@ export class Pong
 				this.resetGame(deltaTime);
 				break;
 		}
+		this.toggleButton();
 		this.entities['Camera'].update(deltaTime);
 		this.entities['Countdown'].update(deltaTime);
 		this.entities['WinnerName'].update(deltaTime);

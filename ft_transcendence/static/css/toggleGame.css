@@ -47,11 +47,11 @@
     display: none;
 }
 
-.hover {
+.knockoff {
 	display: none;
 }
 
-.pong, .hover {
+.pong, .knockoff {
 	color: white;
 	position: absolute;
 	transform: translate(-50%,-50%);
@@ -63,6 +63,6 @@
 	display: none;
 }
 
-.gameToggle input:checked + .checkButton .hover {
+.gameToggle input:checked + .checkButton .knockoff {
 	display: block;
 }

@@ -184,13 +184,16 @@ const routes = {
 function handleSidePanel() {
 	const userData = currentUser.getUser();
 	const loginButton = document.getElementById('loginButton');
+	const playButton = document.getElementById('startButton');
 	const logoutButton = document.getElementById('logoutButton');
 	const profileButton = document.getElementById('profileButton');
 	if (userData) {
+		playButton.style.display = 'block';
 		loginButton.style.display = 'none';
 		logoutButton.style.display = 'block';
 		profileButton.style.display = 'block';
 	} else {
+		playButton.style.display = 'none';
 		logoutButton.style.display = 'none';
 		profileButton.style.display = 'none';
 		loginButton.style.display = 'block';
@@ -809,9 +812,6 @@ async function one_v_oneHandler() {
 			})
 
 			newButton.addEventListener('click', async () => {
-				// const sidePanel = document.getElementById('sidePanel');
-				// sidePanel.style.display = 'none';
-				// userContainer.innerHTML = "";
 				const usernameEL = document.getElementById('username');
 				if (usernameEL) {
 					const username = usernameEL.value;
@@ -829,6 +829,10 @@ async function one_v_oneHandler() {
 							}
 						})
 						if (response.ok) {
+							const ui = document.getElementById('ui');
+							userContainer.innerHTML = "";
+							ui.style.display = 'none';
+							
 							pong.startGame(userData.username, username);
 						} else {
 							showToast(somethingWentWrong, true);
@@ -890,10 +894,7 @@ async function pongHandler() {
 		return ;
 	}
 	const userContainer = document.getElementById('userContainer');
-	const sidePanel = document.getElementById('sidePanel');
-	const ui = document.getElementById('ui');
 	userContainer.innerHTML = "";
-	sidePanel.style.display = 'none'; // Using display
 	const response = await fetch("/pong/gameMenu.html", {
 		method: "GET",
 		headers: {
@@ -995,6 +996,12 @@ window.onpopstate = () => router.init();
 // 	}
 // }
 
+const gameToggle = document.getElementById('check');
+gameToggle.addEventListener('change', (event) => {
+	pong.changeGame();
+	gameToggle.disabled = true;
+});
+
 router.init();
 
 async function temp_registerHandler() {
@@ -1031,4 +1038,11 @@ async function temp_registerHandler() {
 			showToast(somethingWentWrong, true);
 		}
 	});
+}
+
+export async function handleMatchEnd(gameData) {
+	console.log("handleMatchEnd called");
+	const ui = document.getElementById('ui');
+	ui.style.display = 'block';
+
 }
