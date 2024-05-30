@@ -291,8 +291,27 @@ async function editProfileHandler() {
 			});
 			if (response.ok) {
 				const data = await response.json();
-				if (data.otp_setup_needed)
-
+				if (data.otp_setup_needed) {
+					const otpResponse = await fetch('/users/otpSetup-profile', {
+						method: 'POST',
+						headers: {
+							'Authorization': 'Bearer ' + userData.accessToken,
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({ enable_otp: true })
+					});
+	
+					if (otpResponse.ok) {
+						const otpResult = await otpResponse.json();
+						console.log('1')
+						await handleOtpVerification(otpResult);
+					} else {
+						const otpError = await otpResponse.json();
+						showToast(`Error: ${otpError.detail || 'OTP setup failed'}`, true);
+						return;
+					}
+				}
+				console.log('cechk this ', data.otp_setup_needed);
 				currentUser.setUser(data);
 				showToast(profileSuccess, false);
 				history.pushState({}, "", "/profile");
@@ -329,6 +348,28 @@ async function editProfileHandler() {
 		}
 	});
 }
+
+async function handleOtpVerification(data) {
+    const userContainer = document.getElementById('userContainer');
+    userContainer.innerHTML = '';
+
+    // Log the HTML content to ensure it is being received
+    console.log('QR HTML:', data.qr_html);
+
+    userContainer.insertAdjacentHTML('beforeend', data.qr_html);
+
+    // Add a slight delay to ensure the form is rendered
+    setTimeout(() => {
+        const otpForm = document.getElementById('otpForm');
+        if (otpForm) {
+            console.log('OTP form found');
+            otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmit(event, data.user.username));
+        } else {
+            console.error('OTP form not found');
+        }
+    }, 100);
+}
+
 
 function createFriendRow(friend) {
 	const friendBodyEl = document.getElementById('friendsBody');
@@ -661,6 +702,7 @@ async function handleOtpVerificationSubmit(event, username) {
     const otpForm = event.target;
     const otpFormData = new FormData(otpForm);
     otpFormData.append('username', username);
+	console.log('4')
 
     try {
         const verifyResponse = await fetch('/users/verify-otp', {

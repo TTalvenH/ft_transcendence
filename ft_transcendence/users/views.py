@@ -270,6 +270,43 @@ def getUserPorfile(request, username):
     # Return the serialized user data
     return Response(serializer.data)
 
+@api_view(['POST'])
+def otpSetupView(request):
+	user = get_object_or_404(CustomUser, id=request.user.id)
+	enable_otp = request.data.get('enable_otp')
+	otp_data = {}
+	otp_data = setup_otp(user)
+	if not otp_data['created']:
+		return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
+	# Construct the response data
+	response_data = {
+		'otp': otp_data
+	}
+
+		# Convert DRF request to Django HttpRequest
+	django_request = HttpRequest()
+	django_request.method = 'GET'
+	django_request.user = request.user
+
+	# Manually include CSRF token in the context
+	csrf_token = get_token(request)
+	context = {
+		**otp_data['context'],
+		'csrf_token': csrf_token,
+	}
+
+	# Render the QR code HTML with CSRF token
+	qr_html = render_to_string('users/qr.html', context, request=django_request)
+
+	# Construct the response data
+	response_data = {
+		'otp': otp_data,
+		'qr_html': qr_html  # Include the rendered HTML in the response
+	}
+
+	return Response(response_data, status=status.HTTP_201_CREATED)
+
 from rest_framework.parsers import MultiPartParser
 
 @api_view(['PUT'])
@@ -287,9 +324,8 @@ def updateUserProfile(request):
 		profile_serializer.save()
 		formSwitch = request.data.get('otp_enabled')
 		otp_setup_needed = False
-		if formSwitch == 'true' and not user.otp_verified and not user.otp_enabled:
+		if formSwitch == 'true':
 			otp_setup_needed = True
-
 		user_serializer = UserSerializer(instance=user)
 		jwt_token = create_jwt_pair_for_user(user)
 		if not user.otp_verified:

@@ -9,6 +9,7 @@ urlpatterns = [
 	path('qr_prompt.html', views.qrPrompt),
 	path('qr.html', views.renderQr),
 	path('update_profile.html', views.updateProfile),
+	path('otpSetup-profile', views.otpSetupView),
 	path('verify-otp', views.verify_otp, name="verify-otp"),
 	path('setup-otp', views.setup_otp, name="setup-otp"),
 	path('validate-otp', views.validateOtpAndLogin, name="validate-otp"),
