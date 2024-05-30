@@ -20,6 +20,7 @@ const reActivate = '<i class="fa-regular fa-circle-xmark"></i> Please setup 2FA 
 class Router {
 	constructor() {
 		this.routes = [];
+		this.currentPath = '';
 	}
 	get(path, handler) {
 		// Check if path and handler are provided
@@ -38,13 +39,14 @@ class Router {
 		this.routes.push(route);
 	}
 	init() {
+		handleSidePanel();
+		this.currentPath = window.location.pathname;
 		currentUser.refreshToken();
 		this.routes.some(route => {
 			let regEx = new RegExp(`^${route.path}$`);
 			let path = window.location.pathname;
 
 			if (path.match(regEx)) {
-				handleSidePanel();
 				let req = { path };
 				return route.handler(this, req);
 			}
@@ -760,24 +762,25 @@ async function one_v_oneHandler() {
 			const one_v_oneHTML = await one_v_oneResponse.text();
 			userContainer.innerHTML = "";
 			userContainer.insertAdjacentHTML('beforeend', one_v_oneHTML);
+
+			const newButton = document.createElement('button');
+			newButton.classList.add('button');
+			newButton.innerText = "Start Game";
+			newButton.style.bottom = "30px";
+			newButton.style.position = "absolute";
+
 			const guestButton = document.getElementById('guestButton');
 			guestButton.addEventListener('click', async () => {
 				const gameBox = document.getElementById('gameBox');
 				const buttons = document.getElementById('buttons');
 				const h2Element = document.createElement('h2');
-				const newButton = document.createElement('button');
 
 				buttons.remove();
 
 				h2Element.innerText = "Guest";
 				
 				gameBox.style.minHeight = "400px";
-				
-				newButton.classList.add('button');
-				newButton.innerText = "Start Game";
-				newButton.style.bottom = "30px";
-				newButton.style.position = "absolute";
-
+			
 				gameBox.appendChild(h2Element);
 				gameBox.appendChild(newButton);
 			});
@@ -786,6 +789,56 @@ async function one_v_oneHandler() {
 			cancelButton.addEventListener('click', () => {
 				history.pushState({}, "", "/pong");
 				router.init();
+			})
+
+			const userButton = document.getElementById('userButton');
+			userButton.addEventListener('click', async () => {
+				const gameBox = document.getElementById('gameBox');
+				const buttons = document.getElementById('buttons');
+				const inputDiv = document.createElement('div');
+
+				buttons.remove();
+
+				inputDiv.classList.add('inputBox');
+				inputDiv.innerHTML = '<input id="username" type="username" name="username" placeholder="Player 2 Username" required onkeyup="this.setAttribute(\'value\', this.value);" value="" autocomplete="one-time-code">';
+				inputDiv.style.position = "absolute";
+				inputDiv.style.bottom = "80px";
+
+				gameBox.appendChild(inputDiv);
+				gameBox.appendChild(newButton);
+			})
+
+			newButton.addEventListener('click', async () => {
+				// const sidePanel = document.getElementById('sidePanel');
+				// sidePanel.style.display = 'none';
+				// userContainer.innerHTML = "";
+				const usernameEL = document.getElementById('username');
+				if (usernameEL) {
+					const username = usernameEL.value;
+					if (!username) {
+						showToast(circle_xmark + 'Please enter a username', true);
+						return ;
+					}
+					// todo check if user exists
+					console.log(username);
+					try {
+						const response = await fetch(`/users/check_if_user_exists/${username}/`, {
+							method: "POST",
+							headers: {
+								'Authorization': `Bearer ${userData.accessToken}`,
+							}
+						})
+						if (response.ok) {
+							pong.startGame(userData.username, username);
+						} else {
+							showToast(somethingWentWrong, true);
+						}
+					}
+					catch (error) {
+						console.error(error);
+						showToast(somethingWentWrong, true);
+					}
+				}
 			})
 		} else {
 			console.log("watafak")
@@ -831,6 +884,11 @@ async function controlsHandler() {
 
 async function pongHandler() {
 	const userData = currentUser.getUser();
+	if (!userData) {
+		history.pushState({}, "", "/");
+		router.init();
+		return ;
+	}
 	const userContainer = document.getElementById('userContainer');
 	const sidePanel = document.getElementById('sidePanel');
 	const ui = document.getElementById('ui');
@@ -869,23 +927,18 @@ let currentRoute = "";
 
 window.route = (event) => {
     event.preventDefault();
-    const href = event.currentTarget.href;
-	console.log('href = ' + href)
-	console.log('currentRoute = ' + currentRoute)
-    if (href !== currentRoute) { // Check if the new route is different from the current one
-        window.history.pushState({}, "", href);
-		currentRoute = href;
-		console.log(href)
-		router.init();
-
-        // handleLocation();
-    }
+	const newPath = new URL(event.currentTarget.href).pathname;
+	if (router.currentPath === newPath) {
+		return ;
+	}
+	window.history.pushState({}, "", newPath);
+	router.init();
 };
 
 const pong = new Pong();
 
 pong.gameLoop();
-// window.onpopstate = handleLocation;
+window.onpopstate = () => router.init();
 // handleLocation();
 
 

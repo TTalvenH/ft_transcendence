@@ -23,4 +23,5 @@ urlpatterns = [
 	path('add-matchHistory/<int:match_id>/', views.add_matchHistory, name="add-matchHistory"),
 	path('get-matchHistory', views.get_matchHistory, name="get-matchHistory"),
 	path('token/refresh_token', TokenRefreshView.as_view(), name="refresh_token"),
+	path('check_if_user_exists/<str:username>/', views.user_exists, name="user_exists"),
 ]
