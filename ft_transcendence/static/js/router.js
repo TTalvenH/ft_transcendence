@@ -594,83 +594,6 @@ async function handleOtpSubmit(event) {
     }
 }
 
-async function loginHandler2() {
-	const userContainer = document.getElementById('userContainer');
-	userContainer.innerHTML = "";
-	if (!loginFormHTML)
-		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
-	userContainer.insertAdjacentHTML('beforeend', loginFormHTML);
-    // Add event listener to the registration form
-    const loginForm = document.getElementById('loginForm');
-    loginForm.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Prevent default form submission behavior
-
-        // Get form data
-        const formData = new FormData(loginForm);
-        
-        try {
-            // Send form data to the backend
-            const response = await fetch('/users/login-user', {
-				method: 'POST',
-				body: formData
-            });
-            if (response.ok) {
-				const data = await response.json();
-				currentUser.setUser(data);
-				showToast(loginSuccess, false);
-				history.pushState({}, "", "/");
-				router.init();
-				// handleLocation();
-            } else {
-                showToast(loginFail, true);
-            }
-        } catch (error) {
-            showToast(somethingWentWrong, true);
-        }
-	});
-}
-
-
-
-
-// async function loginHandler() {
-// 	const registerBox = document.getElementById('registerBox');
-// 	if (registerBox)
-// 		registerBox.remove();
-// 	if (!loginFormHTML)
-// 		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
-//     document.getElementById('ui').insertAdjacentHTML('beforeend', loginFormHTML);
-//     // Add event listener to the registration form
-//     const loginForm = document.getElementById('loginForm');
-//     loginForm.addEventListener('submit', async (event) => {
-//         event.prev entDefault(); // Prevent default form submission behavior
-
-//         // Get form data
-//         let formData = new FormData(loginForm);
-        
-//         try {
-//             // Send form data to the backend
-//             const response = await fetch('/users/login-user', {
-//                 method: 'POST',
-//                 body: formData
-//             });
-
-//             if (response.ok) {
-//                 // Registration successful
-//                 alert('Login successful!');
-//                 // Redirect to another page or handle the response as needed
-//             } else {
-//                 // Registration failed
-//                 alert('Login failed!');
-//             }
-//         } catch (error) {
-//             console.error('Error couldnt login', error);
-//             alert('An error occurred during registration. Please try again later.');
-//         }
-//     });
-// }
-
-
 async function registerHandler() {
     const userContainer = document.getElementById('userContainer');
     userContainer.innerHTML = "";
@@ -828,14 +751,15 @@ window.route = (event) => {
 		currentRoute = href;
 		console.log(href)
 		router.init();
-
-        // handleLocation();
     }
 };
 
 const pong = new Pong();
 
 pong.gameLoop();
+router.init();
+
+
 // window.onpopstate = handleLocation;
 // handleLocation();
 
@@ -893,40 +817,76 @@ pong.gameLoop();
 // 	}
 // }
 
-router.init();
 
-async function temp_registerHandler() {
-	const userContainer = document.getElementById('userContainer');
-	userContainer.innerHTML = "";
-	if (!registerFormHTML) // we only fetch once and then save it locally
-		registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
-	userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
-	// Add event listener to the registration form
-	const registerForm = document.getElementById('registerForm');
-	registerForm.addEventListener('submit', async (event) => {
-		event.preventDefault(); // Prevent default form submission behavior
-		// Get form data
-		const formData = new FormData(registerForm);
-		try {
-			// Send form data to the backend
-			const response = await fetch('/users/create-user', {
-				method: 'POST',
-				body: formData
-			});
+// async function temp_registerHandler() {
+// 	const userContainer = document.getElementById('userContainer');
+// 	userContainer.innerHTML = "";
+// 	if (!registerFormHTML) // we only fetch once and then save it locally
+// 		registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
+// 	userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
+// 	// Add event listener to the registration form
+// 	const registerForm = document.getElementById('registerForm');
+// 	registerForm.addEventListener('submit', async (event) => {
+// 		event.preventDefault(); // Prevent default form submission behavior
+// 		// Get form data
+// 		const formData = new FormData(registerForm);
+// 		try {
+// 			// Send form data to the backend
+// 			const response = await fetch('/users/create-user', {
+// 				method: 'POST',
+// 				body: formData
+// 			});
 
-			if (response.ok) {
-				showToast(registerSuccess, false);
-				history.pushState({}, "", "/");
-				handleLocation();
-			} else {
-				const data = await response.json();
-				if (data)
-					showToast(circle_xmark + data.detail, true);
-				else
-					showToast(somethingWentWrong, true);
-			}
-		} catch (error) {
-			showToast(somethingWentWrong, true);
-		}
-	});
-}
+// 			if (response.ok) {
+// 				showToast(registerSuccess, false);
+// 				history.pushState({}, "", "/");
+// 				handleLocation();
+// 			} else {
+// 				const data = await response.json();
+// 				if (data)
+// 					showToast(circle_xmark + data.detail, true);
+// 				else
+// 					showToast(somethingWentWrong, true);
+// 			}
+// 		} catch (error) {
+// 			showToast(somethingWentWrong, true);
+// 		}
+// 	});
+// }
+
+
+// async function loginHandler2() {
+// 	const userContainer = document.getElementById('userContainer');
+// 	userContainer.innerHTML = "";
+// 	if (!loginFormHTML)
+// 		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
+// 	userContainer.insertAdjacentHTML('beforeend', loginFormHTML);
+//     // Add event listener to the registration form
+//     const loginForm = document.getElementById('loginForm');
+//     loginForm.addEventListener('submit', async (event) => {
+//         event.preventDefault(); // Prevent default form submission behavior
+
+//         // Get form data
+//         const formData = new FormData(loginForm);
+        
+//         try {
+//             // Send form data to the backend
+//             const response = await fetch('/users/login-user', {
+// 				method: 'POST',
+// 				body: formData
+//             });
+//             if (response.ok) {
+// 				const data = await response.json();
+// 				currentUser.setUser(data);
+// 				showToast(loginSuccess, false);
+// 				history.pushState({}, "", "/");
+// 				router.init();
+// 				// handleLocation();
+//             } else {
+//                 showToast(loginFail, true);
+//             }
+//         } catch (error) {
+//             showToast(somethingWentWrong, true);
+//         }
+// 	});
+// }
