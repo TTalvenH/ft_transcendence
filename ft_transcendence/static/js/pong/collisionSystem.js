@@ -53,6 +53,8 @@ function handlePlayerCollision(ball, player) {
 export function collisionSystem(entities, game, deltaTime) {
 	if (game === Game.PONG) {
 		const ball = entities.pongEntities["Ball"];
+		const powerUp = entities.entities["PowerUp1"];
+		
 		const walls = [
 			entities.pongEntities["NeonBox1"],
 			entities.pongEntities["NeonBox2"],
@@ -75,9 +77,26 @@ export function collisionSystem(entities, game, deltaTime) {
 				}
 			}
 			// Check for collisions with players
-			for (const player of players) {
-				if (player.collisionBox.intersectsSphere(new THREE.Sphere(nextPosition, ball.radius))) {
-					handlePlayerCollision(ball, player);
+			if (ball.velocity.x > 0) {
+				if (players[0].collisionBox.intersectsSphere(new THREE.Sphere(nextPosition, ball.radius))) {
+					handlePlayerCollision(ball, players[0]);
+				}
+			}
+			else {
+				if (players[1].collisionBox.intersectsSphere(new THREE.Sphere(nextPosition, ball.radius))) {
+					handlePlayerCollision(ball, players[1]);
+				}
+			}
+			if (powerUp.isVisible && new THREE.Sphere(nextPosition, ball.radius).intersectsSphere(new THREE.Sphere(powerUp.object.position, powerUp.radius))) {
+				powerUp.isVisible = false;
+				if (ball.velocity.x > 0) {
+					if (players[1].hitPoints < 3) {
+						players[1].hitPoints++;
+					}
+				} else {
+					if (players[0].hitPoints < 3) {
+						players[0].hitPoints++;
+					}
 				}
 			}
 		}
@@ -85,22 +104,34 @@ export function collisionSystem(entities, game, deltaTime) {
 	else if (game === Game.KNOCKOFF) {
 		const player1 = entities.knockoffEntities["Player1"];
 		const player2 = entities.knockoffEntities["Player2"];
+		const powerUp = entities.entities["PowerUp1"];
 		const camera = entities.entities["Camera"];
 
 		// CCD steps
 		const numberOfSteps = 20;
 		const stepSize = deltaTime / numberOfSteps;
 		
-		if (player1.spawnTimer > 0 || player2.spawnTimer > 0) {
-			return;
-		}
-
 		for (let step = 0; step < numberOfSteps; step++) {
 			const nextPosition1 = player1.position.clone().add(player1.velocity.clone().multiplyScalar((step + 1) * stepSize));
 			const nextPosition2 = player2.position.clone().add(player2.velocity.clone().multiplyScalar((step + 1) * stepSize));
+			const powerUpPosition = powerUp.object.position.clone();
 			// Check for collisions with players
 			const distanceBetweenCenters = nextPosition1.distanceTo(nextPosition2);
-			if (distanceBetweenCenters < player1.radius + player2.radius) {
+			const powerUpDistance1 = nextPosition1.distanceTo(powerUpPosition);
+			const powerUpDistance2 = nextPosition2.distanceTo(powerUpPosition);
+			if (powerUpDistance1 < powerUp.radius + player1.radius && powerUp.isVisible) {
+				powerUp.isVisible = false;
+				if (player1.hitPoints < 3) {
+					player1.hitPoints++;
+				}
+			}
+			if (powerUpDistance2 < powerUp.radius + player2.radius && powerUp.isVisible) {
+				powerUp.isVisible = false;
+				if (player2.hitPoints < 3) {
+					player2.hitPoints++;
+				}
+			}
+			if (!(player1.spawnTimer > 0 || player2.spawnTimer > 0) && distanceBetweenCenters < player1.radius + player2.radius) {
 				player1.lightFlicker(0.55, 1, 7);
 				player2.lightFlicker(0.55, 1, 7);
 				let fasterPlayer = player1;
@@ -117,7 +148,10 @@ export function collisionSystem(entities, game, deltaTime) {
 				const bounceVelocity = normal.clone().multiplyScalar(bounceBack);
 				slowerPlayer.velocity.copy(bounceVelocity.clone().multiplyScalar(1));
 				fasterPlayer.velocity.copy(bounceVelocity.clone().multiplyScalar(-0.1));
+				slowerPlayer.position.z = 0;
+				fasterPlayer.position.z = 0;
 			}
+
 		}
 		
 	}

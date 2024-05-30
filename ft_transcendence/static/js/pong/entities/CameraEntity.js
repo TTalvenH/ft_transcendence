@@ -77,6 +77,8 @@ export class CameraEntity {
 			case GameStates.PLAYING:
 				this.playingLoop(deltaTime);
 				break;
+			case GameStates.COUNTDOWN:
+				this.playingLoop(deltaTime);
 			case GameStates.PAUSED:
 				break;
 			case GameStates.GAMEOVER:
@@ -84,11 +86,10 @@ export class CameraEntity {
 				break;
 		}
 		if (this.lookAt.distanceTo(this.targetLookAt) > 0.01) {
-			this.lookAt.lerp(this.targetLookAt, 0.018 * deltaTime);
+			this.lookAt.lerp(this.targetLookAt, 0.030);
 		}
-		
 		if (Math.abs(this.camera.fov - this.targetFov) > 0.1) {
-			this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, this.targetFov, 0.03 * deltaTime);
+			this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, this.targetFov, 0.05);
 			this.camera.updateProjectionMatrix();
 		}
 		this.camera.lookAt(this.lookAt);
