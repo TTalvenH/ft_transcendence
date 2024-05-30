@@ -122,7 +122,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 	)
 	class Meta:
 		model = CustomUser
-		fields = ['id', 'image', 'username', 'friends', 'match_history', 'last_active', 'old_password', 'new_password', 'confirm_password', 'email']
+		fields = ['id', 'image', 'username', 'friends', 'match_history', 'last_active', 'old_password', 'new_password', 'confirm_password', 'email', 'otp_enabled']
 		read_only_fields = ['id', 'friends', 'match_history', 'last_active']
 		extra_kwargs = {
 			'username': {'required': False}  # Make username field optional for partial updates
@@ -164,6 +164,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
 		if new_password:
 			instance.set_password(new_password)
 			instance.save()
+		if instance.otp_enabled == False:
+			instance.otp_verified = False
+			instance.save()
+
 
 		# Update match_history entries with the user's new name
 		for match in instance.match_history.all():

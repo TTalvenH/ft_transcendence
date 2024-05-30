@@ -40,7 +40,7 @@ def updateProfile(request):
 		'username': user.username,
 		'profile_image': user.image.url if user.image else 'static/images/plankton.jpg',
 		'email': user.email,
-		'display_name': user.display_name
+		'display_name': user.display_name,
 	}
 	return render(request, 'users/update_profile.html', context)
 
@@ -285,18 +285,20 @@ def updateUserProfile(request):
 	profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True, context={'request': request})
 	if profile_serializer.is_valid():
 		profile_serializer.save()
-		# Handle the 2FA switch
-		otp_enabled_in_form = request.data.get('otp_enabled')
-		print('this is', otp_enabled_in_form)
-		if otp_enabled_in_form == 'false':
-			user.otp_enabled = False
-			user.otp_verified = False
-			TOTPDevice.objects.filter(user=user, name='default').delete()
-			user.save()
+		formSwitch = request.data.get('otp_enabled')
+		otp_setup_needed = False
+		if formSwitch == 'true' and not user.otp_verified and not user.otp_enabled:
+			otp_setup_needed = True
 
 		user_serializer = UserSerializer(instance=user)
 		jwt_token = create_jwt_pair_for_user(user)
-		return Response({'user': user_serializer.data, 'tokens': jwt_token})
+		if not user.otp_verified:
+			devices = TOTPDevice.objects.filter(user=user, name='default')
+			if devices.exists():
+				devices.delete()
+		print(user.otp_enabled)
+		print(user.otp_verified)
+		return Response({'user': user_serializer.data, 'tokens': jwt_token, 'otp_setup_needed': otp_setup_needed})
 	detail = {'detail': 'Invalid data'}
 	if profile_serializer.errors.get('username'):
 		detail = {'detail': 'Username taken.'}

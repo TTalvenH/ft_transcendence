@@ -196,7 +196,6 @@ function handleSidePanel() {
 		profileButton.style.display = 'none';
 		loginButton.style.display = 'block';
 	}
-
 }
 
 function addGameOptions() {
@@ -292,6 +291,8 @@ async function editProfileHandler() {
 			});
 			if (response.ok) {
 				const data = await response.json();
+				if (data.otp_setup_needed)
+
 				currentUser.setUser(data);
 				showToast(profileSuccess, false);
 				history.pushState({}, "", "/profile");
@@ -328,7 +329,6 @@ async function editProfileHandler() {
 		}
 	});
 }
-
 
 function createFriendRow(friend) {
 	const friendBodyEl = document.getElementById('friendsBody');
