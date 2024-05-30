@@ -40,7 +40,6 @@ export class PowerUpEntity {
 
 	update(deltaTime) {
 		this.object.rotation.y += 0.03 * deltaTime;
-		console.log(this.spawnTime, this.isVisible)
 		if ( !this.isVisible && this.spawnTime <= 0) {
 			this.spawnTime = 400;
 			this.isVisible = true;

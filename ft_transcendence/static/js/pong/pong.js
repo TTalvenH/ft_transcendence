@@ -25,7 +25,8 @@ export const	GameStates = Object.freeze({
 	GAMEOVER: 2,
 	MENU: 3,
 	LOADING: 4,
-	TRANSITIONING: 5
+	TRANSITIONING: 5,
+	COUNTDOWN: 6
 });
 
 export const	Game = Object.freeze({
@@ -36,7 +37,7 @@ export const	Game = Object.freeze({
 export class Pong
 {
 	constructor() {
-		this.gameGlobals = { gameState: GameStates.LOADING, game: Game.KNOCKOFF };
+		this.gameGlobals = { gameState: GameStates.LOADING, game: Game.PONG };
 		this.currentGame = this.gameGlobals.game;
 		const loadingManager = new THREE.LoadingManager();
 		const loader = new FontLoader(loadingManager);
@@ -65,8 +66,6 @@ export class Pong
 		this.camera = this.entities['Camera'].camera;
 		this.renderer = initRenderer();
 		this.composer = initPostProcessing(this.scene, this.camera, this.renderer);
-		this.controls = new OrbitControls( this.camera, this.renderer.domElement );
-		
 		
 		// Pong
 		this.pongEntities['Player1'] = new PlayerEntity(new THREE.Vector3(4, 0, 0), COLORS.FOLLY);
@@ -96,8 +95,8 @@ export class Pong
 		this.entities['User2Name'] = new TextEntity("Guest2", new THREE.Vector3(-6, 7.7, 0), this.font, COLORS.INDIGO);
 		this.entities['Countdown'] = new TextEntity("", new THREE.Vector3(0, 0, 3), this.font, COLORS.INDIGO, this.camera);
 		this.entities['WinnerName'] = new TextEntity("", new THREE.Vector3(0, 0, 3), this.font, COLORS.INDIGO, this.camera);
-		this.entities['Player1Health'] = new HealthBarEntity(new THREE.Vector3(5, 5.5, 0), this.knockoffEntities["Player1"]);
-		this.entities['Player2Health'] = new HealthBarEntity(new THREE.Vector3(-5, 5.5, 0), this.knockoffEntities["Player2"]);
+		this.entities['Player1Health'] = new HealthBarEntity(new THREE.Vector3(5, 5.5, 0), this.pongEntities["Player1"]);
+		this.entities['Player2Health'] = new HealthBarEntity(new THREE.Vector3(-5, 5.5, 0), this.pongEntities["Player2"]);
 		this.entities['PowerUp1'] = new PowerUpEntity(new THREE.Vector3(0, 0, 0));
 		
 		// Render all entities
@@ -121,26 +120,25 @@ export class Pong
 		}
 
 		this.gameClock = new THREE.Clock();
-		this.clock = new THREE.Clock();
 		this.clockDelta = new THREE.Clock();
 		this.matchTime = new THREE.Clock();
 		this.matchDate = {};
-		this.interval = 1 / 120;
 		this.isWinnerLoopOn = false;
 		this.winnerText = "";
 
-		initEventListener(this.allEntities, this.gameGlobals);		
-		Object.values(this.pongEntities).forEach(entity => {
-			entity.object.scale.set(0, 0, 0);
+		initEventListener(this.allEntities, this.gameGlobals);	
+
+		Object.values(this.knockoffEntities).forEach(entity => {
+			entity.object.visible = false;
 		});
-		this.pongEntities['Ball'].pointLight.intensity = 0;
 	}
 
 	async startCountDown() {
 		const countDown = this.entities['Countdown'];
 		const camera = this.entities['Camera'];
 		let i = 3;
-		camera.setTargetLookAt(countDown.position);
+		this.gameGlobals.gameState = GamStates.COUNTDOWN;
+
 		while (i >= 0) {
 			countDown.setText(i.toString());
 			await new Promise(resolve => setTimeout(resolve, 1000));
@@ -173,8 +171,6 @@ export class Pong
 		user2Name.setText(userData.users[1]);
 		user1Name.text = userData.users[0];
 		user2Name.text = userData.users[1];
-		// user1Name.setText(userData.user.username);
-		// console.log(userData);
 		this.startCountDown();
 	}
 
@@ -199,17 +195,14 @@ export class Pong
 		}
 
 		Object.values(this.pongEntities).concat(Object.values(this.knockoffEntities)).forEach(entity => {
-			entity.object.scale.set(0, 0, 0);
-			this.pongEntities['Ball'].pointLight.intensity = 0;
-			this.knockoffEntities['Player1'].pointLight.intensity = 0;
-			this.knockoffEntities['Player2'].pointLight.intensity = 0;
+			entity.object.visible = false;
 		});
 		
 		if (this.gameGlobals.game === Game.KNOCKOFF) {
 			healthBar1.setPlayerRef(knockoffPlayer1);
 			healthBar2.setPlayerRef(knockoffPlayer2);
 			Object.values(this.knockoffEntities).forEach(entity => {
-				entity.object.scale.set(1, 1, 1);
+				entity.object.visible = true;
 			});
 			this.knockoffEntities['Player1'].pointLight.intensity = 1;
 			this.knockoffEntities['Player2'].pointLight.intensity = 1;
@@ -218,9 +211,8 @@ export class Pong
 			healthBar1.setPlayerRef(pongPlayer1);
 			healthBar2.setPlayerRef(pongPlayer2);
 			Object.values(this.pongEntities).forEach(entity => {
-				entity.object.scale.set(1, 1, 1);
+				entity.object.visible = true;
 			});
-			this.pongEntities['Ball'].pointLight.intensity = 0.5;
 		}
 
 		winnerName.setText("");
@@ -233,15 +225,26 @@ export class Pong
 		knockoffPlayer1.hitPoints = knockoffPlayer1.initHitPoints;
 		knockoffPlayer1.velocity.set(0, 0, 0);
 		knockoffPlayer1.launchSpeed = 0;
+		knockoffPlayer1.spawnTimer = 0;
+		knockoffPlayer1.mesh1.material.opacity = 1;
+		knockoffPlayer1.mesh2.material.opacity = 1;
+		knockoffPlayer1.mesh3.material.opacity = 1;
+		knockoffPlayer1.pointLight.intensity = 1;
 		knockoffPlayer2.position.copy(knockoffPlayer2.initPosition);
 		knockoffPlayer2.object.rotation.set(0, 0, 0);
 		knockoffPlayer2.hitPoints = knockoffPlayer2.initHitPoints;
 		knockoffPlayer2.velocity.set(0, 0, 0);
 		knockoffPlayer2.launchSpeed = 0;
+		knockoffPlayer2.spawnTimer = 0;
+		knockoffPlayer2.mesh1.material.opacity = 1;
+		knockoffPlayer2.mesh2.material.opacity = 1;
+		knockoffPlayer2.mesh3.material.opacity = 1;
+		knockoffPlayer2.pointLight.intensity = 1;
+		
 		this.entities['PowerUp1'].object.scale.set(0, 0, 0);
 		this.entities['PowerUp1'].pointLight.intensity = 0;
 		this.entities['PowerUp1'].isVisible = false;
-		this.entities['PowerUp1'].spawnTime = 400;
+		this.entities['PowerUp1'].spawnTime = 300;
 		
 
 		ball.position.copy(ball.initPosition);
@@ -349,10 +352,9 @@ export class Pong
 	}
 	gameLoop() {
 		requestAnimationFrame(() => this.gameLoop());
-		if ( this.gameGlobals.gameState === GameStates.LOADING || this.clock.getElapsedTime() < this.interval) {
+		if ( this.gameGlobals.gameState === GameStates.LOADING) {
 			return;
 		}
-		this.clock.start(); 
 		const deltaTime = this.clockDelta.getDelta() * 100;
 		this.composer.render(this.scene, this.camera);
 		switch (this.gameGlobals.gameState) {

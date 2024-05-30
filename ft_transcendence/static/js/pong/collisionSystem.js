@@ -148,6 +148,8 @@ export function collisionSystem(entities, game, deltaTime) {
 				const bounceVelocity = normal.clone().multiplyScalar(bounceBack);
 				slowerPlayer.velocity.copy(bounceVelocity.clone().multiplyScalar(1));
 				fasterPlayer.velocity.copy(bounceVelocity.clone().multiplyScalar(-0.1));
+				slowerPlayer.position.z = 0;
+				fasterPlayer.position.z = 0;
 			}
 
 		}
