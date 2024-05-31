@@ -38,10 +38,10 @@ class Router {
 		};
 		this.routes.push(route);
 	}
-	init() {
+	async init() {
 		handleSidePanel();
 		this.currentPath = window.location.pathname;
-		currentUser.refreshToken();
+		await currentUser.refreshToken();
 		this.routes.some(route => {
 			let regEx = new RegExp(`^${route.path}$`);
 			let path = window.location.pathname;
@@ -171,16 +171,6 @@ const gameOverData = {
 
 export const gameOverEvent = new CustomEvent('endMatch', { detail: gameOverData });
 
-const routes = {
-	"/": homeHandler,
-	"/pong": pongHandler,
-	"/login": loginHandler,
-	"/register": registerHandler,
-	"/profile": profileHandler,
-	"/edit-profile": editProfileHandler,
-	"/log-out": logOutHandler,
-};
-
 function handleSidePanel() {
 	const userData = currentUser.getUser();
 	const loginButton = document.getElementById('loginButton');
@@ -293,6 +283,7 @@ async function editProfileHandler() {
 			});
 			if (response.ok) {
 				const data = await response.json();
+				currentUser.setUser(data);
 				if (data.otp_setup_needed) {
 					const otpResponse = await fetch('/users/otpSetup-profile', {
 						method: 'POST',
@@ -302,10 +293,10 @@ async function editProfileHandler() {
 						},
 						body: JSON.stringify({ enable_otp: true })
 					});
-	
+					
 					if (otpResponse.ok) {
 						const otpResult = await otpResponse.json();
-						console.log('1')
+						// console.log('1')
 						await handleOtpVerification(otpResult);
 					} else {
 						const otpError = await otpResponse.json();
@@ -313,13 +304,14 @@ async function editProfileHandler() {
 						return;
 					}
 				}
-				console.log('cechk this ', data.otp_setup_needed);
-				currentUser.setUser(data);
-				showToast(profileSuccess, false);
-				history.pushState({}, "", "/profile");
-				handleLocation();
+				else {
 
-			} else {
+					showToast(profileSuccess, false);
+					history.pushState({}, "", "/profile");
+					router.init();
+				}
+			} 
+			else {
 				const data = await response.json();
 				if (data)
 					showToast(circle_xmark + data.detail, true);
@@ -361,17 +353,46 @@ async function handleOtpVerification(data) {
     userContainer.insertAdjacentHTML('beforeend', data.qr_html);
 
     // Add a slight delay to ensure the form is rendered
-    setTimeout(() => {
+
         const otpForm = document.getElementById('otpForm');
         if (otpForm) {
             console.log('OTP form found');
-            otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmit(event, data.user.username));
+            otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmitFromProfile(event, data.username));
         } else {
             console.error('OTP form not found');
         }
-    }, 100);
-}
+    }
 
+	async function handleOtpVerificationSubmitFromProfile(event, username) {
+		event.preventDefault();
+	
+		const otpForm = event.target;
+		const otpFormData = new FormData(otpForm);
+		otpFormData.append('username', username);
+		console.log('4');
+	
+		try {
+			const userData = JSON.parse(localStorage.getItem('currentUser')); // Retrieve current user data
+			const verifyResponse = await fetch('/users/verify-otp', {
+				method: 'POST',
+				body: otpFormData
+			});
+	
+			if (verifyResponse.ok) {
+				const verifyResult = await verifyResponse.json();
+				console.log('2hat');
+				// verifyResult.user.username = username;
+				showToast(profileSuccess, false);
+				history.pushState({}, "", "/profile");
+				router.init();
+			} else {
+				showToast(verificationFailed, true);
+			}
+		} catch (error) {
+			console.log(error);
+			showToast('Something went wrong', true);
+		}
+	}
 
 function createFriendRow(friend) {
 	const friendBodyEl = document.getElementById('friendsBody');
@@ -405,7 +426,7 @@ async function profileHandler() {
 	if (!username) {
 		if (!userData) {
 			history.pushState({}, "", "/");
-			handleLocation();
+			router.init();
 			return;
 		}
 		username = userData.username;
@@ -425,7 +446,7 @@ async function profileHandler() {
 	} else {
 		showToast(somethingWentWrong, true);
 		history.pushState({}, "", "/");
-		handleLocation();
+		router.init();
 		return;
 	}
 
@@ -478,7 +499,7 @@ async function profileHandler() {
 	// } else {
 	// 	showToast(somethingWentWrong, true);
 	// 	history.pushState({}, "", "/");
-	// 	handleLocation();
+	// 	router.init();
 	// 	return;
 	// }
 	const addFriendButton = document.getElementById('addFriendButton');
@@ -627,7 +648,7 @@ async function handleOtpSubmit(event) {
 			showToast(loginSuccess, false);
 			currentUser.setUser(otpData);
 			history.pushState({}, "", "/");
-			handleLocation();
+			router.init();
         } else {
 			showToast(verificationFailed, true);
         }
@@ -687,18 +708,18 @@ async function handleRegistrationResponse(result) {
 
         const otpForm = document.getElementById('otpForm');
         if (otpForm) {
-            otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmit(event, result.user.username));
+            otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmitRegistering(event, result.user.username));
         } else {
             console.error('OTP form not found');
         }
     } else {
         showToast('Registration successful', false);
         history.pushState({}, "", "/");
-        handleLocation();
+        router.init();
     }
 }
 
-async function handleOtpVerificationSubmit(event, username) {
+async function handleOtpVerificationSubmitRegistering(event, username) {
     event.preventDefault();
     
     const otpForm = event.target;
@@ -719,7 +740,7 @@ async function handleOtpVerificationSubmit(event, username) {
             userContainer.innerHTML = '';
             showToast('Registration successful', false);
             history.pushState({}, "", "/");
-            handleLocation();
+            router.init();
         } else {
             showToast(verificationFailed, true);
         }
@@ -916,7 +937,22 @@ const pong = new Pong();
 
 pong.gameLoop();
 window.onpopstate = () => router.init();
-// handleLocation();
+// router.init();
+
+const gameToggle = document.getElementById('check');
+gameToggle.addEventListener('change', (event) => {
+	pong.changeGame();
+	gameToggle.disabled = true;
+});
+
+router.init();
+
+export async function handleMatchEnd(gameData) {
+    console.log("handleMatchEnd called");
+    const ui = document.getElementById('ui');
+    ui.style.display = 'block';
+
+}
 
 
 // async function registerHandler() {
@@ -972,14 +1008,6 @@ window.onpopstate = () => router.init();
 // 	}
 // }
 
-const gameToggle = document.getElementById('check');
-gameToggle.addEventListener('change', (event) => {
-	pong.changeGame();
-	gameToggle.disabled = true;
-});
-
-router.init();
-
 // async function temp_registerHandler() {
 // 	const userContainer = document.getElementById('userContainer');
 // 	userContainer.innerHTML = "";
@@ -1002,7 +1030,7 @@ router.init();
 // 			if (response.ok) {
 // 				showToast(registerSuccess, false);
 // 				history.pushState({}, "", "/");
-// 				handleLocation();
+// 				router.init();
 // 			} else {
 // 				const data = await response.json();
 // 				if (data)
@@ -1043,7 +1071,7 @@ router.init();
 // 				showToast(loginSuccess, false);
 // 				history.pushState({}, "", "/");
 // 				router.init();
-// 				// handleLocation();
+// 				// router.init();
 //             } else {
 //                 showToast(loginFail, true);
 //             }

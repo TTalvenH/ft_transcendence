@@ -183,11 +183,12 @@ def validateOtpAndLogin(request):
 
 	return Response({'tokens': token, 'user': serializer.data}, status=status.HTTP_200_OK)
 
+
 @api_view(['POST'])
 def verify_otp(request):
 	user = get_object_or_404(CustomUser, username=request.data.get('username'))
-
 	otp = request.data.get('otp')
+
 	if not otp:
 		return Response({'detail': 'OTP required.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -199,6 +200,7 @@ def verify_otp(request):
 			return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
 	except TOTPDevice.DoesNotExist:
 		return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
+
 	user.otp_verified = True
 	user.save()
 	return Response({'detail': 'OTP verified successfully.'}, status=status.HTTP_200_OK)
@@ -279,12 +281,7 @@ def otpSetupView(request):
 	if not otp_data['created']:
 		return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
-	# Construct the response data
-	response_data = {
-		'otp': otp_data
-	}
-
-		# Convert DRF request to Django HttpRequest
+	# Convert DRF request to Django HttpRequest
 	django_request = HttpRequest()
 	django_request.method = 'GET'
 	django_request.user = request.user
@@ -302,7 +299,8 @@ def otpSetupView(request):
 	# Construct the response data
 	response_data = {
 		'otp': otp_data,
-		'qr_html': qr_html  # Include the rendered HTML in the response
+		'qr_html': qr_html,  # Include the rendered HTML in the response
+		'username': user.username
 	}
 
 	return Response(response_data, status=status.HTTP_201_CREATED)
@@ -328,10 +326,6 @@ def updateUserProfile(request):
 			otp_setup_needed = True
 		user_serializer = UserSerializer(instance=user)
 		jwt_token = create_jwt_pair_for_user(user)
-		if not user.otp_verified:
-			devices = TOTPDevice.objects.filter(user=user, name='default')
-			if devices.exists():
-				devices.delete()
 		print(user.otp_enabled)
 		print(user.otp_verified)
 		return Response({'user': user_serializer.data, 'tokens': jwt_token, 'otp_setup_needed': otp_setup_needed})
