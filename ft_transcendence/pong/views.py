@@ -1,9 +1,11 @@
 import json
 from django.shortcuts import render
 from rest_framework.response import Response
+from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
-from pong import models
+from .models import Match
+from .serializers import MatchSerializer
 
 # Create your views here.
 @api_view(['GET'])
@@ -48,3 +50,12 @@ def one_v_one_template(request):
 @api_view(['GET'])
 def controls_template(request):
 	return render(request, 'pong/controls.html')
+
+@api_view(['POST'])
+def create_match(request):
+	match_serializer = MatchSerializer(data=request.data)
+
+	if match_serializer.is_valid():
+		match_serializer.save()
+		return Response(match_serializer.data, status=status.HTTP_201_CREATED)
+	return Response(match_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

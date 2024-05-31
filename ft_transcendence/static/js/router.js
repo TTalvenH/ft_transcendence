@@ -21,6 +21,7 @@ class Router {
 	constructor() {
 		this.routes = [];
 		this.currentPath = '';
+		this.currenSearchParams = '';
 	}
 	get(path, handler) {
 		// Check if path and handler are provided
@@ -38,10 +39,11 @@ class Router {
 		};
 		this.routes.push(route);
 	}
-	init() {
+	async init() {
 		handleSidePanel();
 		this.currentPath = window.location.pathname;
-		currentUser.refreshToken();
+		this.currenSearchParams = window.location.search;
+		await currentUser.refreshToken();
 		this.routes.some(route => {
 			let regEx = new RegExp(`^${route.path}$`);
 			let path = window.location.pathname;
@@ -663,21 +665,21 @@ async function loginHandler2() {
 
 
 async function registerHandler() {
-    const userContainer = document.getElementById('userContainer');
-    userContainer.innerHTML = "";
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
 
-    if (!registerFormHTML) {
-        registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
-    }
+	if (!registerFormHTML) {
+		registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
+	}
 
-    userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
+	userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
 
-    const registerForm = document.getElementById('registerForm');
-    if (registerForm) {
-        registerForm.addEventListener('submit', handleRegisterSubmit);
-    } else {
-        console.error('Registration form not found');
-    }
+	const registerForm = document.getElementById('registerForm');
+	if (registerForm) {
+		registerForm.addEventListener('submit', handleRegisterSubmit);
+	} else {
+		console.error('Registration form not found');
+	}
 }
 
 async function handleRegisterSubmit(event) {
@@ -929,10 +931,10 @@ let currentRoute = "";
 window.route = (event) => {
     event.preventDefault();
 	const newPath = new URL(event.currentTarget.href).pathname;
-	if (router.currentPath === newPath) {
+	if (router.currentPath === newPath && router.currenSearchParams === event.currentTarget.search) {
 		return ;
 	}
-	window.history.pushState({}, "", newPath);
+	window.history.pushState({}, "", event.currentTarget.href);
 	router.init();
 };
 

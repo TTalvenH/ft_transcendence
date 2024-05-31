@@ -112,3 +112,17 @@ POST http://127.0.0.1:8000/users/token/refresh_token
 Content-Type: application/json
 
 { "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcxNzQwNzIwNCwiaWF0IjoxNzE2OTc1MjA0LCJqdGkiOiI0Mzc3MjEzOWI3MmU0MDQzYWRiMmYyNzg0NDExNWMyMCIsInVzZXJfaWQiOjQ0fQ.Wgkz6ELoRp6LzCd5jfhsQuJHjd5oDYWImWRI67KZw2s"}
+
+###
+
+POST http://127.0.0.1:8000/pong/create-match
+Content-Type: application/json
+
+{
+    "player1": 44,
+    "player1Hp": 4,
+    "player2": 46,
+    "player2Hp": 3,
+    "timePlayed": "30 minutes",
+    "dateTime": "2024-05-31"
+}

@@ -4,8 +4,8 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes, parser_classes
 from rest_framework.permissions import IsAuthenticated
-from .models import CustomUser, PongMatch
-from .serializers import UserSerializer, RegisterUserSerializer, UserProfileSerializer, MatchHistorySerializer, FriendSerializer
+from .models import CustomUser
+from .serializers import UserSerializer, RegisterUserSerializer, UserProfileSerializer, FriendSerializer
 from .tokens import create_jwt_pair_for_user
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from rest_framework.permissions import IsAuthenticated
@@ -22,6 +22,7 @@ from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.contrib.auth import authenticate
 from django.middleware.csrf import get_token
+from pong.serializers import MatchSerializer
 
 @api_view(['GET'])
 def login_template(request):
@@ -52,9 +53,10 @@ def userProfileTemplate(request, username):
 	context = {
 		'username': user.username,
 		'profile_image': user.image.url if user.image else 'static/images/plankton.jpg',
+		'match_history': MatchSerializer(instance=user.player1_matches.all(), many=True).data + MatchSerializer(instance=user.player2_matches.all(), many=True).data,
 		'friends': FriendSerializer(instance=user.friends.all(), many=True).data,
-		'match_history': MatchHistorySerializer(instance=user.match_history.all(), many=True).data
 	}
+	print(context.get('match_history'))
 	return render(request, 'users/profile.html', context)
 
 @api_view(['GET'])
