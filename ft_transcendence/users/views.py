@@ -391,3 +391,12 @@ def get_matchHistory(request):
 @permission_classes([IsAuthenticated])
 def logOut(request):
 	return Response(status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@update_last_active
+@permission_classes([IsAuthenticated])
+def user_exists(request, username):
+	user = get_object_or_404(CustomUser, username=username)
+	print('dsadassadasdasd')
+	return Response(status=status.HTTP_200_OK)

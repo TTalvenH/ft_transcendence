@@ -43,3 +43,8 @@ def game_menu_template(request):
 @api_view(['GET'])
 def one_v_one_template(request):
 	return render(request, 'pong/1v1.html')
+
+
+@api_view(['GET'])
+def controls_template(request):
+	return render(request, 'pong/controls.html')

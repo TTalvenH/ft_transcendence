@@ -27,6 +27,7 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 	<link rel="stylesheet" type="text/css" href="{% static 'css/qr.css'%}">
 	<link rel="stylesheet" type="text/css" href="{% static 'css/game.css'%}">
+	<link rel="stylesheet" type="text/css" href="{% static 'css/toggleGame.css'%}">
 	<script type="importmap">
 		{
 		  "imports": {
@@ -41,7 +42,7 @@
 <body>
     <div id="root">
 		<div id="ui">
-			<div id="sidePanel" class="col-1 d-flex flex-column justify-content-start align-items-center pt-5">
+			<div id="sidePanel" class="sidePanel col-1 d-flex flex-column justify-content-start align-items-center pt-5">
 				<div id="startButton" >
 					<a href="/pong" onclick="route(event)">
 						<button class="button mb-4">PLAY</button>
@@ -59,8 +60,18 @@
 				</div>
 				<div id="loginButton">
 					<a href="/login" onclick="route(event)">
-						<button class="button">LOGIN</button>
+						<button class="button mb-4">LOGIN</button>
 					</a>
+				</div>
+				<div class="toggleGame">
+					<div class="gameToggle">
+						<input type="checkbox" id="check">
+						<label for="check" class="checkButton">
+							<span class="pong">PONG</span>
+							<span class="knockoff">KNOCKOFF</span>
+						</label>
+					</div>
+					{% comment %} <p>PONG</p> {% endcomment %}
 				</div>
 			</div>
 			<div class="container" id="userContainer"></div>

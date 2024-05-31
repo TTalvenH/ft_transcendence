@@ -19,7 +19,7 @@ export class BallEntity {
 		// Movement
 		this.velocity = new THREE.Vector3(0, 0, 0,);
 		this.direction = new THREE.Vector3(randomXComponent, Math.sin(randomAngleY), 0);
-		this.initSpeed = 0.03;
+		this.initSpeed = 0.035;
 		this.speed = this.initSpeed;
 		
 		// Mesh
