@@ -297,10 +297,9 @@ def otpSetupView(request):
 	# Render the QR code HTML with CSRF token
 	qr_html = render_to_string('users/qr.html', context, request=django_request)
 
-	# Construct the response data
 	response_data = {
 		'otp': otp_data,
-		'qr_html': qr_html,  # Include the rendered HTML in the response
+		'qr_html': qr_html,
 		'username': user.username
 	}
 
@@ -323,12 +322,10 @@ def updateUserProfile(request):
 		profile_serializer.save()
 		formSwitch = request.data.get('otp_enabled')
 		otp_setup_needed = False
-		if formSwitch == 'true':
+		if formSwitch == 'true' and not user.otp_verified:
 			otp_setup_needed = True
 		user_serializer = UserSerializer(instance=user)
 		jwt_token = create_jwt_pair_for_user(user)
-		print(user.otp_enabled)
-		print(user.otp_verified)
 		return Response({'user': user_serializer.data, 'tokens': jwt_token, 'otp_setup_needed': otp_setup_needed})
 	detail = {'detail': 'Invalid data'}
 	if profile_serializer.errors.get('username'):

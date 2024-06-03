@@ -22,34 +22,38 @@ class Router {
 		this.currentPath = '';
 	}
 	get(path, handler) {
-		// Check if path and handler are provided
 		if (!path || !handler) throw new Error('path and handler are required');
-		// Check if path is a string
 		if (typeof path !== 'string') throw new TypeError('path must be a string');
-		// Check if handler is a function
 		if (typeof handler !== 'function') throw new TypeError('handler must be a function');
 		this.routes.forEach(route => {
 			if (route.path === path) throw new Error(`Route with path ${path} already exists`);
 		});
-		const route = {
-			path,
-			handler
-		};
+		const route = { path, handler };
 		this.routes.push(route);
 	}
 	async init() {
 		handleSidePanel();
 		this.currentPath = window.location.pathname;
+		console.log(window.location.pathname);
 		await currentUser.refreshToken();
-		this.routes.some(route => {
-			let regEx = new RegExp(`^${route.path}$`);
-			let path = window.location.pathname;
-
-			if (path.match(regEx)) {
-				let req = { path };
-				return route.handler(this, req);
-			}
+		const route = this.routes.find(route => {
+			const regEx = new RegExp(`^${route.path}$`);
+			return this.currentPath.match(regEx);
 		});
+		if (route) {
+			let req = { path: this.currentPath };
+			return route.handler(this, req);
+		} else {
+			history.pushState({}, "", "/");
+		}
+	}
+	handle404() {
+		const userContainer = document.getElementById('userContainer');
+		userContainer.innerHTML = `
+			<h1>404 - Page Not Found</h1>
+			<p>The page you are looking for does not exist.</p>
+			<a href="/">Go to Home</a>
+		`;
 	}
 }
 
@@ -587,8 +591,8 @@ async function handleLoginSubmit(event) {
 			}
 		}
 		else {
-			const errorData = await response.json()
-			showToast(errorData, true);
+			// const errorData = await response.json();
+			showToast(loginFail, true);
 		}
 		}
 	catch (error) {
@@ -908,7 +912,6 @@ const pong = new Pong();
 
 pong.gameLoop();
 window.onpopstate = () => router.init();
-// router.init();
 
 const gameToggle = document.getElementById('check');
 gameToggle.addEventListener('change', (event) => {
