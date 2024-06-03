@@ -88,7 +88,7 @@
 						{% for friend in friends %}
 							<tr>
 								<td>
-									<a class="profileLink" href="/profile?username={{ friend.username }}" onclick="route(event)">
+									<a class="link" href="/profile?username={{ friend.username }}" onclick="route(event)">
 										{{ friend.username }}
 									</a>
 								</td>
@@ -108,10 +108,13 @@
 			</div>
 		</div>
 		<div class="col-7">
-			<h1 style="color: white;">
+			<h1 id="tableHeader" style="color: white;">
 				Match History
 			</h1>
-			<div class="table-responsive" style="max-height: 475px; width: 460px;">
+			<div class="switchButton">
+				<button id="switchButton"><i class="fa-solid fa-repeat"></i></button>
+			</div>
+			<div id="match_history" class="table-responsive" style="max-height: 475px; width: 460px;">
 				<table class="tableClass">
 					<thead>
 						<tr>
@@ -136,6 +139,32 @@
 									<td style="color: red;">{{ match.player1Hp }} - {{ match.player2Hp }}</td>
 								{% endif %}
 								<td>{{ match.dateTime }}</td>
+							</tr>
+						{% endfor %}
+					</tbody>
+				</table>
+			</div>
+			<div id="tournament_history" class="table-responsive" style="max-height: 475px; width: 460px; display: none;">
+				<table class="tableClass">
+					<thead>
+						<tr>
+							<th scope="col">Game</th>
+							<th scope="col">Date</th>
+						</tr>
+					</thead>
+					<tbody id="matchHistoryBody">
+						{% for match in tournament_history %}
+							<tr>
+								<td>
+									<a class="link" href="/tournament?id={{ match.id }}">
+										{{ match.game }}
+									</a>
+								</td>
+								<td>
+									<a class="link" href="/tournament?id={{ match.id }}">
+										{{ match.dateTime }}
+									</a>
+								</td>
 							</tr>
 						{% endfor %}
 					</tbody>

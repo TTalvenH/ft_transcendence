@@ -22,7 +22,7 @@ from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.contrib.auth import authenticate
 from django.middleware.csrf import get_token
-from pong.serializers import MatchSerializer
+from pong.serializers import MatchSerializer, TournamentSerializer
 
 @api_view(['GET'])
 def login_template(request):
@@ -54,11 +54,14 @@ def userProfileTemplate(request, username):
 	player2_matches = user.player2_matches.all().filter(tournament_match=False)
 	match_history = MatchSerializer(instance=player1_matches, many=True).data + MatchSerializer(instance=player2_matches, many=True).data
 	match_history = sorted(match_history, key=lambda x: x['dateTime'], reverse=True)
-	print(match_history)
+	tournament_history = TournamentSerializer(instance=user.tournament_set.all(), many=True).data
+	tournament_history = sorted(tournament_history, key=lambda x: x['dateTime'], reverse=True)
+	print(tournament_history)
 	context = {
 		'username': user.username,
 		'profile_image': user.image.url if user.image else 'static/images/plankton.jpg',
 		'match_history': match_history,
+		'tournament_history': tournament_history,
 		'friends': FriendSerializer(instance=user.friends.all(), many=True).data,
 	}
 	print(context.get('match_history'))

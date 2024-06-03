@@ -1,3 +1,4 @@
+//variables where we save the html content when it is first fetched
 let loginFormHTML;
 let registerFormHTML;
 const loginSuccess = '<i class="fa-regular fa-circle-check"></i> Login Success';
@@ -16,6 +17,7 @@ const circle_check = '<i class="fa-regular fa-circle-check"></i>';
 const verificationFailed = '<i class="fa-regular fa-circle-xmark"></i> Verification failed';
 const notVerified = '<i class="fa-regular fa-circle-xmark"></i> OTP was activated but not verified';
 const reActivate = '<i class="fa-regular fa-circle-xmark"></i> Please setup 2FA in profile settings';
+
 class Router {
 	constructor() {
 		this.routes = [];
@@ -23,13 +25,19 @@ class Router {
 		this.currenSearchParams = '';
 	}
 	get(path, handler) {
+		// Check if path and handler are provided
 		if (!path || !handler) throw new Error('path and handler are required');
+		// Check if path is a string
 		if (typeof path !== 'string') throw new TypeError('path must be a string');
+		// Check if handler is a function
 		if (typeof handler !== 'function') throw new TypeError('handler must be a function');
 		this.routes.forEach(route => {
 			if (route.path === path) throw new Error(`Route with path ${path} already exists`);
 		});
-		const route = { path, handler };
+		const route = {
+			path,
+			handler
+		};
 		this.routes.push(route);
 	}
 	async init() {
@@ -37,24 +45,15 @@ class Router {
 		this.currentPath = window.location.pathname;
 		this.currenSearchParams = window.location.search;
 		await currentUser.refreshToken();
-		const route = this.routes.find(route => {
-			const regEx = new RegExp(`^${route.path}$`);
-			return this.currentPath.match(regEx);
+		this.routes.some(route => {
+			let regEx = new RegExp(`^${route.path}$`);
+			let path = window.location.pathname;
+
+			if (path.match(regEx)) {
+				let req = { path };
+				return route.handler(this, req);
+			}
 		});
-		if (route) {
-			let req = { path: this.currentPath };
-			return route.handler(this, req);
-		} else {
-			history.pushState({}, "", "/");
-		}
-	}
-	handle404() {
-		const userContainer = document.getElementById('userContainer');
-		userContainer.innerHTML = `
-			<h1>404 - Page Not Found</h1>
-			<p>The page you are looking for does not exist.</p>
-			<a href="/">Go to Home</a>
-		`;
 	}
 }
 
@@ -62,7 +61,7 @@ const router = new Router();
 
 router.get('/', homeHandler);
 
-router.get('/login', loginHandler);
+router.get('/login', loginHandler2);
 
 router.get('/register', registerHandler);
 
@@ -175,6 +174,16 @@ const gameOverData = {
 
 export const gameOverEvent = new CustomEvent('endMatch', { detail: gameOverData });
 
+const routes = {
+	"/": homeHandler,
+	"/pong": pongHandler,
+	"/login": loginHandler,
+	"/register": registerHandler,
+	"/profile": profileHandler,
+	"/edit-profile": editProfileHandler,
+	"/log-out": logOutHandler,
+};
+
 function handleSidePanel() {
 	const userData = currentUser.getUser();
 	const loginButton = document.getElementById('loginButton');
@@ -192,6 +201,7 @@ function handleSidePanel() {
 		profileButton.style.display = 'none';
 		loginButton.style.display = 'block';
 	}
+
 }
 
 function addGameOptions() {
@@ -231,7 +241,7 @@ async function editProfileHandler() {
 		headers: {
 			'Authorization': 'Bearer ' + userData.accessToken,
 		},
-	});
+	})
 	if (!updateProfileResponse.ok) {
 		showToast(somethingWentWrong, true);
 		return;
@@ -249,8 +259,10 @@ async function editProfileHandler() {
 		if (selectedFile) {
 			var reader = new FileReader();
 			reader.onload = function(e) {
+				// Replace the image source with the selected image
 				profileImage.src = e.target.result;
 				profileImage.onload = function() {
+					// Make sure the image is loaded before displaying it
 					profileImage.style.display = 'block';
 				}
 			}
@@ -259,16 +271,6 @@ async function editProfileHandler() {
 	});
 
 	const updateProfileForm = document.getElementById('updateProfileForm');
-	const otpEnabledInput = document.getElementById('otpEnabled');
-	const flexSwitch2FA = document.getElementById('flexSwitch2FA');
-
-	// Set the hidden input value based on the switch's initial state
-	otpEnabledInput.value = flexSwitch2FA.checked;
-
-	flexSwitch2FA.addEventListener('change', () => {
-		otpEnabledInput.value = flexSwitch2FA.checked;
-	});
-
 	updateProfileForm.addEventListener('submit', async (event) => {
 		try {
 			event.preventDefault();
@@ -277,7 +279,7 @@ async function editProfileHandler() {
 			if (selectedFile) {
 				formData.append('image', selectedFile);
 			}
-
+			console.log(formData);
 			const response = await fetch('/users/update-user-profile', {
 				method: 'PUT',
 				headers: {
@@ -288,32 +290,10 @@ async function editProfileHandler() {
 			if (response.ok) {
 				const data = await response.json();
 				currentUser.setUser(data);
-				if (data.otp_setup_needed) {
-					const otpResponse = await fetch('/users/otpSetup-profile', {
-						method: 'POST',
-						headers: {
-							'Authorization': 'Bearer ' + userData.accessToken,
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify({ enable_otp: true })
-					});
-					
-					if (otpResponse.ok) {
-						const otpResult = await otpResponse.json();
-						await handleOtpVerification(otpResult);
-					} else {
-						const otpError = await otpResponse.json();
-						showToast(`Error: ${otpError.detail || 'OTP setup failed'}`, true);
-						return;
-					}
-				}
-				else {
-					showToast(profileSuccess, false);
-					history.pushState({}, "", "/profile");
-					router.init();
-				}
-			} 
-			else {
+				showToast(profileSuccess, false);
+				history.pushState({}, "", "/profile");
+				handleLocation();
+			} else {
 				const data = await response.json();
 				if (data)
 					showToast(circle_xmark + data.detail, true);
@@ -343,48 +323,6 @@ async function editProfileHandler() {
 			});
 		}
 	});
-}
-
-async function handleOtpVerification(data) {
-    const userContainer = document.getElementById('userContainer');
-    userContainer.innerHTML = '';
-    userContainer.insertAdjacentHTML('beforeend', data.qr_html);
-
-	const otpForm = document.getElementById('otpForm');
-	if (otpForm) {
-		console.log('OTP form found');
-		otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmitFromProfile(event, data.username));
-	} else {
-		console.error('OTP form not found');
-	}
-}
-
-async function handleOtpVerificationSubmitFromProfile(event, username) {
-	event.preventDefault();
-
-	const otpForm = event.target;
-	const otpFormData = new FormData(otpForm);
-	otpFormData.append('username', username);
-
-	try {
-		const userData = JSON.parse(localStorage.getItem('currentUser')); // Retrieve current user data
-		const verifyResponse = await fetch('/users/verify-otp', {
-			method: 'POST',
-			body: otpFormData
-		});
-
-		if (verifyResponse.ok) {
-			const verifyResult = await verifyResponse.json();
-			showToast(profileSuccess, false);
-			history.pushState({}, "", "/profile");
-			router.init();
-		} else {
-			showToast(verificationFailed, true);
-		}
-	} catch (error) {
-		console.log(error);
-		showToast(somethingWentWrong, true);
-	}
 }
 
 function createFriendRow(friend) {
@@ -419,7 +357,7 @@ async function profileHandler() {
 	if (!username) {
 		if (!userData) {
 			history.pushState({}, "", "/");
-			router.init();
+			handleLocation();
 			return;
 		}
 		username = userData.username;
@@ -439,7 +377,7 @@ async function profileHandler() {
 	} else {
 		showToast(somethingWentWrong, true);
 		history.pushState({}, "", "/");
-		router.init();
+		handleLocation();
 		return;
 	}
 
@@ -492,7 +430,7 @@ async function profileHandler() {
 	// } else {
 	// 	showToast(somethingWentWrong, true);
 	// 	history.pushState({}, "", "/");
-	// 	router.init();
+	// 	handleLocation();
 	// 	return;
 	// }
 	const addFriendButton = document.getElementById('addFriendButton');
@@ -520,6 +458,24 @@ async function profileHandler() {
 			}
 		}
 	});
+
+	const switchTable = document.getElementById('switchButton');
+	switchTable.addEventListener('click', () => {
+		console.log('click');
+		const match_history_table = document.getElementById('match_history');
+		console.log(match_history_table.style.display);
+		const tournament_history_table = document.getElementById('tournament_history');
+		const tableHeader = document.getElementById('tableHeader');
+		if (match_history_table.style.display === 'none') {
+			tableHeader.innerText = 'Match History';
+			match_history_table.style.display = 'block';
+			tournament_history_table.style.display = 'none';
+		} else {
+			tableHeader.innerText = 'Tournament History';
+			match_history_table.style.display = 'none';
+			tournament_history_table.style.display = 'block';
+		}
+	})
 }
 
 async function loginHandler() {
@@ -530,14 +486,17 @@ async function loginHandler() {
         window.loginFormHTML = await fetchHTML("/users/login.html");
     }
     const userContainer = document.getElementById('userContainer');
-    userContainer.innerHTML = '';
+    userContainer.innerHTML = ''; // Clear the UI container
     userContainer.insertAdjacentHTML('beforeend', window.loginFormHTML);
 
+    // Add event listener to the login form
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', handleLoginSubmit);
     }
 }
+
+// could remove this function
 
 async function fetchHTML(url) {
     try {
@@ -578,7 +537,7 @@ async function handleLoginSubmit(event) {
 				showToast(reActivate, false);
 				currentUser.setUser(loginData);
 				history.pushState({}, "", "/");
-				router.init();
+				handleLocation();
 			}
             else if (loginData.otp_required && loginData.otp_verified) {
                 loginForm.remove();
@@ -586,14 +545,13 @@ async function handleLoginSubmit(event) {
             }
 			else {
 				showToast(loginSuccess, false);
-				currentUser.setUser(loginData);
 				history.pushState({}, "", "/");
-				router.init();
+				handleLocation();
 			}
 		}
 		else {
-			// const errorData = await response.json();
-			showToast(loginFail, true);
+			const errorData = await response.json()
+			showToast(errorData, true);
 		}
 		}
 	catch (error) {
@@ -608,7 +566,7 @@ async function loadOtpForm() {
     }
     
     const userContainer = document.getElementById('userContainer');
-    userContainer.innerHTML = '';
+    userContainer.innerHTML = ''; // Clear the Usercontainer
     userContainer.insertAdjacentHTML('beforeend', window.otpFormHTML);
 
     const otpForm = document.getElementById('otpForm');
@@ -638,7 +596,7 @@ async function handleOtpSubmit(event) {
 			showToast(loginSuccess, false);
 			currentUser.setUser(otpData);
 			history.pushState({}, "", "/");
-			router.init();
+			handleLocation();
         } else {
 			showToast(verificationFailed, true);
         }
@@ -647,6 +605,83 @@ async function handleOtpSubmit(event) {
         alert('An error occurred during OTP validation. Please try again later.');
     }
 }
+
+async function loginHandler2() {
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
+	if (!loginFormHTML)
+		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
+	userContainer.insertAdjacentHTML('beforeend', loginFormHTML);
+    // Add event listener to the registration form
+    const loginForm = document.getElementById('loginForm');
+    loginForm.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Prevent default form submission behavior
+
+        // Get form data
+        const formData = new FormData(loginForm);
+        
+        try {
+            // Send form data to the backend
+            const response = await fetch('/users/login-user', {
+				method: 'POST',
+				body: formData
+            });
+            if (response.ok) {
+				const data = await response.json();
+				currentUser.setUser(data);
+				showToast(loginSuccess, false);
+				history.pushState({}, "", "/");
+				router.init();
+				// handleLocation();
+            } else {
+                showToast(loginFail, true);
+            }
+        } catch (error) {
+            showToast(somethingWentWrong, true);
+        }
+	});
+}
+
+
+
+
+// async function loginHandler() {
+// 	const registerBox = document.getElementById('registerBox');
+// 	if (registerBox)
+// 		registerBox.remove();
+// 	if (!loginFormHTML)
+// 		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
+//     document.getElementById('ui').insertAdjacentHTML('beforeend', loginFormHTML);
+//     // Add event listener to the registration form
+//     const loginForm = document.getElementById('loginForm');
+//     loginForm.addEventListener('submit', async (event) => {
+//         event.prev entDefault(); // Prevent default form submission behavior
+
+//         // Get form data
+//         let formData = new FormData(loginForm);
+        
+//         try {
+//             // Send form data to the backend
+//             const response = await fetch('/users/login-user', {
+//                 method: 'POST',
+//                 body: formData
+//             });
+
+//             if (response.ok) {
+//                 // Registration successful
+//                 alert('Login successful!');
+//                 // Redirect to another page or handle the response as needed
+//             } else {
+//                 // Registration failed
+//                 alert('Login failed!');
+//             }
+//         } catch (error) {
+//             console.error('Error couldnt login', error);
+//             alert('An error occurred during registration. Please try again later.');
+//         }
+//     });
+// }
+
 
 async function registerHandler() {
 	const userContainer = document.getElementById('userContainer');
@@ -698,18 +733,18 @@ async function handleRegistrationResponse(result) {
 
         const otpForm = document.getElementById('otpForm');
         if (otpForm) {
-            otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmitRegistering(event, result.user.username));
+            otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmit(event, result.user.username));
         } else {
             console.error('OTP form not found');
         }
     } else {
-        showToast(registerSuccess, false);
+        showToast('Registration successful', false);
         history.pushState({}, "", "/");
-        router.init();
+        handleLocation();
     }
 }
 
-async function handleOtpVerificationSubmitRegistering(event, username) {
+async function handleOtpVerificationSubmit(event, username) {
     event.preventDefault();
     
     const otpForm = event.target;
@@ -721,13 +756,15 @@ async function handleOtpVerificationSubmitRegistering(event, username) {
             method: 'POST',
             body: otpFormData
         });
-
+        
+        const verifyResult = await verifyResponse.json();
+        
         if (verifyResponse.ok) {
             const userContainer = document.getElementById('userContainer');
             userContainer.innerHTML = '';
-            showToast(registerSuccess, false);
+            showToast('Registration successful', false);
             history.pushState({}, "", "/");
-            router.init();
+            handleLocation();
         } else {
             showToast(verificationFailed, true);
         }
@@ -904,6 +941,17 @@ async function pongHandler() {
 	controlsButton.addEventListener('click', controlsHandler);
 }
 
+async function handleLocation() {
+	handleSidePanel();
+	const url = new URL(window.location.href);
+	const path = url.pathname;
+	currentRoute = window.location.href;
+	const handler = routes[path] || routes["/404"];
+	await handler();
+}
+
+let currentRoute = "";
+
 window.route = (event) => {
     event.preventDefault();
 	const newPath = new URL(event.currentTarget.href).pathname;
@@ -918,21 +966,7 @@ const pong = new Pong();
 
 pong.gameLoop();
 window.onpopstate = () => router.init();
-
-const gameToggle = document.getElementById('check');
-gameToggle.addEventListener('change', (event) => {
-	pong.changeGame();
-	gameToggle.disabled = true;
-});
-
-router.init();
-
-export async function handleMatchEnd(gameData) {
-    console.log("handleMatchEnd called");
-    const ui = document.getElementById('ui');
-    ui.style.display = 'block';
-
-}
+// handleLocation();
 
 
 // async function registerHandler() {
@@ -988,75 +1022,54 @@ export async function handleMatchEnd(gameData) {
 // 	}
 // }
 
-// async function temp_registerHandler() {
-// 	const userContainer = document.getElementById('userContainer');
-// 	userContainer.innerHTML = "";
-// 	if (!registerFormHTML) // we only fetch once and then save it locally
-// 		registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
-// 	userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
-// 	// Add event listener to the registration form
-// 	const registerForm = document.getElementById('registerForm');
-// 	registerForm.addEventListener('submit', async (event) => {
-// 		event.preventDefault(); // Prevent default form submission behavior
-// 		// Get form data
-// 		const formData = new FormData(registerForm);
-// 		try {
-// 			// Send form data to the backend
-// 			const response = await fetch('/users/create-user', {
-// 				method: 'POST',
-// 				body: formData
-// 			});
+const gameToggle = document.getElementById('check');
+gameToggle.addEventListener('change', (event) => {
+	pong.changeGame();
+	gameToggle.disabled = true;
+});
 
-// 			if (response.ok) {
-// 				showToast(registerSuccess, false);
-// 				history.pushState({}, "", "/");
-// 				router.init();
-// 			} else {
-// 				const data = await response.json();
-// 				if (data)
-// 					showToast(circle_xmark + data.detail, true);
-// 				else
-// 					showToast(somethingWentWrong, true);
-// 			}
-// 		} catch (error) {
-// 			showToast(somethingWentWrong, true);
-// 		}
-// 	});
-// }
+router.init();
+
+async function temp_registerHandler() {
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
+	if (!registerFormHTML) // we only fetch once and then save it locally
+		registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
+	userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
+	// Add event listener to the registration form
+	const registerForm = document.getElementById('registerForm');
+	registerForm.addEventListener('submit', async (event) => {
+		event.preventDefault(); // Prevent default form submission behavior
+		// Get form data
+		const formData = new FormData(registerForm);
+		try {
+			// Send form data to the backend
+			const response = await fetch('/users/create-user', {
+				method: 'POST',
+				body: formData
+			});
+
+			if (response.ok) {
+				showToast(registerSuccess, false);
+				history.pushState({}, "", "/");
+				handleLocation();
+			} else {
+				const data = await response.json();
+				if (data)
+					showToast(circle_xmark + data.detail, true);
+				else
+					showToast(somethingWentWrong, true);
+			}
+		} catch (error) {
+			showToast(somethingWentWrong, true);
+		}
+	});
+}
+
+export async function handleMatchEnd(gameData) {
+	console.log("handleMatchEnd called");
+	const ui = document.getElementById('ui');
+	ui.style.display = 'block';
 
 
-// async function loginHandler2() {
-// 	const userContainer = document.getElementById('userContainer');
-// 	userContainer.innerHTML = "";
-// 	if (!loginFormHTML)
-// 		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
-// 	userContainer.insertAdjacentHTML('beforeend', loginFormHTML);
-//     // Add event listener to the registration form
-//     const loginForm = document.getElementById('loginForm');
-//     loginForm.addEventListener('submit', async (event) => {
-//         event.preventDefault(); // Prevent default form submission behavior
-
-//         // Get form data
-//         const formData = new FormData(loginForm);
-        
-//         try {
-//             // Send form data to the backend
-//             const response = await fetch('/users/login-user', {
-// 				method: 'POST',
-// 				body: formData
-//             });
-//             if (response.ok) {
-// 				const data = await response.json();
-// 				currentUser.setUser(data);
-// 				showToast(loginSuccess, false);
-// 				history.pushState({}, "", "/");
-// 				router.init();
-// 				// router.init();
-//             } else {
-//                 showToast(loginFail, true);
-//             }
-//         } catch (error) {
-//             showToast(somethingWentWrong, true);
-//         }
-// 	});
-// }
+}

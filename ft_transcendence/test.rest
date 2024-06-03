@@ -120,13 +120,13 @@ Content-Type: application/json
 
 {
 	"game": "Pong",
-	"tournament_match": "true",
+	"tournament_match": "false",
 	"player1": 46,
-	"player1Hp": 22,
+	"player1Hp": 6,
 	"player2": 44,
-	"player2Hp": 43,
+	"player2Hp": 4,
 	"timePlayed": "30 minutes",
-	"dateTime": "2023-06-03T00:15:23Z"
+	"dateTime": "2024-07-03T00:15:23Z"
 }
 
 
@@ -136,7 +136,8 @@ POST http://127.0.0.1:8000/pong/create-tournament
 Content-Type: application/json
 
 {
-	"match_one": 23,
-	"match_two": 24,
-	"match_final": 25
+	"game": "Pong",
+	"match_one": 1,
+	"match_two": 2,
+	"match_final": 3
 }

@@ -66,6 +66,8 @@ class TournamentSerializer(serializers.ModelSerializer):
 		model = Tournament
 		fields = [
 			'id',
+			'game',
+			'dateTime',
 			'match_one',
 			'match_two',
 			'match_final',
@@ -86,4 +88,26 @@ class TournamentCreateSerializer(serializers.ModelSerializer):
 		]
 
 	def create(self, validated_data):
-		return Tournament.objects.create(**validated_data)
+		# Extract matches from the validated data
+		match_one = validated_data.pop('match_one')
+		match_two = validated_data.pop('match_two')
+		match_final = validated_data.pop('match_final')
+
+		# Create the tournament
+		tournament = Tournament.objects.create(
+			match_one=match_one,
+			match_two=match_two,
+			match_final=match_final
+		)
+
+		# Add players from the matches to the tournament
+		players = set()
+		players.add(match_one.player1)
+		players.add(match_one.player2)
+		players.add(match_two.player1)
+		players.add(match_two.player2)
+
+		tournament.players.set(players)
+		tournament.save()
+
+		return tournament
