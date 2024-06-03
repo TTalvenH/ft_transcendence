@@ -119,10 +119,10 @@ POST http://127.0.0.1:8000/pong/create-match
 Content-Type: application/json
 
 {
-    "player1": 44,
-    "player1Hp": 4,
-    "player2": 46,
-    "player2Hp": 3,
-    "timePlayed": "30 minutes",
-    "dateTime": "2024-05-31"
+	"player1": 44,
+	"player1Hp": 10,
+	"player2": 46,
+	"player2Hp": 20,
+	"timePlayed": "30 minutes",
+	"dateTime": "2024-05-31"
 }
