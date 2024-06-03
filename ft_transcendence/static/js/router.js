@@ -834,7 +834,12 @@ async function one_v_oneHandler() {
 							const ui = document.getElementById('ui');
 							userContainer.innerHTML = "";
 							ui.style.display = 'none';
-							
+							const data = {
+								player1: userData.username,
+								player1_id: userData.id,
+								player2: username,
+								player2_id: null
+							}
 							pong.startGame(userData.username, username);
 						} else {
 							showToast(somethingWentWrong, true);

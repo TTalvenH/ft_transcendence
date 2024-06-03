@@ -50,10 +50,15 @@ def updateProfile(request):
 @update_last_active
 def userProfileTemplate(request, username):
 	user = get_object_or_404(CustomUser, username=username)
+	player1_matches = user.player1_matches.all().filter(tournament_match=False)
+	player2_matches = user.player2_matches.all().filter(tournament_match=False)
+	match_history = MatchSerializer(instance=player1_matches, many=True).data + MatchSerializer(instance=player2_matches, many=True).data
+	match_history = sorted(match_history, key=lambda x: x['dateTime'], reverse=True)
+	print(match_history)
 	context = {
 		'username': user.username,
 		'profile_image': user.image.url if user.image else 'static/images/plankton.jpg',
-		'match_history': MatchSerializer(instance=user.player1_matches.all(), many=True).data + MatchSerializer(instance=user.player2_matches.all(), many=True).data,
+		'match_history': match_history,
 		'friends': FriendSerializer(instance=user.friends.all(), many=True).data,
 	}
 	print(context.get('match_history'))

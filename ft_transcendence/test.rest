@@ -119,10 +119,24 @@ POST http://127.0.0.1:8000/pong/create-match
 Content-Type: application/json
 
 {
-	"player1": 44,
-	"player1Hp": 10,
-	"player2": 46,
-	"player2Hp": 20,
+	"game": "Pong",
+	"tournament_match": "true",
+	"player1": 46,
+	"player1Hp": 22,
+	"player2": 44,
+	"player2Hp": 43,
 	"timePlayed": "30 minutes",
-	"dateTime": "2024-05-31"
+	"dateTime": "2023-06-03T00:15:23Z"
+}
+
+
+###
+
+POST http://127.0.0.1:8000/pong/create-tournament
+Content-Type: application/json
+
+{
+	"match_one": 23,
+	"match_two": 24,
+	"match_final": 25
 }

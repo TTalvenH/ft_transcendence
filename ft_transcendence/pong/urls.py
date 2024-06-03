@@ -8,4 +8,5 @@ urlpatterns = [
 	path('1v1.html', views.one_v_one_template, name="1v1"),
 	path('controls.html', views.controls_template, name="controls"),
 	path('create-match', views.create_match, name="create-match"),
+	path('create-tournament', views.create_tournament, name="create-tournament"),
 ]

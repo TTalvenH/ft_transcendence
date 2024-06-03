@@ -5,7 +5,7 @@ from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from django.contrib.auth.models import User
 from .models import Match
-from .serializers import MatchSerializer
+from .serializers import MatchSerializer, MatchCreateSerializer, TournamentSerializer, TournamentCreateSerializer
 
 # Create your views here.
 @api_view(['GET'])
@@ -53,9 +53,18 @@ def controls_template(request):
 
 @api_view(['POST'])
 def create_match(request):
-	match_serializer = MatchSerializer(data=request.data)
+	match_serializer = MatchCreateSerializer(data=request.data)
 
 	if match_serializer.is_valid():
 		match_serializer.save()
 		return Response(match_serializer.data, status=status.HTTP_201_CREATED)
 	return Response(match_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def create_tournament(request):
+	tournament_serializer = TournamentCreateSerializer(data=request.data)
+
+	if tournament_serializer.is_valid():
+		tournament_serializer.save()
+		return Response(tournament_serializer.data, status=status.HTTP_201_CREATED)
+	return Response(tournament_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Match
+from .models import Match, Tournament
 from users.models import CustomUser
 
 class MatchSerializer(serializers.ModelSerializer):
@@ -31,7 +31,9 @@ class MatchCreateSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Match
 		fields = [
+			'id',
 			'game',
+			'tournament_match',
 			'player1',
 			'player1Hp',
 			'player2',
@@ -39,6 +41,7 @@ class MatchCreateSerializer(serializers.ModelSerializer):
 			'timePlayed',
 			'dateTime'
 		]
+		read_only_fields = ['id']
 
 	def validate(self, data):
 		"""
@@ -52,3 +55,35 @@ class MatchCreateSerializer(serializers.ModelSerializer):
 		# Custom creation logic, if needed
 		match = Match.objects.create(**validated_data)
 		return match
+	
+
+class TournamentSerializer(serializers.ModelSerializer):
+	match_one = MatchSerializer()
+	match_two = MatchSerializer()
+	match_final = MatchSerializer()
+
+	class Meta:
+		model = Tournament
+		fields = [
+			'id',
+			'match_one',
+			'match_two',
+			'match_final',
+		]
+		read_only_fields = ['id']
+
+class TournamentCreateSerializer(serializers.ModelSerializer):
+	match_one = serializers.PrimaryKeyRelatedField(queryset=Match.objects.all())
+	match_two = serializers.PrimaryKeyRelatedField(queryset=Match.objects.all())
+	match_final = serializers.PrimaryKeyRelatedField(queryset=Match.objects.all())
+
+	class Meta:
+		model = Tournament
+		fields = [
+			'match_one',
+			'match_two',
+			'match_final'
+		]
+
+	def create(self, validated_data):
+		return Tournament.objects.create(**validated_data)
