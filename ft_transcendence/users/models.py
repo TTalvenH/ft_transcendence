@@ -8,7 +8,7 @@ from django.core.files.storage import default_storage
 # Creating our own user class
 class CustomUser(AbstractUser):
 	display_name = models.CharField(max_length=50, blank=True)
-	match_history = models.ManyToManyField('PongMatch', blank=True)
+	# match_history = models.ManyToManyField('PongMatch', blank=True)
 	friends = models.ManyToManyField('CustomUser', blank=True)
 	image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
 	otp_enabled = models.BooleanField(default=False)
@@ -36,14 +36,14 @@ def delete_image_on_delete(sender, instance, **kwargs):
 		if default_storage.exists(instance.image.path):
 			default_storage.delete(instance.image.path)
 
-class PongMatch(models.Model):
-    player1Name = models.CharField(max_length=20)
-    player1Hp = models.IntegerField()
-    player2Name = models.CharField(max_length=20)
-    player2Hp = models.IntegerField()
-    winner = models.CharField(max_length=20)
-    timePlayed = models.CharField(max_length=20)
-    dateTime = models.CharField(max_length=20)
+# class PongMatch(models.Model):
+#     player1Name = models.CharField(max_length=20)
+#     player1Hp = models.IntegerField()
+#     player2Name = models.CharField(max_length=20)
+#     player2Hp = models.IntegerField()
+#     winner = models.CharField(max_length=20)
+#     timePlayed = models.CharField(max_length=20)
+#     dateTime = models.CharField(max_length=20)
 
-    def __str__(self):
-        return f'{self.player1Name} vs. {self.player2Name} on {self.dateTime}'
+#     def __str__(self):
+#         return f'{self.player1Name} vs. {self.player2Name} on {self.dateTime}'

@@ -1,7 +1,9 @@
 from rest_framework import serializers
-from .models import CustomUser, PongMatch
+from .models import CustomUser
 from .tokens import create_jwt_pair_for_user
 from django.utils import timezone
+from pong.serializers import MatchSerializer
+from pong.models import Match
 import re
 
 
@@ -99,14 +101,14 @@ class FriendSerializer(serializers.ModelSerializer):
 		five_minutes_ago = now - timezone.timedelta(minutes=1)
 		return last_active >= five_minutes_ago
 
-class MatchHistorySerializer(serializers.ModelSerializer):
-	class Meta:
-		model = PongMatch
-		fields = ['id', 'player1Name', 'player1Hp', 'player2Name', 'player2Hp', 'winner', 'timePlayed', 'dateTime']
+# class MatchHistorySerializer(serializers.ModelSerializer):
+# 	class Meta:
+# 		model = PongMatch
+# 		fields = ['id', 'player1Name', 'player1Hp', 'player2Name', 'player2Hp', 'winner', 'timePlayed', 'dateTime']
 
 class UserProfileSerializer(serializers.ModelSerializer):
 	friends = FriendSerializer(many=True)  # Use the nested serializer
-	match_history = MatchHistorySerializer(many=True)
+	# match_history = MatchHistorySerializer(many=True)
 	old_password = serializers.CharField(
 		write_only=True,
 		required=False,
@@ -170,14 +172,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 		# Update match_history entries with the user's new name
-		for match in instance.match_history.all():
-			if match.player1Name == old_username:
-				match.player1Name = instance.username
-			elif match.player2Name == old_username:
-				match.player2Name = instance.username
-			if match.winner == old_username:
-				match.winner = instance.username
-			match.save()
-			print('player 1 = {}, player 2 = {}, winner = {}'.format(match.player1Name, match.player2Name, match.winner))
+		# for match in instance.match_history.all():
+		# 	if match.player1Name == old_username:
+		# 		match.player1Name = instance.username
+		# 	elif match.player2Name == old_username:
+		# 		match.player2Name = instance.username
+		# 	if match.winner == old_username:
+		# 		match.winner = instance.username
+		# 	match.save()
+		# 	print('player 1 = {}, player 2 = {}, winner = {}'.format(match.player1Name, match.player2Name, match.winner))
 
 		return instance

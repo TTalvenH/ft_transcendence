@@ -20,6 +20,7 @@ class Router {
 	constructor() {
 		this.routes = [];
 		this.currentPath = '';
+		this.currenSearchParams = '';
 	}
 	get(path, handler) {
 		if (!path || !handler) throw new Error('path and handler are required');
@@ -34,7 +35,7 @@ class Router {
 	async init() {
 		handleSidePanel();
 		this.currentPath = window.location.pathname;
-		console.log(window.location.pathname);
+		this.currenSearchParams = window.location.search;
 		await currentUser.refreshToken();
 		const route = this.routes.find(route => {
 			const regEx = new RegExp(`^${route.path}$`);
@@ -648,21 +649,21 @@ async function handleOtpSubmit(event) {
 }
 
 async function registerHandler() {
-    const userContainer = document.getElementById('userContainer');
-    userContainer.innerHTML = "";
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
 
-    if (!registerFormHTML) {
-        registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
-    }
+	if (!registerFormHTML) {
+		registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
+	}
 
-    userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
+	userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
 
-    const registerForm = document.getElementById('registerForm');
-    if (registerForm) {
-        registerForm.addEventListener('submit', handleRegisterSubmit);
-    } else {
-        console.error('Registration form not found');
-    }
+	const registerForm = document.getElementById('registerForm');
+	if (registerForm) {
+		registerForm.addEventListener('submit', handleRegisterSubmit);
+	} else {
+		console.error('Registration form not found');
+	}
 }
 
 async function handleRegisterSubmit(event) {
@@ -815,7 +816,12 @@ async function one_v_oneHandler() {
 							const ui = document.getElementById('ui');
 							userContainer.innerHTML = "";
 							ui.style.display = 'none';
-							
+							const data = {
+								player1: userData.username,
+								player1_id: userData.id,
+								player2: username,
+								player2_id: null
+							}
 							pong.startGame(userData.username, username);
 						} else {
 							showToast(somethingWentWrong, true);
@@ -901,10 +907,10 @@ async function pongHandler() {
 window.route = (event) => {
     event.preventDefault();
 	const newPath = new URL(event.currentTarget.href).pathname;
-	if (router.currentPath === newPath) {
+	if (router.currentPath === newPath && router.currenSearchParams === event.currentTarget.search) {
 		return ;
 	}
-	window.history.pushState({}, "", newPath);
+	window.history.pushState({}, "", event.currentTarget.href);
 	router.init();
 };
 

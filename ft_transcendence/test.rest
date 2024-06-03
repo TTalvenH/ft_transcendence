@@ -112,3 +112,31 @@ POST http://127.0.0.1:8000/users/token/refresh_token
 Content-Type: application/json
 
 { "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcxNzQwNzIwNCwiaWF0IjoxNzE2OTc1MjA0LCJqdGkiOiI0Mzc3MjEzOWI3MmU0MDQzYWRiMmYyNzg0NDExNWMyMCIsInVzZXJfaWQiOjQ0fQ.Wgkz6ELoRp6LzCd5jfhsQuJHjd5oDYWImWRI67KZw2s"}
+
+###
+
+POST http://127.0.0.1:8000/pong/create-match
+Content-Type: application/json
+
+{
+	"game": "Pong",
+	"tournament_match": "true",
+	"player1": 46,
+	"player1Hp": 22,
+	"player2": 44,
+	"player2Hp": 43,
+	"timePlayed": "30 minutes",
+	"dateTime": "2023-06-03T00:15:23Z"
+}
+
+
+###
+
+POST http://127.0.0.1:8000/pong/create-tournament
+Content-Type: application/json
+
+{
+	"match_one": 23,
+	"match_two": 24,
+	"match_final": 25
+}
