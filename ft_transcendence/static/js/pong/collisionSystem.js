@@ -54,49 +54,33 @@ export function collisionSystem(entities, game, deltaTime) {
 	if (game === Game.PONG) {
 		const ball = entities.pongEntities["Ball"];
 		const powerUp = entities.entities["PowerUp1"];
-		
-		const walls = [
-			entities.pongEntities["NeonBox1"],
-			entities.pongEntities["NeonBox2"],
-			entities.pongEntities["NeonBox3"],
-			entities.pongEntities["NeonBox4"]
-		];
+		const walls = [entities.pongEntities["NeonBox1"], entities.pongEntities["NeonBox2"], entities.pongEntities["NeonBox3"], entities.pongEntities["NeonBox4"]];
 		const players = [entities.pongEntities["Player1"], entities.pongEntities["Player2"]];
 		const camera = entities.entities["Camera"];
-		// CCD steps
-		const numberOfSteps = 20;
-		const stepSize = deltaTime / numberOfSteps;
-	
-		for (let step = 0; step < numberOfSteps; step++) {
-			const nextPosition = ball.position.clone().add(ball.velocity.clone().multiplyScalar((step + 1) * stepSize));
-	
-			// Check for collisions with walls
-			for (const wall of walls) {
-				if (wall.collisionBox.intersectsSphere(new THREE.Sphere(nextPosition, ball.radius))) {
-					handleWallCollision(ball, wall, players, camera);
-				}
-			}
-			// Check for collisions with players
+		const nextPosition = ball.position.clone().add(ball.velocity.clone().multiplyScalar(deltaTime));
+
+		// Check for collisions with walls
+		const wall1 = ball.velocity.y < 0 ? walls[0] : walls[1];
+		const wall2 = ball.velocity.x < 0 ? walls[2] : walls[3];
+		if (wall1.collisionBox.intersectsSphere(new THREE.Sphere(nextPosition, ball.radius)))
+			handleWallCollision(ball, wall1, players, camera);
+		if (wall2.collisionBox.intersectsSphere(new THREE.Sphere(nextPosition, ball.radius)))
+			handleWallCollision(ball, wall2, players, camera);
+			
+		// Check for collisions with players
+		const player = ball.velocity.x > 0 ? players[0] : players[1];
+		if (player.collisionBox.intersectsSphere(new THREE.Sphere(nextPosition, ball.radius))) {
+			handlePlayerCollision(ball, player);
+		}
+		if (powerUp.isVisible && new THREE.Sphere(nextPosition, ball.radius).intersectsSphere(new THREE.Sphere(powerUp.object.position, powerUp.radius))) {
+			powerUp.isVisible = false;
 			if (ball.velocity.x > 0) {
-				if (players[0].collisionBox.intersectsSphere(new THREE.Sphere(nextPosition, ball.radius))) {
-					handlePlayerCollision(ball, players[0]);
+				if (players[1].hitPoints < 3) {
+					players[1].hitPoints++;
 				}
-			}
-			else {
-				if (players[1].collisionBox.intersectsSphere(new THREE.Sphere(nextPosition, ball.radius))) {
-					handlePlayerCollision(ball, players[1]);
-				}
-			}
-			if (powerUp.isVisible && new THREE.Sphere(nextPosition, ball.radius).intersectsSphere(new THREE.Sphere(powerUp.object.position, powerUp.radius))) {
-				powerUp.isVisible = false;
-				if (ball.velocity.x > 0) {
-					if (players[1].hitPoints < 3) {
-						players[1].hitPoints++;
-					}
-				} else {
-					if (players[0].hitPoints < 3) {
-						players[0].hitPoints++;
-					}
+			} else {
+				if (players[0].hitPoints < 3) {
+					players[0].hitPoints++;
 				}
 			}
 		}
