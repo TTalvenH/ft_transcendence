@@ -69,7 +69,7 @@ export class BallEntity {
 			return;
 		}
 		let emissiveIntensity = THREE.MathUtils.clamp(Math.random(), minFlicker, maxFlicker);
-		let lightIntensity = THREE.MathUtils.clamp(Math.random(), minFlicker, maxFlicker) * 4;
+		let lightIntensity = THREE.MathUtils.clamp(Math.random(), minFlicker, this.lightIntensity) * 4;
 		this.pointLight.intensity = lightIntensity;
 		this.material.emissiveIntensity = emissiveIntensity;
 		
