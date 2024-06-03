@@ -65,6 +65,13 @@ def qrPrompt(request):
 def renderQr(request):
     return render(request, 'users/qr.html')
 
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from django.http import HttpRequest
+from django.middleware.csrf import get_token
+from django.template.loader import render_to_string
+
 @api_view(['POST'])
 def createUser(request):
     serializer = RegisterUserSerializer(data=request.data)
@@ -74,37 +81,30 @@ def createUser(request):
         # If OTP is enabled, set up OTP for the user
         enable_otp = request.data.get('enable_otp')
         otp_data = {}
+        qr_html = None
         if enable_otp == 'true':
             otp_data = setup_otp(user)
             if not otp_data['created']:
                 return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Construct the response data
-        response_data = {
-            'user': serializer.data,
-            'otp': otp_data
-        }
+            # Convert DRF request to Django HttpRequest
+            django_request = HttpRequest()
+            django_request.method = 'GET'
+            django_request.user = request.user
 
- 		 # Convert DRF request to Django HttpRequest
-        django_request = HttpRequest()
-        django_request.method = 'GET'
-        django_request.user = request.user
+            # Manually include CSRF token in the context
+            csrf_token = get_token(request)
+            context = otp_data.get('context', {})
+            context['csrf_token'] = csrf_token
 
-        # Manually include CSRF token in the context
-        csrf_token = get_token(request)
-        context = {
-            **otp_data['context'],
-            'csrf_token': csrf_token,
-        }
-
-        # Render the QR code HTML with CSRF token
-        qr_html = render_to_string('users/qr.html', context, request=django_request)
+            # Render the QR code HTML with CSRF token
+            qr_html = render_to_string('users/qr.html', context, request=django_request)
 
         # Construct the response data
         response_data = {
             'user': serializer.data,
             'otp': otp_data,
-            'qr_html': qr_html  # Include the rendered HTML in the response
+            'qr_html': qr_html  # Include the rendered HTML in the response if available
         }
 
         return Response(response_data, status=status.HTTP_201_CREATED)
@@ -115,6 +115,7 @@ def createUser(request):
     elif serializer.errors.get('email'):
         detail = {'detail': 'Email taken'}
     return Response(detail, status=status.HTTP_400_BAD_REQUEST)
+
 
 def setup_otp(user):
 	device, created = TOTPDevice.objects.get_or_create(user=user, name='default')

@@ -713,7 +713,7 @@ async function handleRegistrationResponse(result) {
             console.error('OTP form not found');
         }
     } else {
-        showToast('Registration successful', false);
+        showToast(registerSuccess, false);
         history.pushState({}, "", "/");
         router.init();
     }
@@ -738,7 +738,7 @@ async function handleOtpVerificationSubmitRegistering(event, username) {
         if (verifyResponse.ok) {
             const userContainer = document.getElementById('userContainer');
             userContainer.innerHTML = '';
-            showToast('Registration successful', false);
+            showToast(registerSuccess, false);
             history.pushState({}, "", "/");
             router.init();
         } else {
@@ -912,14 +912,14 @@ async function pongHandler() {
 	controlsButton.addEventListener('click', controlsHandler);
 }
 
-async function handleLocation() {
-	handleSidePanel();
-	const url = new URL(window.location.href);
-	const path = url.pathname;
-	currentRoute = window.location.href;
-	const handler = routes[path] || routes["/404"];
-	await handler();
-}
+// async function handleLocation() {
+// 	handleSidePanel();
+// 	const url = new URL(window.location.href);
+// 	const path = url.pathname;
+// 	currentRoute = window.location.href;
+// 	const handler = routes[path] || routes["/404"];
+// 	await handler();
+// }
 
 let currentRoute = "";
 

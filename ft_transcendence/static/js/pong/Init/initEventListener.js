@@ -37,22 +37,22 @@ export function initEventListener(entities, gameGlobals) {
 			case "d":
 				knockoffPlayer2.keyRight = true;
 				break;
-			case "p":
-				if (gameGlobals.gameState === GameStates.PAUSED || gameGlobals.gameState === GameStates.MENU)
-				{
-					gameGlobals.gameState = GameStates.PLAYING;
-				}
-				else if (gameGlobals.gameState === GameStates.PLAYING)
-				{
-					gameGlobals.gameState = GameStates.PAUSED;
-				}
-				break;
-			case "t":
-				if (gameGlobals.gameState === GameStates.MENU && gameGlobals.game === Game.PONG)
-					gameGlobals.game = Game.KNOCKOFF;
-				else if (gameGlobals.gameState === GameStates.MENU && gameGlobals.game === Game.KNOCKOFF)
-					gameGlobals.game = Game.PONG;
-				break;
+			// case "p":
+			// 	if (gameGlobals.gameState === GameStates.PAUSED || gameGlobals.gameState === GameStates.MENU)
+			// 	{
+			// 		gameGlobals.gameState = GameStates.PLAYING;
+			// 	}
+			// 	else if (gameGlobals.gameState === GameStates.PLAYING)
+			// 	{
+			// 		gameGlobals.gameState = GameStates.PAUSED;
+			// 	}
+			// 	break;
+			// case "t":
+			// 	if (gameGlobals.gameState === GameStates.MENU && gameGlobals.game === Game.PONG)
+			// 		gameGlobals.game = Game.KNOCKOFF;
+			// 	else if (gameGlobals.gameState === GameStates.MENU && gameGlobals.game === Game.KNOCKOFF)
+			// 		gameGlobals.game = Game.PONG;
+			// 	break;
 		}
 	});
 	
