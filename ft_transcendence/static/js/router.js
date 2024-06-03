@@ -1,4 +1,3 @@
-//variables where we save the html content when it is first fetched
 let loginFormHTML;
 let registerFormHTML;
 const loginSuccess = '<i class="fa-regular fa-circle-check"></i> Login Success';
@@ -296,7 +295,6 @@ async function editProfileHandler() {
 					
 					if (otpResponse.ok) {
 						const otpResult = await otpResponse.json();
-						// console.log('1')
 						await handleOtpVerification(otpResult);
 					} else {
 						const otpError = await otpResponse.json();
@@ -305,7 +303,6 @@ async function editProfileHandler() {
 					}
 				}
 				else {
-
 					showToast(profileSuccess, false);
 					history.pushState({}, "", "/profile");
 					router.init();
@@ -346,53 +343,44 @@ async function editProfileHandler() {
 async function handleOtpVerification(data) {
     const userContainer = document.getElementById('userContainer');
     userContainer.innerHTML = '';
-
-    // Log the HTML content to ensure it is being received
-    console.log('QR HTML:', data.qr_html);
-
     userContainer.insertAdjacentHTML('beforeend', data.qr_html);
 
-    // Add a slight delay to ensure the form is rendered
-
-        const otpForm = document.getElementById('otpForm');
-        if (otpForm) {
-            console.log('OTP form found');
-            otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmitFromProfile(event, data.username));
-        } else {
-            console.error('OTP form not found');
-        }
-    }
-
-	async function handleOtpVerificationSubmitFromProfile(event, username) {
-		event.preventDefault();
-	
-		const otpForm = event.target;
-		const otpFormData = new FormData(otpForm);
-		otpFormData.append('username', username);
-		console.log('4');
-	
-		try {
-			const userData = JSON.parse(localStorage.getItem('currentUser')); // Retrieve current user data
-			const verifyResponse = await fetch('/users/verify-otp', {
-				method: 'POST',
-				body: otpFormData
-			});
-	
-			if (verifyResponse.ok) {
-				const verifyResult = await verifyResponse.json();
-				console.log('2hat');
-				// verifyResult.user.username = username;
-				showToast(profileSuccess, false);
-				history.pushState({}, "", "/profile");
-				router.init();
-			} else {
-				showToast(verificationFailed, true);
-			}
-		} catch (error) {
-			console.log(error);
-			showToast('Something went wrong', true);
-		}
+	const otpForm = document.getElementById('otpForm');
+	if (otpForm) {
+		console.log('OTP form found');
+		otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmitFromProfile(event, data.username));
+	} else {
+		console.error('OTP form not found');
 	}
+}
+
+async function handleOtpVerificationSubmitFromProfile(event, username) {
+	event.preventDefault();
+
+	const otpForm = event.target;
+	const otpFormData = new FormData(otpForm);
+	otpFormData.append('username', username);
+
+	try {
+		const userData = JSON.parse(localStorage.getItem('currentUser')); // Retrieve current user data
+		const verifyResponse = await fetch('/users/verify-otp', {
+			method: 'POST',
+			body: otpFormData
+		});
+
+		if (verifyResponse.ok) {
+			const verifyResult = await verifyResponse.json();
+			showToast(profileSuccess, false);
+			history.pushState({}, "", "/profile");
+			router.init();
+		} else {
+			showToast(verificationFailed, true);
+		}
+	} catch (error) {
+		console.log(error);
+		showToast(somethingWentWrong, true);
+	}
+}
 
 function createFriendRow(friend) {
 	const friendBodyEl = document.getElementById('friendsBody');
@@ -537,17 +525,14 @@ async function loginHandler() {
         window.loginFormHTML = await fetchHTML("/users/login.html");
     }
     const userContainer = document.getElementById('userContainer');
-    userContainer.innerHTML = ''; // Clear the UI container
+    userContainer.innerHTML = '';
     userContainer.insertAdjacentHTML('beforeend', window.loginFormHTML);
 
-    // Add event listener to the login form
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', handleLoginSubmit);
     }
 }
-
-// could remove this function
 
 async function fetchHTML(url) {
     try {
@@ -618,7 +603,7 @@ async function loadOtpForm() {
     }
     
     const userContainer = document.getElementById('userContainer');
-    userContainer.innerHTML = ''; // Clear the Usercontainer
+    userContainer.innerHTML = '';
     userContainer.insertAdjacentHTML('beforeend', window.otpFormHTML);
 
     const otpForm = document.getElementById('otpForm');
@@ -725,16 +710,13 @@ async function handleOtpVerificationSubmitRegistering(event, username) {
     const otpForm = event.target;
     const otpFormData = new FormData(otpForm);
     otpFormData.append('username', username);
-	console.log('4')
 
     try {
         const verifyResponse = await fetch('/users/verify-otp', {
             method: 'POST',
             body: otpFormData
         });
-        
-        const verifyResult = await verifyResponse.json();
-        
+
         if (verifyResponse.ok) {
             const userContainer = document.getElementById('userContainer');
             userContainer.innerHTML = '';
@@ -911,17 +893,6 @@ async function pongHandler() {
 	const controlsButton = document.getElementById('controls');
 	controlsButton.addEventListener('click', controlsHandler);
 }
-
-// async function handleLocation() {
-// 	handleSidePanel();
-// 	const url = new URL(window.location.href);
-// 	const path = url.pathname;
-// 	currentRoute = window.location.href;
-// 	const handler = routes[path] || routes["/404"];
-// 	await handler();
-// }
-
-let currentRoute = "";
 
 window.route = (event) => {
     event.preventDefault();
