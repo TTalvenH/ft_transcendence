@@ -90,7 +90,7 @@ def createUser(request):
         otp_data = {}
         qr_html = None
         if enable_otp == 'true':
-            otp_data = setup_otp(user)
+            otp_data = setupOTP(user)
             if not otp_data['created']:
                 return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -124,7 +124,7 @@ def createUser(request):
     return Response(detail, status=status.HTTP_400_BAD_REQUEST)
 
 
-def setup_otp(user):
+def setupOTP(user):
 	device, created = TOTPDevice.objects.get_or_create(user=user, name='default')
 
 	key = pyotp.random_base32()
@@ -193,7 +193,7 @@ def validateOtpAndLogin(request):
 
 
 @api_view(['POST'])
-def verify_otp(request):
+def verifyOTP(request):
 	user = get_object_or_404(CustomUser, username=request.data.get('username'))
 	otp = request.data.get('otp')
 
@@ -280,12 +280,14 @@ def getUserPorfile(request, username):
     # Return the serialized user data
     return Response(serializer.data)
 
+# otpSetupView is called when user sets up otp from profile
+
 @api_view(['POST'])
 def otpSetupView(request):
 	user = get_object_or_404(CustomUser, id=request.user.id)
 	enable_otp = request.data.get('enable_otp')
 	otp_data = {}
-	otp_data = setup_otp(user)
+	otp_data = setupOTP(user)
 	if not otp_data['created']:
 		return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 

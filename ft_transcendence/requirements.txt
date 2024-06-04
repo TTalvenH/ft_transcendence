@@ -7,4 +7,3 @@ Pillow
 pyotp
 django_otp
 qrcode
-three
