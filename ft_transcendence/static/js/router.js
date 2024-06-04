@@ -205,11 +205,6 @@ function handleSidePanel() {
 
 }
 
-function addGameOptions() {
-	alert("add game options");
-	console.log("test")
-}
-
 const logoutButton = document.getElementById('logoutButton');
 logoutButton.addEventListener('click', logOutHandler);
 
