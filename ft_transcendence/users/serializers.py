@@ -124,7 +124,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 	)
 	class Meta:
 		model = CustomUser
-		fields = ['id', 'image', 'username', 'friends', 'last_active', 'old_password', 'new_password', 'confirm_password', 'email', 'otp_enabled']
+		fields = ['id', 'image', 'username', 'friends', 'last_active', 'old_password', 'new_password', 'confirm_password', 'email', 'otp_enabled',]
 		read_only_fields = ['id', 'friends', 'match_history', 'last_active']
 		extra_kwargs = {
 			'username': {'required': False}  # Make username field optional for partial updates

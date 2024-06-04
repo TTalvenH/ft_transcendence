@@ -758,21 +758,21 @@ async function loginHandler2() {
 
 
 async function registerHandler() {
-	const userContainer = document.getElementById('userContainer');
-	userContainer.innerHTML = "";
+    const userContainer = document.getElementById('userContainer');
+    userContainer.innerHTML = "";
 
-	if (!registerFormHTML) {
-		registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
-	}
+    if (!registerFormHTML) {
+        registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
+    }
 
-	userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
+    userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
 
-	const registerForm = document.getElementById('registerForm');
-	if (registerForm) {
-		registerForm.addEventListener('submit', handleRegisterSubmit);
-	} else {
-		console.error('Registration form not found');
-	}
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+        registerForm.addEventListener('submit', handleRegisterSubmit);
+    } else {
+        console.error('Registration form not found');
+    }
 }
 
 async function handleRegisterSubmit(event) {
@@ -781,6 +781,11 @@ async function handleRegisterSubmit(event) {
     const registerForm = event.target;
     const formData = new FormData(registerForm);
     
+	// Log the FormData to ensure it's correct
+	for (var pair of formData.entries()) {
+		console.log(pair[0]+ ': ' + pair[1]);
+	}
+
     try {
         const response = await fetch('/users/create-user', {
             method: 'POST',
@@ -801,7 +806,8 @@ async function handleRegisterSubmit(event) {
 
 async function handleRegistrationResponse(result) {
     const userContainer = document.getElementById('userContainer');
-    if (result.otp && result.qr_html) {
+    
+	if (result.otp && result.qr_html) {
         userContainer.innerHTML = '';
         userContainer.insertAdjacentHTML('beforeend', result.qr_html);
 
@@ -811,6 +817,9 @@ async function handleRegistrationResponse(result) {
         } else {
             console.error('OTP form not found');
         }
+    } else if (result.otp && result.email_otp) {
+        showToast(result.otp.email_otp, false);
+        await handleEmailOtpVerification(result.user.username);
     } else {
         showToast('Registration successful', false);
         history.pushState({}, "", "/");
@@ -837,6 +846,46 @@ async function handleOtpVerificationSubmit(event, username) {
             const userContainer = document.getElementById('userContainer');
             userContainer.innerHTML = '';
             showToast('Registration successful', false);
+            history.pushState({}, "", "/");
+            handleLocation();
+        } else {
+            showToast(verificationFailed, true);
+        }
+    } catch (error) {
+        showToast('Something went wrong', true);
+    }
+}
+
+async function handleEmailOtpVerification(username) {
+    const userContainer = document.getElementById('userContainer');
+    userContainer.innerHTML = `
+        <form id="emailOtpForm">
+            <label for="emailOtpCode">Enter the OTP sent to your email:</label>
+            <input type="text" id="emailOtpCode" name="otp_code" required>
+            <button type="submit">Verify OTP</button>
+        </form>
+    `;
+
+    const emailOtpForm = document.getElementById('emailOtpForm');
+    emailOtpForm.addEventListener('submit', (event) => handleEmailOtpVerificationSubmit(event, username));
+}
+
+async function handleEmailOtpVerificationSubmit(event, username) {
+    event.preventDefault();
+
+    const emailOtpForm = event.target;
+    const formData = new FormData(emailOtpForm);
+    formData.append('username', username);
+
+    try {
+        const verifyResponse = await fetch('/users/verify-email-otp', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (verifyResponse.ok) {
+            const verifyResult = await verifyResponse.json();
+            showToast('OTP verified successfully. Registration complete.', false);
             history.pushState({}, "", "/");
             handleLocation();
         } else {
