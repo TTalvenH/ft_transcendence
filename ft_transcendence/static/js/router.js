@@ -40,6 +40,7 @@ class Router {
 		};
 		this.routes.push(route);
 	}
+
 	async init() {
 		handleSidePanel();
 		this.currentPath = window.location.pathname;
@@ -931,6 +932,7 @@ async function one_v_oneHandler() {
 						})
 						if (response.ok) {
 							const player2Data = await response.json();
+							console.log(player2Data);
 							const ui = document.getElementById('ui');
 							userContainer.innerHTML = "";
 							ui.style.display = 'none';
@@ -1020,6 +1022,79 @@ async function pongHandler() {
 
 	const controlsButton = document.getElementById('controls');
 	controlsButton.addEventListener('click', controlsHandler);
+
+	const tournamentButton = document.getElementById('tournament');
+	tournamentButton.addEventListener('click', tournamentHandler);
+}
+
+async function tournamentHandler() {
+	const userData = currentUser.getUser();
+	if (!userData) {
+		history.pushState({}, "", "/");
+		router.init();
+		return ;
+	}
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
+	const response = await fetch("/pong/tournament.html", {
+		method: "GET",
+		headers: {
+			'Authorization': `Bearer ${userData.accessToken}`,
+		}
+	});
+	if (response.ok) {
+		const html = await response.text();
+		userContainer.insertAdjacentHTML('beforeend', html);
+
+		const cancelButton = document.getElementById('cancel');
+		cancelButton.addEventListener('click', () => {
+			history.pushState({}, "", "/pong");
+			router.init();
+		})
+
+		const startButton = document.getElementById('startButton');
+		
+		const addPlayerButtons = document.querySelectorAll('.addUserButton');
+		let buttonClicks = 0;
+		for (let i = 0; i < addPlayerButtons.length; i++) {
+			addPlayerButtons[i].addEventListener('click', async () => {
+				const input = addPlayerButtons[i].previousElementSibling;
+				if (!input) {
+					return ;
+				}
+				if (!input.value) {
+					showToast(circle_xmark + 'Please enter a username', true);
+					return ;
+				}
+				const response = await fetch(`/users/get-user/${input.value}/`, {
+					method: "POST",
+					headers: {
+						'Authorization': `Bearer ${userData.accessToken}`,
+					}
+				})
+				if (response.ok) {
+					const data = await response.json();
+					const playerHeader = document.getElementById('player' + (i));
+					playerHeader.innerHTML = data.username;
+					const playerInput = document.getElementById('player' + (i) + '_input');
+					playerHeader.style.display = 'block';
+					playerInput.style.display = 'none';
+					buttonClicks++;
+					console.log(buttonClicks);
+					if (buttonClicks === 3) {
+						console.log('watafak')
+						startButton.style.display = 'block';
+					}
+				} else {
+					console.error(response);
+					showToast(somethingWentWrong, true);
+				}
+				// input.focus();
+			})
+		}
+	} else {
+		showToast(somethingWentWrong, true);
+	}
 }
 
 async function handleLocation() {
@@ -1149,7 +1224,34 @@ async function temp_registerHandler() {
 }
 
 export async function handleMatchEnd(gameData) {
+	const userData = JSON.parse(localStorage.getItem('currentUser'));
 	console.log("handleMatchEnd called");
+	if (gameData) {
+		console.log("gamedata = " + JSON.stringify(gameData));
+		const body = {
+			game: 'pong',
+			tournament_match: false,
+			player1: gameData.player1.id,
+			player1Hp: gameData.player1.hitpoints,
+			player2: gameData.player2.id,
+			player2Hp: gameData.player2.hitpoints,
+			timePlayed: gameData.matchTimeLength,
+			dateTime: gameData.dateTime
+		}
+		console.log(JSON.stringify(body));
+		const response = await fetch('/pong/create-match', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer ' + userData.accessToken,
+			},
+			body: JSON.stringify(body)
+		});
+		if (response.error) {
+			console.log(response.error);
+			showToast(somethingWentWrong, true);
+		}
+	}
 	setTimeout(() => {
 		const ui = document.getElementById('ui');
 		ui.style.display = 'block';

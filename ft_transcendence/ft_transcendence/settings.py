@@ -62,9 +62,9 @@ MIDDLEWARE = [
 	# 'users.middleware.userMiddleware'
 ]
 
-# CORS_ALLOWED_ORIGINS = [
-# 	"http://localhost:8000",
-# ]
+CORS_ALLOWED_ORIGINS = [
+	"http://localhost:8000",
+]
 
 ROOT_URLCONF = 'ft_transcendence.urls'
 

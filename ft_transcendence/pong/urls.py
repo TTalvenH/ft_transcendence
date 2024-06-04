@@ -9,4 +9,5 @@ urlpatterns = [
 	path('controls.html', views.controls_template, name="controls"),
 	path('create-match', views.create_match, name="create-match"),
 	path('create-tournament', views.create_tournament, name="create-tournament"),
+	path('tournament.html', views.tournament_template, name="tournament"),
 ]

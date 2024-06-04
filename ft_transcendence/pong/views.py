@@ -53,8 +53,16 @@ def one_v_one_template(request):
 
 
 @api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@update_last_active
 def controls_template(request):
 	return render(request, 'pong/controls.html')
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@update_last_active
+def tournament_template(request):
+	return render(request, 'pong/tournament.html', {'username': request.user.username})
 
 @api_view(['POST'])
 def create_match(request):

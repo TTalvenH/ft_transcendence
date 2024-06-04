@@ -37,6 +37,7 @@ export const	Game = Object.freeze({
 export class Pong
 {
 	constructor() {
+		this.gameData = {};
 		this.gameGlobals = { gameState: GameStates.LOADING, game: Game.PONG };
 		this.currentGame = this.gameGlobals.game;
 		const loadingManager = new THREE.LoadingManager();
@@ -164,6 +165,7 @@ export class Pong
 	}
 
 	startGame(data) {
+		this.gameData = data;
 		const user1Name = this.entities['User1Name']
 		const user2Name = this.entities['User2Name']
 		
@@ -300,14 +302,17 @@ export class Pong
 			return;
 		}
 
+		//todo add game type. tournament or 1v1
 		const gameOverData = {
 			game: this.gameGlobals.game,
 			player1: {
-				name: userName1.text,
+				username: this.gameData.player1,
+				id: this.gameData.player1_id,
 				hitpoints: player1.hitPoints,
 			},
 			player2: {
-				name: userName2.text,
+				name: this.gameData.player2,
+				id: this.gameData.player2_id,
 				hitpoints: player2.hitPoints,
 			},
 			winner: winner,

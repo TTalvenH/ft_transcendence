@@ -125,8 +125,7 @@ Content-Type: application/json
 	"player1Hp": 6,
 	"player2": 44,
 	"player2Hp": 4,
-	"timePlayed": "30 minutes",
-	"dateTime": "2024-07-03T00:15:23Z"
+	"timePlayed": "30 minutes"
 }
 
 

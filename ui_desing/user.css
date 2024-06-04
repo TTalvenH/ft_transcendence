@@ -8,12 +8,14 @@
 	width: 25rem;
 	padding: 2.5rem;
 	box-sizing: border-box;
-	background: rgba(233, 68, 225, 0.1);
+	/* background: rgba(233, 68, 225, 0.1); */
+	background: rgba(100, 18, 96, 0.453);
 	border-radius: 0.625rem;
+	box-shadow: 0 0 30px #f141f1;
 }
 
 
-.box::before {
+/* .box::before {
     content: "";
     position: absolute;
     top: -2px; 
@@ -24,11 +26,11 @@
     z-index: -1;
 	border-radius: 0.625rem;
 
-    box-shadow: 0 0 10px #f141f1, 0 0 20px #f141f1, 0 0 30px #f141f1, 0 0 40px #f141f1;
+    box-shadow: 0 0 30px #f141f1;
 
 
     filter: blur(2px);
-}
+} */
   
   .box h2 {
 	margin: 0 0 1.875rem;
@@ -52,6 +54,7 @@
 	border-bottom: 0.065rem solid #fff;
 	outline: none;
 	background: transparent;
+	text-align: center;
   }
   
 .inputBox label {
@@ -100,4 +103,26 @@
     left: 0;
     color: #ffffff;
     font-size: 0.75rem;
+}
+
+.actionRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between; /* This ensures the content is spread between start and end */
+}
+
+.checkboxBox {
+    display: flex;
+    margin-left: auto; /* This will push the checkboxBox to the right */
+    margin-right: 10px;
+}
+
+.checkboxBox input {
+    margin-left: 5px;
+    margin-top: 15px;
+}
+
+.checkboxlabel {
+	margin-top: 9px;
+    color: #ffffff;
 }

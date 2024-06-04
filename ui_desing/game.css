@@ -77,11 +77,12 @@
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	background: rgba(233, 68, 225, 0.1);
+	background: rgba(100, 18, 96, 0.453);
 	border-radius: 0.625rem;
 	border: 2px solid #f141f1;
+	box-shadow: 0 0 30px #f141f1;
 	height: 400px;
-	width: 600px;
+	width: 400px;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-around;
