@@ -33,6 +33,5 @@ urlpatterns = [
 	path('sidepanel.html', views.ui),
 	path('pong/', include('pong.urls')),
 	path('users/', include('users.urls')),
-	path('', include('two_factor.urls')),
     re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
 ]

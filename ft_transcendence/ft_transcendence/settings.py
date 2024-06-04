@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     'django_otp',
     'django_otp.plugins.otp_totp',
     'django_otp.plugins.otp_static',
-    'two_factor',
 	'corsheaders'
 ]
 
@@ -63,9 +62,9 @@ MIDDLEWARE = [
 	# 'users.middleware.userMiddleware'
 ]
 
-CORS_ALLOWED_ORIGINS = [
-	"http://localhost:8000",
-]
+# CORS_ALLOWED_ORIGINS = [
+# 	"http://localhost:8000",
+# ]
 
 ROOT_URLCONF = 'ft_transcendence.urls'
 

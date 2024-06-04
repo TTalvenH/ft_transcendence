@@ -45,16 +45,17 @@ class Router {
 		this.currentPath = window.location.pathname;
 		this.currenSearchParams = window.location.search;
 		await currentUser.refreshToken();
-		this.routes.some(route => {
-			let regEx = new RegExp(`^${route.path}$`);
-			let path = window.location.pathname;
-
-			if (path.match(regEx)) {
-				let req = { path };
-				return route.handler(this, req);
-			}
+		const route = this.routes.find(route => {
+			const regEx = new RegExp(`^${route.path}$`);
+			return this.currentPath.match(regEx);
 		});
-	}
+		if (route) {
+			let req = { path: this.currentPath };
+			return route.handler(this, req);
+		} else {
+			history.pushState({}, "", "/");
+		}
+    }
 }
 
 const router = new Router();
@@ -244,7 +245,7 @@ async function editProfileHandler() {
 		headers: {
 			'Authorization': 'Bearer ' + userData.accessToken,
 		},
-	})
+	});
 	if (!updateProfileResponse.ok) {
 		showToast(somethingWentWrong, true);
 		return;
@@ -262,10 +263,8 @@ async function editProfileHandler() {
 		if (selectedFile) {
 			var reader = new FileReader();
 			reader.onload = function(e) {
-				// Replace the image source with the selected image
 				profileImage.src = e.target.result;
 				profileImage.onload = function() {
-					// Make sure the image is loaded before displaying it
 					profileImage.style.display = 'block';
 				}
 			}
@@ -274,6 +273,16 @@ async function editProfileHandler() {
 	});
 
 	const updateProfileForm = document.getElementById('updateProfileForm');
+	const otpEnabledInput = document.getElementById('otpEnabled');
+	const flexSwitch2FA = document.getElementById('flexSwitch2FA');
+
+	// Set the hidden input value based on the switch's initial state
+	otpEnabledInput.value = flexSwitch2FA.checked;
+
+	flexSwitch2FA.addEventListener('change', () => {
+		otpEnabledInput.value = flexSwitch2FA.checked;
+	});
+
 	updateProfileForm.addEventListener('submit', async (event) => {
 		try {
 			event.preventDefault();
@@ -282,7 +291,7 @@ async function editProfileHandler() {
 			if (selectedFile) {
 				formData.append('image', selectedFile);
 			}
-			console.log(formData);
+
 			const response = await fetch('/users/update-user-profile', {
 				method: 'PUT',
 				headers: {
@@ -292,16 +301,36 @@ async function editProfileHandler() {
 			});
 			if (response.ok) {
 				const data = await response.json();
-				//updating the user data
 				let current_user_data = JSON.parse(localStorage.getItem('currentUser'));
 				current_user_data.username = data.user.username;
 				current_user_data.id = data.user.id;
 				localStorage.setItem('currentUser', JSON.stringify(current_user_data));
-
-				showToast(profileSuccess, false);
-				history.pushState({}, "", "/profile");
-				router.init();
-			} else {
+				if (data.otp_setup_needed) {
+					const otpResponse = await fetch('/users/otpSetup-profile', {
+						method: 'POST',
+						headers: {
+							'Authorization': 'Bearer ' + userData.accessToken,
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({ enable_otp: true })
+					});
+					
+					if (otpResponse.ok) {
+						const otpResult = await otpResponse.json();
+						await handleOtpVerification(otpResult);
+					} else {
+						const otpError = await otpResponse.json();
+						showToast(`Error: ${otpError.detail || 'OTP setup failed'}`, true);
+						return;
+					}
+				}
+				else {
+					showToast(profileSuccess, false);
+					history.pushState({}, "", "/profile");
+					router.init();
+				}
+			} 
+			else {
 				const data = await response.json();
 				if (data)
 					showToast(circle_xmark + data.detail, true);
@@ -331,6 +360,48 @@ async function editProfileHandler() {
 			});
 		}
 	});
+}
+
+async function handleOtpVerification(data) {
+    const userContainer = document.getElementById('userContainer');
+    userContainer.innerHTML = '';
+    userContainer.insertAdjacentHTML('beforeend', data.qr_html);
+
+	const otpForm = document.getElementById('otpForm');
+	if (otpForm) {
+		console.log('OTP form found');
+		otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmitFromProfile(event, data.username));
+	} else {
+		console.error('OTP form not found');
+	}
+}
+
+async function handleOtpVerificationSubmitFromProfile(event, username) {
+	event.preventDefault();
+
+	const otpForm = event.target;
+	const otpFormData = new FormData(otpForm);
+	otpFormData.append('username', username);
+
+	try {
+		const userData = JSON.parse(localStorage.getItem('currentUser')); // Retrieve current user data
+		const verifyResponse = await fetch('/users/verify-otp', {
+			method: 'POST',
+			body: otpFormData
+		});
+
+		if (verifyResponse.ok) {
+			const verifyResult = await verifyResponse.json();
+			showToast(profileSuccess, false);
+			history.pushState({}, "", "/profile");
+			router.init();
+		} else {
+			showToast(verificationFailed, true);
+		}
+	} catch (error) {
+		console.log(error);
+		showToast(somethingWentWrong, true);
+	}
 }
 
 function createFriendRow(friend) {
@@ -965,6 +1036,7 @@ let currentRoute = "";
 window.route = (event) => {
     event.preventDefault();
 	const newPath = new URL(event.currentTarget.href).pathname;
+	console.log('haloooo');
 	if (router.currentPath === newPath && router.currenSearchParams === event.currentTarget.search) {
 		return ;
 	}
