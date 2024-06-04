@@ -48,14 +48,6 @@ class Router {
 			history.pushState({}, "", "/");
 		}
 	}
-	handle404() {
-		const userContainer = document.getElementById('userContainer');
-		userContainer.innerHTML = `
-			<h1>404 - Page Not Found</h1>
-			<p>The page you are looking for does not exist.</p>
-			<a href="/">Go to Home</a>
-		`;
-	}
 }
 
 const router = new Router();
