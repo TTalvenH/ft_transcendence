@@ -4,11 +4,21 @@
 		<h6>1 v 1</h6>
 	</div>
 	<div>
-		<h2>player1</h2>
+		<h2>{{ username }}</h2>
 		<h2>vs</h2>
+		<h2 style="display: none" id="guestHeader">Guest</h2>
 	</div>
 	<div id="buttons">
 		<button id="guestButton" style="left: 60px; position: absolute; bottom: 50px;" class="button">Play as Guest</button>
 		<button id="userButton" style="right: 60px; position: absolute; bottom: 50px;" class="button">Play as User</button>
 	</div>
+	<div id="username" style="position: absolute; bottom: 80px; display: none;" class="inputBox">
+		<input id="username_input" type="username"
+			name="username"
+			placeholder="Player 2 Username"
+			required onkeyup="this.setAttribute('value', this.value);"
+			value=""
+			autocomplete="one-time-code">
+	</div>
+	<button id="startGame" style="position: absolute; bottom: 30px; display: none;" class="button">Start Game</button>
 </div>

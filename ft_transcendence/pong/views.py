@@ -2,10 +2,13 @@ import json
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework import generics, status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes
 from django.contrib.auth.models import User
 from .models import Match
 from .serializers import MatchSerializer, MatchCreateSerializer, TournamentSerializer, TournamentCreateSerializer
+from users.decorators import update_last_active
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 # Create your views here.
 @api_view(['GET'])
@@ -43,8 +46,10 @@ def game_menu_template(request):
 
 
 @api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@update_last_active
 def one_v_one_template(request):
-	return render(request, 'pong/1v1.html')
+	return render(request, 'pong/1v1.html', {'username': request.user.username})
 
 
 @api_view(['GET'])

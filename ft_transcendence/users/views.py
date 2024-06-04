@@ -248,26 +248,26 @@ def testToken(request):
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-@api_view(['GET'])
-@authentication_classes([JWTAuthentication])
-@update_last_active
-@permission_classes([IsAuthenticated])
-def getUser(request, user_id):
-    # Extract user ID from the token
-    token_user_id = request.user.id
+# @api_view(['GET'])
+# @authentication_classes([JWTAuthentication])
+# @update_last_active
+# @permission_classes([IsAuthenticated])
+# def getUser(request, user_id):
+#     # Extract user ID from the token
+#     token_user_id = request.user.id
     
-    # Ensure the token user matches the requested user ID
-    if token_user_id != user_id:
-        return Response({"error": "You are not authorized to access this user's data."}, status=403)
+#     # Ensure the token user matches the requested user ID
+#     if token_user_id != user_id:
+#         return Response({"error": "You are not authorized to access this user's data."}, status=403)
     
-    # Retrieve user from the database
-    user = get_object_or_404(CustomUser, id=user_id)
+#     # Retrieve user from the database
+#     user = get_object_or_404(CustomUser, id=user_id)
     
-    # Serialize the user data
-    serializer = UserSerializer(instance=user)
+#     # Serialize the user data
+#     serializer = UserSerializer(instance=user)
     
-    # Return the serialized user data
-    return Response({'user': serializer.data})
+#     # Return the serialized user data
+#     return Response({'user': serializer.data})
 
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
@@ -335,8 +335,7 @@ def updateUserProfile(request):
 		if formSwitch == 'true' and not user.otp_verified:
 			otp_setup_needed = True
 		user_serializer = UserSerializer(instance=user)
-		jwt_token = create_jwt_pair_for_user(user)
-		return Response({'user': user_serializer.data, 'tokens': jwt_token, 'otp_setup_needed': otp_setup_needed})
+		return Response({'user': user_serializer.data, 'otp_setup_needed': otp_setup_needed})
 	detail = {'detail': 'Invalid data'}
 	if profile_serializer.errors.get('username'):
 		detail = {'detail': 'Username taken.'}
@@ -398,7 +397,7 @@ def logOut(request):
 @authentication_classes([JWTAuthentication])
 @update_last_active
 @permission_classes([IsAuthenticated])
-def user_exists(request, username):
+def get_user(request, username):
 	user = get_object_or_404(CustomUser, username=username)
 	print('dsadassadasdasd')
-	return Response(status=status.HTTP_200_OK)
+	return Response({'username': user.username, 'id': user.id}, status=status.HTTP_200_OK)

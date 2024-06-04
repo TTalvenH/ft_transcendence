@@ -65,7 +65,7 @@ router.get('/login', loginHandler2);
 
 router.get('/register', registerHandler);
 
-router.get('/log-out', logOutHandler);
+// router.get('/log-out', logOutHandler);
 
 router.get('/edit-profile', editProfileHandler);
 
@@ -209,6 +209,9 @@ function addGameOptions() {
 	console.log("test")
 }
 
+const logoutButton = document.getElementById('logoutButton');
+logoutButton.addEventListener('click', logOutHandler);
+
 async function logOutHandler() {
 	const userData = currentUser.getUser();
 	console.log('userdata = ' + userData.accessToken);
@@ -289,10 +292,15 @@ async function editProfileHandler() {
 			});
 			if (response.ok) {
 				const data = await response.json();
-				currentUser.setUser(data);
+				//updating the user data
+				let current_user_data = JSON.parse(localStorage.getItem('currentUser'));
+				current_user_data.username = data.user.username;
+				current_user_data.id = data.user.id;
+				localStorage.setItem('currentUser', JSON.stringify(current_user_data));
+
 				showToast(profileSuccess, false);
 				history.pushState({}, "", "/profile");
-				handleLocation();
+				router.init();
 			} else {
 				const data = await response.json();
 				if (data)
@@ -786,28 +794,32 @@ async function one_v_oneHandler() {
 			const one_v_oneHTML = await one_v_oneResponse.text();
 			userContainer.innerHTML = "";
 			userContainer.insertAdjacentHTML('beforeend', one_v_oneHTML);
+			const startGameButton = document.getElementById('startGame');
 
-			const newButton = document.createElement('button');
-			newButton.classList.add('button');
-			newButton.innerText = "Start Game";
-			newButton.style.bottom = "30px";
-			newButton.style.position = "absolute";
+			let mode = "guest";
 
 			const guestButton = document.getElementById('guestButton');
 			guestButton.addEventListener('click', async () => {
-				const gameBox = document.getElementById('gameBox');
 				const buttons = document.getElementById('buttons');
-				const h2Element = document.createElement('h2');
+				const guestHeader = document.getElementById('guestHeader');
 
 				buttons.remove();
 
-				h2Element.innerText = "Guest";
-				
-				gameBox.style.minHeight = "400px";
-			
-				gameBox.appendChild(h2Element);
-				gameBox.appendChild(newButton);
+				guestHeader.style.display = "block";
+				startGameButton.style.display = "block";
 			});
+
+			const userButton = document.getElementById('userButton');
+			userButton.addEventListener('click', async () => {
+				const buttons = document.getElementById('buttons');
+				buttons.remove();
+
+				const username = document.getElementById('username');
+				username.style.display = "block";
+
+				startGameButton.style.display = "block";
+				mode = "user";
+			})
 
 			const cancelButton = document.getElementById('cancel');
 			cancelButton.addEventListener('click', () => {
@@ -815,27 +827,24 @@ async function one_v_oneHandler() {
 				router.init();
 			})
 
-			const userButton = document.getElementById('userButton');
-			userButton.addEventListener('click', async () => {
-				const gameBox = document.getElementById('gameBox');
-				const buttons = document.getElementById('buttons');
-				const inputDiv = document.createElement('div');
 
-				buttons.remove();
-
-				inputDiv.classList.add('inputBox');
-				inputDiv.innerHTML = '<input id="username" type="username" name="username" placeholder="Player 2 Username" required onkeyup="this.setAttribute(\'value\', this.value);" value="" autocomplete="one-time-code">';
-				inputDiv.style.position = "absolute";
-				inputDiv.style.bottom = "80px";
-
-				gameBox.appendChild(inputDiv);
-				gameBox.appendChild(newButton);
-			})
-
-			newButton.addEventListener('click', async () => {
-				const usernameEL = document.getElementById('username');
-				if (usernameEL) {
-					const username = usernameEL.value;
+			startGameButton.addEventListener('click', async () => {
+				if (mode === "guest") {
+					const ui = document.getElementById('ui');
+					userContainer.innerHTML = "";
+					ui.style.display = 'none';
+					const data = {
+						player1: userData.username,
+						player1_id: userData.id,
+						player2: 'Guest',
+						player2_id: -1
+					}
+					pong.startGame(data);
+					return ;
+				}
+				const username_input = document.getElementById('username_input');
+				if (username_input) {
+					const username = username_input.value;
 					if (!username) {
 						showToast(circle_xmark + 'Please enter a username', true);
 						return ;
@@ -843,23 +852,24 @@ async function one_v_oneHandler() {
 					// todo check if user exists
 					console.log(username);
 					try {
-						const response = await fetch(`/users/check_if_user_exists/${username}/`, {
+						const response = await fetch(`/users/get-user/${username}/`, {
 							method: "POST",
 							headers: {
 								'Authorization': `Bearer ${userData.accessToken}`,
 							}
 						})
 						if (response.ok) {
+							const player2Data = await response.json();
 							const ui = document.getElementById('ui');
 							userContainer.innerHTML = "";
 							ui.style.display = 'none';
 							const data = {
 								player1: userData.username,
 								player1_id: userData.id,
-								player2: username,
-								player2_id: null
+								player2: player2Data.username,
+								player2_id: player2Data.id
 							}
-							pong.startGame(userData.username, username);
+							pong.startGame(data);
 						} else {
 							showToast(somethingWentWrong, true);
 						}
@@ -1068,8 +1078,9 @@ async function temp_registerHandler() {
 
 export async function handleMatchEnd(gameData) {
 	console.log("handleMatchEnd called");
-	const ui = document.getElementById('ui');
-	ui.style.display = 'block';
-
-
+	setTimeout(() => {
+		const ui = document.getElementById('ui');
+		ui.style.display = 'block';
+		router.init();
+	}, 5000);
 }

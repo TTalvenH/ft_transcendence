@@ -163,14 +163,14 @@ export class Pong
 		this.isWinnerLoopOn = false;
 	}
 
-	startGame(player1Name, player2Name) {
+	startGame(data) {
 		const user1Name = this.entities['User1Name']
 		const user2Name = this.entities['User2Name']
 		
-		user1Name.setText(player1Name);
-		user2Name.setText(player2Name);
-		user1Name.text = player1Name;
-		user2Name.text = player2Name;
+		user1Name.setText(data.player1);
+		user2Name.setText(data.player2);
+		user1Name.text = data.player1;
+		user2Name.text = data.player2;
 		this.startCountDown();
 	}
 

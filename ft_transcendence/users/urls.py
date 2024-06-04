@@ -16,7 +16,7 @@ urlpatterns = [
 	path('create-user', views.createUser, name="create-user"),
 	path('login-user', views.loginUser, name="login-user"),
 	path('test-token', views.testToken, name="test-token"),
-	path('get-user/<int:user_id>/', views.getUser, name="get-user"),
+	# path('get-user/<int:user_id>/', views.getUser, name="get-user"),
 	path('get-user-profile/<str:username>/', views.getUserPorfile, name="get-user-profile"),
 	path('update-user-profile', views.updateUserProfile, name="update-user-profile"),
 	path('add-friend/<str:username>/', views.addFriend, name="add-friend"),
@@ -24,5 +24,5 @@ urlpatterns = [
 	path('add-matchHistory/<int:match_id>/', views.add_matchHistory, name="add-matchHistory"),
 	path('get-matchHistory', views.get_matchHistory, name="get-matchHistory"),
 	path('token/refresh_token', TokenRefreshView.as_view(), name="refresh_token"),
-	path('check_if_user_exists/<str:username>/', views.user_exists, name="user_exists"),
+	path('get-user/<str:username>/', views.get_user, name="get-user"),
 ]
