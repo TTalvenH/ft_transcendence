@@ -127,12 +127,10 @@ class User {
 				}
 				else {
 					this.removeUser();
-					showToast(circle_xmark + 'Session Has Expired', true);
 					window.pushState({}, "", "/");
 					router.init();
 				}
 			} catch (error) {
-				console.log('error == ' + error);
 				showToast(somethingWentWrong, true);
 			}
 		}
@@ -1052,8 +1050,7 @@ async function tournamentHandler() {
 			router.init();
 		})
 
-		const startButton = document.getElementById('startButton');
-		
+		let players = [{username: userData.username, id: userData.id}];
 		const addPlayerButtons = document.querySelectorAll('.addUserButton');
 		let buttonClicks = 0;
 		for (let i = 0; i < addPlayerButtons.length; i++) {
@@ -1066,6 +1063,14 @@ async function tournamentHandler() {
 					showToast(circle_xmark + 'Please enter a username', true);
 					return ;
 				}
+				if (input.value === userData.username) {
+					showToast(circle_xmark + 'You cannot add yourself', true);
+					return ;
+				}
+				if (players.find(player => player.username === input.value)) {
+					showToast(circle_xmark + 'User already added', true);
+					return ;
+				}
 				const response = await fetch(`/users/get-user/${input.value}/`, {
 					method: "POST",
 					headers: {
@@ -1076,22 +1081,29 @@ async function tournamentHandler() {
 					const data = await response.json();
 					const playerHeader = document.getElementById('player' + (i));
 					playerHeader.innerHTML = data.username;
+					players.push(data);
 					const playerInput = document.getElementById('player' + (i) + '_input');
 					playerHeader.style.display = 'block';
 					playerInput.style.display = 'none';
 					buttonClicks++;
-					console.log(buttonClicks);
-					if (buttonClicks === 3) {
-						console.log('watafak')
-						startButton.style.display = 'block';
-					}
 				} else {
-					console.error(response);
+					if (response.status === 404) {
+						showToast(circle_xmark + 'User not found', true);
+						return ;
+					}
 					showToast(somethingWentWrong, true);
 				}
 				// input.focus();
 			})
 		}
+		
+		const startTournament = document.getElementById('startTournament');
+		startTournament.addEventListener('click', async () => {
+			if (buttonClicks < 3) {
+				showToast(circle_xmark + 'Please add at least 3 players', true);
+				return ;
+			}
+		})
 	} else {
 		showToast(somethingWentWrong, true);
 	}
