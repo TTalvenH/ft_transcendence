@@ -140,3 +140,10 @@ Content-Type: application/json
 	"match_two": 2,
 	"match_final": 3
 }
+
+###
+
+GET http://127.0.0.1:8000/pong/tournament_match.html
+Content-Type: application/json
+
+{ "haloo": "Haloo"}

@@ -169,10 +169,11 @@ export class Pong
 		const user1Name = this.entities['User1Name']
 		const user2Name = this.entities['User2Name']
 		
-		user1Name.setText(data.player1);
-		user2Name.setText(data.player2);
-		user1Name.text = data.player1;
-		user2Name.text = data.player2;
+		console.log(data);
+		user1Name.setText(data.player1.username);
+		user2Name.setText(data.player2.username);
+		user1Name.text = data.player1.username;
+		user2Name.text = data.player2.username;
 		this.startCountDown();
 	}
 
@@ -302,17 +303,20 @@ export class Pong
 			return;
 		}
 
+
+		
 		//todo add game type. tournament or 1v1
 		const gameOverData = {
+			tournament_match: this.gameData.tournament_match,
 			game: this.gameGlobals.game,
 			player1: {
-				username: this.gameData.player1,
-				id: this.gameData.player1_id,
+				username: this.gameData.player1.username,
+				id: this.gameData.player1.id,
 				hitpoints: player1.hitPoints,
 			},
 			player2: {
-				name: this.gameData.player2,
-				id: this.gameData.player2_id,
+				username: this.gameData.player2.username,
+				id: this.gameData.player2.id,
 				hitpoints: player2.hitPoints,
 			},
 			winner: winner,

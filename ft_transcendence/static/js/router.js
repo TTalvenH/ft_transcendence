@@ -67,8 +67,6 @@ router.get('/login', loginHandler);
 
 router.get('/register', registerHandler);
 
-router.get('/log-out', logOutHandler);
-
 router.get('/edit-profile', editProfileHandler);
 
 router.get('/pong', pongHandler);
@@ -501,9 +499,6 @@ async function profileHandler() {
 }
 
 async function loginHandler() {
-    const registerBox = document.getElementById('registerBox');
-    if (registerBox) 
-		registerBox.remove();
     if (!window.loginFormHTML) {
         window.loginFormHTML = await fetchHTML("/users/login.html");
     }
@@ -560,6 +555,8 @@ async function handleLoginSubmit(event) {
                 await loadOtpForm();
 			}
 			if (loginData.otp_required && !loginData.otp_verified) {
+				console.log(loginData.otp_required);
+				console.log(loginData.otp_verified);
 				showToast(loginSuccess, false);
 				showToast(notVerified, true);
 				showToast(reActivate, false);
@@ -715,9 +712,9 @@ async function handleRegistrationResponse(result) {
         console.error('OTP form not found');
     }
 
-    // showToast('Registration successful', false);
-    // history.pushState({}, "", "/");
-    // router.init();
+	showToast('Registration successful', false);
+	history.pushState({}, "", "/");
+	router.init();
 }
 
 
@@ -798,15 +795,21 @@ async function one_v_oneHandler() {
 
 
 			startGameButton.addEventListener('click', async () => {
+				await currentUser.refreshToken();
 				if (mode === "guest") {
 					const ui = document.getElementById('ui');
 					userContainer.innerHTML = "";
 					ui.style.display = 'none';
 					const data = {
-						player1: userData.username,
-						player1_id: userData.id,
-						player2: 'Guest',
-						player2_id: -1
+						tournament_match: true,
+						player1: {
+							username: userData.username,
+							id: userData.id
+						},
+						player2: {
+							username: "Guest",
+							id: -1
+						}
 					}
 					pong.startGame(data);
 					return ;
@@ -834,10 +837,14 @@ async function one_v_oneHandler() {
 							userContainer.innerHTML = "";
 							ui.style.display = 'none';
 							const data = {
-								player1: userData.username,
-								player1_id: userData.id,
-								player2: player2Data.username,
-								player2_id: player2Data.id
+								player1: {
+									username: userData.username,
+									id: userData.id
+								},
+								player2: {
+									username: player2Data.username,
+									id: player2Data.id
+								}
 							}
 							pong.startGame(data);
 						} else {
@@ -924,6 +931,15 @@ async function pongHandler() {
 	tournamentButton.addEventListener('click', tournamentHandler);
 }
 
+function shuffleArray(array) {
+	for (var i = array.length - 1; i > 0; i--) {
+		var j = Math.floor(Math.random() * (i + 1));
+		var temp = array[i];
+		array[i] = array[j];
+		array[j] = temp;
+	}
+}
+
 async function tournamentHandler() {
 	const userData = currentUser.getUser();
 	if (!userData) {
@@ -951,9 +967,9 @@ async function tournamentHandler() {
 
 		let players = [{username: userData.username, id: userData.id}];
 		const addPlayerButtons = document.querySelectorAll('.addUserButton');
-		let buttonClicks = 0;
 		for (let i = 0; i < addPlayerButtons.length; i++) {
 			addPlayerButtons[i].addEventListener('click', async () => {
+				await currentUser.refreshToken();
 				const input = addPlayerButtons[i].previousElementSibling;
 				if (!input) {
 					return ;
@@ -984,7 +1000,6 @@ async function tournamentHandler() {
 					const playerInput = document.getElementById('player' + (i) + '_input');
 					playerHeader.style.display = 'block';
 					playerInput.style.display = 'none';
-					buttonClicks++;
 				} else {
 					if (response.status === 404) {
 						showToast(circle_xmark + 'User not found', true);
@@ -998,14 +1013,86 @@ async function tournamentHandler() {
 		
 		const startTournament = document.getElementById('startTournament');
 		startTournament.addEventListener('click', async () => {
-			if (buttonClicks < 3) {
+			if (players.length < 4) {
 				showToast(circle_xmark + 'Please add at least 3 players', true);
 				return ;
+			}
+			console.log(players);
+			shuffleArray(players);
+			console.log(players);
+			tournamentData = [
+				{
+					tournament_match: true,
+					player1: players[0],
+					player2: players[1],
+				},
+				{
+					tournament_match: true,
+					player1: players[2],
+					player2: players[3],
+				},
+				{
+					tournament_match: true,
+					player1: null,
+					player2: null,
+				}
+			]
+			// tournamentData = {
+			// 	type: 'tournament',
+			// 	match_one: {
+			// 		player1: players[0],
+			// 		player2: players[1],
+			// 	},
+			// 	match_two: {
+			// 		player1: players[2],
+			// 		player2: players[3],
+			// 	},
+			// 	match_three: {
+			// 		player1: null,
+			// 		player2: null,
+			// 	}
+
+			// }
+			const response = await fetch("/pong/tournament_match.html", {
+				method: "GET",
+				headers: {
+					'Authorization': `Bearer ${userData.accessToken}`,
+				}
+			})
+			if (response.ok) {
+				if (!window.tournamentMatchHTML) {
+					window.tournamentMatchHTML = await response.text();
+				}
+				nextMatch(tournamentData[0]);
+			} else {
+				showToast(somethingWentWrong, true);
 			}
 		})
 	} else {
 		showToast(somethingWentWrong, true);
 	}
+}
+
+let tournamentData = null;
+
+function nextMatch(gameData) {
+	const ui = document.getElementById('ui');
+	ui.style.display = 'block';
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
+	userContainer.insertAdjacentHTML('beforeend', window.tournamentMatchHTML);
+	const player_one = document.getElementById('player_one');
+	const player_two = document.getElementById('player_two');
+	player_one.innerHTML = gameData.player1.username;
+	player_two.innerHTML = gameData.player2.username;
+	isTournament = true;
+
+	const nextMatch = document.getElementById('nextMatch');
+	nextMatch.addEventListener('click', async () => {
+		const ui = document.getElementById('ui');
+		ui.style.display = 'none';
+		pong.startGame(gameData);
+	})
 }
 
 window.route = (event) => {
@@ -1032,6 +1119,8 @@ gameToggle.addEventListener('change', (event) => {
 
 router.init();
 
+let isTournament = false;
+let matchIds = [];
 
 export async function handleMatchEnd(gameData) {
 	const userData = JSON.parse(localStorage.getItem('currentUser'));
@@ -1039,8 +1128,8 @@ export async function handleMatchEnd(gameData) {
 	if (gameData) {
 		console.log("gamedata = " + JSON.stringify(gameData));
 		const body = {
-			game: 'pong',
-			tournament_match: false,
+			game: gameData.game,
+			tournament_match: gameData.tournament_match,
 			player1: gameData.player1.id,
 			player1Hp: gameData.player1.hitpoints,
 			player2: gameData.player2.id,
@@ -1057,14 +1146,57 @@ export async function handleMatchEnd(gameData) {
 			},
 			body: JSON.stringify(body)
 		});
-		if (response.error) {
-			console.log(response.error);
+		if (response.ok) {
+			const data = await response.json();
+			if (isTournament) {
+				console.log('is tournament = ' + isTournament);
+				matchIds.push(data.id);
+				const winner = gameData.player1.hitpoints > gameData.player2.hitpoints ? gameData.player1 : gameData.player2;
+				console.log('winner = ' + winner.username);
+				if (!tournamentData[2].player1) {
+					tournamentData[2].player1 = winner;
+				} else {
+					tournamentData[2].player2 = winner;
+				}
+				if (matchIds.length === 3) {
+					const tournament_response = await fetch('/pong/create-tournament', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': 'Bearer ' + userData.accessToken,
+						},
+						body: JSON.stringify({
+							game: gameData.game,
+							match_one: matchIds[0],
+							match_two: matchIds[1],
+							match_final: matchIds[2],
+						})
+					})
+					if (tournament_response.error) {
+						showToast(somethingWentWrong, true);
+					}
+					matchIds = [];
+					isTournament = false;
+				} else {
+					console.log('matchIds asd = ' + matchIds.length);
+					setTimeout(() => {
+						nextMatch(tournamentData[matchIds.length]);
+					}, 5000);
+				}
+			} else {
+				if (matchIds.length > 0) {
+					matchIds = [];
+				} 
+			}
+		} else {
 			showToast(somethingWentWrong, true);
 		}
 	}
-	setTimeout(() => {
-		const ui = document.getElementById('ui');
-		ui.style.display = 'block';
-		router.init();
-	}, 5000);
+	if (!isTournament) {
+		setTimeout(() => {
+			const ui = document.getElementById('ui');
+			ui.style.display = 'block';
+			router.init();
+		}, 5000);
+	}
 }

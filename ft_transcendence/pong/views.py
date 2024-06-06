@@ -64,6 +64,14 @@ def controls_template(request):
 def tournament_template(request):
 	return render(request, 'pong/tournament.html', {'username': request.user.username})
 
+
+@api_view(['GET'])
+# @authentication_classes([JWTAuthentication])
+# @update_last_active
+def tournament_match_template(request):
+	data = request.data
+	return render(request, 'pong/tournament_match.html', data)
+
 @api_view(['POST'])
 def create_match(request):
 	match_serializer = MatchCreateSerializer(data=request.data)
