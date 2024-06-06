@@ -63,11 +63,11 @@ const router = new Router();
 
 router.get('/', homeHandler);
 
-router.get('/login', loginHandler2);
+router.get('/login', loginHandler);
 
 router.get('/register', registerHandler);
 
-// router.get('/log-out', logOutHandler);
+router.get('/log-out', logOutHandler);
 
 router.get('/edit-profile', editProfileHandler);
 
@@ -174,16 +174,6 @@ const gameOverData = {
 
 export const gameOverEvent = new CustomEvent('endMatch', { detail: gameOverData });
 
-const routes = {
-	"/": homeHandler,
-	"/pong": pongHandler,
-	"/login": loginHandler,
-	"/register": registerHandler,
-	"/profile": profileHandler,
-	"/edit-profile": editProfileHandler,
-	"/log-out": logOutHandler,
-};
-
 function handleSidePanel() {
 	const userData = currentUser.getUser();
 	const loginButton = document.getElementById('loginButton');
@@ -202,11 +192,6 @@ function handleSidePanel() {
 		loginButton.style.display = 'block';
 	}
 
-}
-
-function addGameOptions() {
-	alert("add game options");
-	console.log("test")
 }
 
 const logoutButton = document.getElementById('logoutButton');
@@ -383,7 +368,7 @@ async function handleOtpVerificationSubmitFromProfile(event, username) {
 	otpFormData.append('username', username);
 
 	try {
-		const userData = JSON.parse(localStorage.getItem('currentUser')); // Retrieve current user data
+		const userData = JSON.parse(localStorage.getItem('currentUser'));
 		const verifyResponse = await fetch('/users/verify-otp', {
 			method: 'POST',
 			body: otpFormData
@@ -523,7 +508,7 @@ async function loginHandler() {
         window.loginFormHTML = await fetchHTML("/users/login.html");
     }
     const userContainer = document.getElementById('userContainer');
-    userContainer.innerHTML = ''; // Clear the UI container
+    userContainer.innerHTML = '';
     userContainer.insertAdjacentHTML('beforeend', window.loginFormHTML);
 
     // Add event listener to the login form
@@ -533,7 +518,7 @@ async function loginHandler() {
     }
 }
 
-// could remove this function
+// could remove this function or use it in everything
 
 async function fetchHTML(url) {
     try {
@@ -566,15 +551,21 @@ async function handleLoginSubmit(event) {
         });
         if (response.ok) {
             loginData = await response.json();
-			console.log(loginData.user.username);
+			console.log('loginData');
+			console.log(loginData);
             currentUsername = formData.get('username');
+			if (loginData.email_otp_required)
+			{
+				loginForm.remove();
+                await loadOtpForm();
+			}
 			if (loginData.otp_required && !loginData.otp_verified) {
 				showToast(loginSuccess, false);
 				showToast(notVerified, true);
 				showToast(reActivate, false);
 				currentUser.setUser(loginData);
 				history.pushState({}, "", "/");
-				handleLocation();
+				router.init()
 			}
             else if (loginData.otp_required && loginData.otp_verified) {
                 loginForm.remove();
@@ -627,13 +618,13 @@ async function handleOtpSubmit(event) {
             method: 'POST',
             body: otpFormData
         });
-
+		console.log(otpResponse.data);
         if (otpResponse.ok) {
 			const otpData = await otpResponse.json();
 			showToast(loginSuccess, false);
 			currentUser.setUser(otpData);
 			history.pushState({}, "", "/");
-			handleLocation();
+			router.init()
         } else {
 			showToast(verificationFailed, true);
         }
@@ -643,60 +634,22 @@ async function handleOtpSubmit(event) {
     }
 }
 
-async function loginHandler() {
-	const registerBox = document.getElementById('registerBox');
-	if (registerBox)
-		registerBox.remove();
-	if (!loginFormHTML)
-		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
-    document.getElementById('ui').insertAdjacentHTML('beforeend', loginFormHTML);
-    // Add event listener to the registration form
-    const loginForm = document.getElementById('loginForm');
-    loginForm.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Prevent default form submission behavior
-
-        // Get form data
-        let formData = new FormData(loginForm);
-        
-        try {
-            // Send form data to the backend
-            const response = await fetch('/users/login-user', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (response.ok) {
-                // Registration successful
-                alert('Login successful!');
-                // Redirect to another page or handle the response as needed
-            } else {
-                // Registration failed
-                alert('Login failed!');
-            }
-        } catch (error) {
-            console.error('Error couldnt login', error);
-            alert('An error occurred during registration. Please try again later.');
-        }
-    });
-}
-
-
 async function registerHandler() {
-	const userContainer = document.getElementById('userContainer');
-	userContainer.innerHTML = "";
+    const userContainer = document.getElementById('userContainer');
+    userContainer.innerHTML = "";
 
-	if (!registerFormHTML) {
-		registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
-	}
+    if (!registerFormHTML) {
+        registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
+    }
 
-	userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
+    userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
 
-	const registerForm = document.getElementById('registerForm');
-	if (registerForm) {
-		registerForm.addEventListener('submit', handleRegisterSubmit);
-	} else {
-		console.error('Registration form not found');
-	}
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+        registerForm.addEventListener('submit', handleRegisterSubmit);
+    } else {
+        console.error('Registration form not found');
+    }
 }
 
 async function handleRegisterSubmit(event) {
@@ -705,6 +658,11 @@ async function handleRegisterSubmit(event) {
     const registerForm = event.target;
     const formData = new FormData(registerForm);
     
+	// Log the FormData to ensure it's correct
+	for (var pair of formData.entries()) {
+		console.log(pair[0]+ ': ' + pair[1]);
+	}
+
     try {
         const response = await fetch('/users/create-user', {
             method: 'POST',
@@ -725,22 +683,43 @@ async function handleRegisterSubmit(event) {
 
 async function handleRegistrationResponse(result) {
     const userContainer = document.getElementById('userContainer');
-    if (result.otp && result.qr_html) {
+    if (!userContainer) {
+        console.error('User container not found');
+        return;
+    }
+
+    console.log('Handling registration response:', result);
+
+    if (result.otp && result.otp.email_otp) {
+        try {
+            if (!window.verifyHTML) {
+                window.verifyHTML = await fetchHTML("/users/qr_prompt.html");
+            }
+            userContainer.innerHTML = '';
+            userContainer.insertAdjacentHTML('beforeend', window.verifyHTML);
+            console.log('Inserted verify HTML');
+        } catch (error) {
+            console.error('Error fetching verify HTML:', error);
+        }
+    } else if (result.otp && result.qr_html) {
         userContainer.innerHTML = '';
         userContainer.insertAdjacentHTML('beforeend', result.qr_html);
-
-        const otpForm = document.getElementById('otpForm');
-        if (otpForm) {
-            otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmit(event, result.user.username));
-        } else {
-            console.error('OTP form not found');
-        }
-    } else {
-        showToast('Registration successful', false);
-        history.pushState({}, "", "/");
-        handleLocation();
+        console.log('Inserted QR HTML');
     }
+
+    const otpForm = document.getElementById('otpForm');
+    if (otpForm) {
+        otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmit(event, result.user.username));
+        console.log('OTP form found and event listener added');
+    } else {
+        console.error('OTP form not found');
+    }
+
+    // showToast('Registration successful', false);
+    // history.pushState({}, "", "/");
+    // router.init();
 }
+
 
 async function handleOtpVerificationSubmit(event, username) {
     event.preventDefault();
@@ -748,7 +727,7 @@ async function handleOtpVerificationSubmit(event, username) {
     const otpForm = event.target;
     const otpFormData = new FormData(otpForm);
     otpFormData.append('username', username);
-
+	console.log('hi there2');
     try {
         const verifyResponse = await fetch('/users/verify-otp', {
             method: 'POST',
@@ -762,7 +741,7 @@ async function handleOtpVerificationSubmit(event, username) {
             userContainer.innerHTML = '';
             showToast('Registration successful', false);
             history.pushState({}, "", "/");
-            handleLocation();
+			router.init();
         } else {
             showToast(verificationFailed, true);
         }
@@ -1029,17 +1008,6 @@ async function tournamentHandler() {
 	}
 }
 
-async function handleLocation() {
-	handleSidePanel();
-	const url = new URL(window.location.href);
-	const path = url.pathname;
-	currentRoute = window.location.href;
-	const handler = routes[path] || routes["/404"];
-	await handler();
-}
-
-let currentRoute = "";
-
 window.route = (event) => {
     event.preventDefault();
 	const newPath = new URL(event.currentTarget.href).pathname;
@@ -1064,41 +1032,6 @@ gameToggle.addEventListener('change', (event) => {
 
 router.init();
 
-async function temp_registerHandler() {
-	const userContainer = document.getElementById('userContainer');
-	userContainer.innerHTML = "";
-	if (!registerFormHTML) // we only fetch once and then save it locally
-		registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
-	userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
-	// Add event listener to the registration form
-	const registerForm = document.getElementById('registerForm');
-	registerForm.addEventListener('submit', async (event) => {
-		event.preventDefault(); // Prevent default form submission behavior
-		// Get form data
-		const formData = new FormData(registerForm);
-		try {
-			// Send form data to the backend
-			const response = await fetch('/users/create-user', {
-				method: 'POST',
-				body: formData
-			});
-
-			if (response.ok) {
-				showToast(registerSuccess, false);
-				history.pushState({}, "", "/");
-				handleLocation();
-			} else {
-				const data = await response.json();
-				if (data)
-					showToast(circle_xmark + data.detail, true);
-				else
-					showToast(somethingWentWrong, true);
-			}
-		} catch (error) {
-			showToast(somethingWentWrong, true);
-		}
-	});
-}
 
 export async function handleMatchEnd(gameData) {
 	const userData = JSON.parse(localStorage.getItem('currentUser'));

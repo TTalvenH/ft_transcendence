@@ -70,6 +70,9 @@ ROOT_URLCONF = 'ft_transcendence.urls'
 
 # CORS_ALLOW_ALL_ORIGINS = True #RM LATER AND THE CORSHEADERS + MIDDLEWARE
 
+ROOT_URLCONF = 'ft_transcendence.urls'
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -198,3 +201,11 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'customer.service.pong@gmail.com' #put to env
+EMAIL_HOST_PASSWORD = 'fqih dkpd wtxa jgby' #put to env
