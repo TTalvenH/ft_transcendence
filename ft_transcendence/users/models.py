@@ -12,10 +12,9 @@ class CustomUser(AbstractUser):
 	friends = models.ManyToManyField('CustomUser', blank=True)
 	image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
 	otp_enabled = models.BooleanField(default=False)
+	email_otp_enabled = models.BooleanField(default=False)
 	otp_verified = models.BooleanField(default=False)
 
-	email_otp_enabled = models.BooleanField(default=False)
-	email_otp_verified = models.BooleanField(default=False)
 	email_otp_code = models.CharField(max_length=6, null=True, blank=True)
 
 	last_active = models.DateTimeField(default=timezone.now)

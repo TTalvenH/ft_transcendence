@@ -183,8 +183,7 @@ def loginUser(request):
 		return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 	otp_verified = user.otp_verified
-	email_otp_verified = user.email_otp_verified
-	if otp_verified:
+	if otp_verified and email_otp_enabled:
 		otp_code = generate_email_otp()
 		user.email_otp_code = otp_code
 		user.email_otp_enabled = True
@@ -198,7 +197,7 @@ def loginUser(request):
 		)
 
 	serializer = UserSerializer(instance=user)
-	response_data = {'otp_required': user.otp_enabled, 'email_otp_required': user.email_otp_enabled, 'otp_verified': otp_verified, 'email_otp_verified': email_otp_verified, 'user': serializer.data}
+	response_data = {'otp_required': user.otp_enabled, 'email_otp_required': user.email_otp_enabled, 'otp_verified': otp_verified, 'user': serializer.data}
 	# print(response_data)
 
 	user.update_last_active()
@@ -268,45 +267,28 @@ def verifyOTP(request):
         return Response({'detail': 'OTP required.'}, status=status.HTTP_400_BAD_REQUEST)
 
     # Check if the user has TOTP enabled
-    totp_verified = False
+    otp_verified = False
     if user.otp_enabled:
         try:
             device = TOTPDevice.objects.get(user=user, name='default')
             totp = pyotp.TOTP(device.key)
             if totp.verify(otp):
-                totp_verified = True
+                otp_verified = True
         except TOTPDevice.DoesNotExist:
             return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-    # Check if the user has email OTP enabled
-    email_otp_verified = False
+
     if user.email_otp_enabled:
         if otp == user.email_otp_code:
-            email_otp_verified = True
+           otp_verified = True
 
     # If either TOTP or email OTP is verified, consider it successful
-    if totp_verified or email_otp_verified:
+    if otp_verified:
         user.otp_verified = True
         user.save()
         return Response({'detail': 'OTP verified successfully.'}, status=status.HTTP_200_OK)
     else:
         return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
-
-@api_view(['POST'])
-def verifyEmailOTP(request):
-    user = get_object_or_404(CustomUser, username=request.data.get('username'))
-    otp_code = request.data.get('otp_code')
-
-    if not otp_code:
-        return Response({'detail': 'OTP code required.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    if otp_code == user.email_otp_code:
-        user.email_otp_verified = True
-        user.email_otp_enabled = True
-        user.save()
-        return Response({'detail': 'Email OTP verified successfully.'}, status=status.HTTP_200_OK)
-
-    return Response({'detail': 'Invalid OTP code.'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 
