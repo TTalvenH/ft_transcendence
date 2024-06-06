@@ -369,7 +369,7 @@ async function handleOtpVerificationSubmitFromProfile(event, username) {
 	otpFormData.append('username', username);
 
 	try {
-		const userData = JSON.parse(localStorage.getItem('currentUser')); // Retrieve current user data
+		const userData = JSON.parse(localStorage.getItem('currentUser'));
 		const verifyResponse = await fetch('/users/verify-otp', {
 			method: 'POST',
 			body: otpFormData
@@ -456,47 +456,6 @@ async function profileHandler() {
 		editProfileButton.style.display = 'none';
 		addFriendDiv.style.display = 'none';
 	}
-	// const response = await fetch(`/users/get-user-profile/${username}/`, {
-	// 	method: 'GET',
-	// 	headers: {
-	// 		'Authorization': 'Bearer ' + userData.accessToken
-	// 	},
-	// });
-	// if (response.ok) {
-	// 	const data = await response.json();
-	// 	console.log(data);
-	// 	data.friends.forEach(createFriendRow);
-	// 	const userName = document.getElementById('username');
-	// 	userName.innerText = data.username;
-	// 	const matchBodyEl = document.getElementById('matchHistoryBody');
-	// 	data.match_history.forEach((match) => {
-	// 		const matchRow = document.createElement('tr');
-	// 		const opponent = document.createElement('td');
-	// 		const score = document.createElement('td');
-	// 		const date = document.createElement('td');
-	// 		if (match.player1Name === userData.username) {
-	// 			opponent.innerText = match.player2Name;
-	// 		} else {
-	// 			opponent.innerText = match.player1Name;
-	// 		}
-	// 		score.innerText = match.player1Hp + ' - ' + match.player2Hp;
-	// 		if (match.winner === userData.username) {
-	// 			score.style.color = '#70d170';
-	// 		} else {
-	// 			score.style.color = 'red';
-	// 		}
-	// 		date.innerText = match.dateTime;
-	// 		matchRow.appendChild(opponent);
-	// 		matchRow.appendChild(score);
-	// 		matchRow.appendChild(date);
-	// 		matchBodyEl.appendChild(matchRow);
-	// 	})
-	// } else {
-	// 	showToast(somethingWentWrong, true);
-	// 	history.pushState({}, "", "/");
-	// 	handleLocation();
-	// 	return;
-	// }
 	const addFriendButton = document.getElementById('addFriendButton');
 	addFriendButton.addEventListener('click', async (event) => {
 		event.preventDefault();
@@ -550,7 +509,7 @@ async function loginHandler() {
         window.loginFormHTML = await fetchHTML("/users/login.html");
     }
     const userContainer = document.getElementById('userContainer');
-    userContainer.innerHTML = ''; // Clear the UI container
+    userContainer.innerHTML = '';
     userContainer.insertAdjacentHTML('beforeend', window.loginFormHTML);
 
     // Add event listener to the login form

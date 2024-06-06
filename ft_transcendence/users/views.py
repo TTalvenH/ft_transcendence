@@ -253,7 +253,7 @@ def validateOtpAndLogin(request):
 def verifyOTP(request):
     user = get_object_or_404(CustomUser, username=request.data.get('username'))
     otp = request.data.get('otp')
-    
+
     if not otp:
         return Response({'detail': 'OTP required.'}, status=status.HTTP_400_BAD_REQUEST)
 
