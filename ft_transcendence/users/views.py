@@ -184,11 +184,22 @@ def loginUser(request):
 
 	otp_verified = user.otp_verified
 	email_otp_verified = user.email_otp_verified
+	if otp_verified:
+		otp_code = generate_email_otp()
+		user.email_otp_code = otp_code
+		user.email_otp_enabled = True
+		user.save()
+		send_mail(
+			'Your OTP Code',
+			f'Your OTP code is {otp_code}',
+			'customer.support.pong@example.com',
+			[user.email],
+			fail_silently=False,
+		)
+
 	serializer = UserSerializer(instance=user)
 	response_data = {'otp_required': user.otp_enabled, 'email_otp_required': user.email_otp_enabled, 'otp_verified': otp_verified, 'email_otp_verified': email_otp_verified, 'user': serializer.data}
-	print(response_data)
-	if (user.otp_enabled and user.otp_verified) or (user.email_otp_enabled and user.email_otp_verified):
-		return Response(response_data, status=status.HTTP_200_OK) # ? 
+	# print(response_data)
 
 	user.update_last_active()
 	token = create_jwt_pair_for_user(user)
@@ -197,34 +208,33 @@ def loginUser(request):
 	return Response(response_data, status=status.HTTP_200_OK)
 
 
-
 @api_view(['POST'])
 def validateOtpAndLogin(request):
-    user = get_object_or_404(CustomUser, username=request.data['username'])
-    otp = request.data.get('otp')
-    email_otp = user.email_otp_code
+	user = get_object_or_404(CustomUser, username=request.data['username'])
+	otp = request.data.get('otp')
+	email_otp = user.email_otp_code
 
-    if user.otp_enabled and not otp:
-        return Response({'detail': 'OTP required.'}, status=status.HTTP_401_UNAUTHORIZED)
+	if user.otp_enabled and not otp:
+		return Response({'detail': 'OTP required.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    if user.email_otp_enabled and not email_otp:
-        return Response({'detail': 'Email OTP required.'}, status=status.HTTP_401_UNAUTHORIZED)
+	if user.email_otp_enabled and not email_otp:
+		return Response({'detail': 'Email OTP required.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    if user.otp_enabled:
-        device = TOTPDevice.objects.get(user=user, name='default')
-        totp = pyotp.TOTP(device.key)
-        if not totp.verify(otp):
-            return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
+	if user.otp_enabled:
+		device = TOTPDevice.objects.get(user=user, name='default')
+		totp = pyotp.TOTP(device.key)
+		if not totp.verify(otp):
+			return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    if user.email_otp_enabled:
-        if email_otp != user.email_otp_code:
-            return Response({'detail': 'Invalid Email OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
+	if user.email_otp_enabled:
+		if email_otp != user.email_otp_code:
+			return Response({'detail': 'Invalid Email OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    user.update_last_active()
-    token = create_jwt_pair_for_user(user)
-    serializer = UserSerializer(instance=user)
+	user.update_last_active()
+	token = create_jwt_pair_for_user(user)
+	serializer = UserSerializer(instance=user)
 
-    return Response({'tokens': token, 'user': serializer.data}, status=status.HTTP_200_OK)
+	return Response({'tokens': token, 'user': serializer.data}, status=status.HTTP_200_OK)
 
 
 

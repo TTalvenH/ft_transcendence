@@ -18,6 +18,7 @@ const verificationFailed = '<i class="fa-regular fa-circle-xmark"></i> Verificat
 const notVerified = '<i class="fa-regular fa-circle-xmark"></i> OTP was activated but not verified';
 const reActivate = '<i class="fa-regular fa-circle-xmark"></i> Please setup 2FA in profile settings';
 
+
 class Router {
 	constructor() {
 		this.routes = [];
@@ -559,7 +560,7 @@ async function handleLoginSubmit(event) {
 				loginForm.remove();
                 await loadOtpForm();
 			}
-			if (loginData.otp_required && !loginData.otp_verified) {
+			else if (loginData.otp_required && !loginData.otp_verified) {
 				showToast(loginSuccess, false);
 				showToast(notVerified, true);
 				showToast(reActivate, false);
@@ -573,8 +574,9 @@ async function handleLoginSubmit(event) {
             }
 			else {
 				showToast(loginSuccess, false);
+				currentUser.setUser(loginData);
 				history.pushState({}, "", "/");
-				handleLocation();
+				router.init();
 			}
 		}
 		else {
@@ -596,16 +598,20 @@ async function loadOtpForm() {
     const userContainer = document.getElementById('userContainer');
     userContainer.innerHTML = ''; // Clear the Usercontainer
     userContainer.insertAdjacentHTML('beforeend', window.otpFormHTML);
-
+	console.log('hello');
     const otpForm = document.getElementById('otpForm');
     if (otpForm) {
-        otpForm.addEventListener('submit', handleOtpSubmit);
+		console.log(otpForm);
+		otpForm.addEventListener('submit', handleOtpSubmit);
     }
 }
 
-async function handleOtpSubmit(event) {
-    event.preventDefault();
 
+
+
+async function handleOtpSubmit(event) {
+	event.preventDefault();
+	
     const otpForm = event.target;
     let otpFormData = new FormData(otpForm);
 
@@ -618,6 +624,7 @@ async function handleOtpSubmit(event) {
             method: 'POST',
             body: otpFormData
         });
+		console.log('otpResponse: ');
 		console.log(otpResponse.data);
         if (otpResponse.ok) {
 			const otpData = await otpResponse.json();
@@ -689,35 +696,38 @@ async function handleRegistrationResponse(result) {
     }
 
     console.log('Handling registration response:', result);
+	if (result.otp && (result.otp.email_otp || result.qr_html)) {
+		if (result.otp.email_otp) {
+			try {
+				if (!window.verifyHTML) {
+					window.verifyHTML = await fetchHTML("/users/qr_prompt.html");
+				}
+				userContainer.innerHTML = '';
+				userContainer.insertAdjacentHTML('beforeend', window.verifyHTML);
+				console.log('Inserted verify HTML');
+			} catch (error) {
+				console.error('Error fetching verify HTML:', error);
+			}
+		} else if (result.qr_html) {
+			userContainer.innerHTML = '';
+			userContainer.insertAdjacentHTML('beforeend', result.qr_html);
+			console.log('Inserted QR HTML');
+		}
+	
+		const otpForm = document.getElementById('otpForm');
+		if (otpForm) {
+			otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmit(event, result.user.username));
+			console.log('OTP form found and event listener added');
+		} else {
+			console.error('OTP form not found');
+		}
 
-    if (result.otp && result.otp.email_otp) {
-        try {
-            if (!window.verifyHTML) {
-                window.verifyHTML = await fetchHTML("/users/qr_prompt.html");
-            }
-            userContainer.innerHTML = '';
-            userContainer.insertAdjacentHTML('beforeend', window.verifyHTML);
-            console.log('Inserted verify HTML');
-        } catch (error) {
-            console.error('Error fetching verify HTML:', error);
-        }
-    } else if (result.otp && result.qr_html) {
-        userContainer.innerHTML = '';
-        userContainer.insertAdjacentHTML('beforeend', result.qr_html);
-        console.log('Inserted QR HTML');
-    }
-
-    const otpForm = document.getElementById('otpForm');
-    if (otpForm) {
-        otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmit(event, result.user.username));
-        console.log('OTP form found and event listener added');
-    } else {
-        console.error('OTP form not found');
-    }
-
-    // showToast('Registration successful', false);
-    // history.pushState({}, "", "/");
-    // router.init();
+	}
+	else {
+		showToast('Registration successful', false);
+		history.pushState({}, "", "/");
+		router.init();
+	}
 }
 
 
