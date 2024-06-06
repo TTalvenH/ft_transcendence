@@ -470,47 +470,6 @@ async function profileHandler() {
 		editProfileButton.style.display = 'none';
 		addFriendDiv.style.display = 'none';
 	}
-	// const response = await fetch(`/users/get-user-profile/${username}/`, {
-	// 	method: 'GET',
-	// 	headers: {
-	// 		'Authorization': 'Bearer ' + userData.accessToken
-	// 	},
-	// });
-	// if (response.ok) {
-	// 	const data = await response.json();
-	// 	console.log(data);
-	// 	data.friends.forEach(createFriendRow);
-	// 	const userName = document.getElementById('username');
-	// 	userName.innerText = data.username;
-	// 	const matchBodyEl = document.getElementById('matchHistoryBody');
-	// 	data.match_history.forEach((match) => {
-	// 		const matchRow = document.createElement('tr');
-	// 		const opponent = document.createElement('td');
-	// 		const score = document.createElement('td');
-	// 		const date = document.createElement('td');
-	// 		if (match.player1Name === userData.username) {
-	// 			opponent.innerText = match.player2Name;
-	// 		} else {
-	// 			opponent.innerText = match.player1Name;
-	// 		}
-	// 		score.innerText = match.player1Hp + ' - ' + match.player2Hp;
-	// 		if (match.winner === userData.username) {
-	// 			score.style.color = '#70d170';
-	// 		} else {
-	// 			score.style.color = 'red';
-	// 		}
-	// 		date.innerText = match.dateTime;
-	// 		matchRow.appendChild(opponent);
-	// 		matchRow.appendChild(score);
-	// 		matchRow.appendChild(date);
-	// 		matchBodyEl.appendChild(matchRow);
-	// 	})
-	// } else {
-	// 	showToast(somethingWentWrong, true);
-	// 	history.pushState({}, "", "/");
-	// 	handleLocation();
-	// 	return;
-	// }
 	const addFriendButton = document.getElementById('addFriendButton');
 	addFriendButton.addEventListener('click', async (event) => {
 		event.preventDefault();
@@ -684,81 +643,42 @@ async function handleOtpSubmit(event) {
     }
 }
 
-async function loginHandler2() {
-	const userContainer = document.getElementById('userContainer');
-	userContainer.innerHTML = "";
+async function loginHandler() {
+	const registerBox = document.getElementById('registerBox');
+	if (registerBox)
+		registerBox.remove();
 	if (!loginFormHTML)
 		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
-	userContainer.insertAdjacentHTML('beforeend', loginFormHTML);
+    document.getElementById('ui').insertAdjacentHTML('beforeend', loginFormHTML);
     // Add event listener to the registration form
     const loginForm = document.getElementById('loginForm');
     loginForm.addEventListener('submit', async (event) => {
         event.preventDefault(); // Prevent default form submission behavior
 
         // Get form data
-        const formData = new FormData(loginForm);
+        let formData = new FormData(loginForm);
         
         try {
             // Send form data to the backend
             const response = await fetch('/users/login-user', {
-				method: 'POST',
-				body: formData
+                method: 'POST',
+                body: formData
             });
+
             if (response.ok) {
-				const data = await response.json();
-				currentUser.setUser(data);
-				showToast(loginSuccess, false);
-				history.pushState({}, "", "/");
-				router.init();
-				// handleLocation();
+                // Registration successful
+                alert('Login successful!');
+                // Redirect to another page or handle the response as needed
             } else {
-                showToast(loginFail, true);
+                // Registration failed
+                alert('Login failed!');
             }
         } catch (error) {
-            showToast(somethingWentWrong, true);
+            console.error('Error couldnt login', error);
+            alert('An error occurred during registration. Please try again later.');
         }
-	});
+    });
 }
-
-
-
-
-// async function loginHandler() {
-// 	const registerBox = document.getElementById('registerBox');
-// 	if (registerBox)
-// 		registerBox.remove();
-// 	if (!loginFormHTML)
-// 		loginFormHTML = await fetch("/users/login.html").then((data) => data.text());
-//     document.getElementById('ui').insertAdjacentHTML('beforeend', loginFormHTML);
-//     // Add event listener to the registration form
-//     const loginForm = document.getElementById('loginForm');
-//     loginForm.addEventListener('submit', async (event) => {
-//         event.prev entDefault(); // Prevent default form submission behavior
-
-//         // Get form data
-//         let formData = new FormData(loginForm);
-        
-//         try {
-//             // Send form data to the backend
-//             const response = await fetch('/users/login-user', {
-//                 method: 'POST',
-//                 body: formData
-//             });
-
-//             if (response.ok) {
-//                 // Registration successful
-//                 alert('Login successful!');
-//                 // Redirect to another page or handle the response as needed
-//             } else {
-//                 // Registration failed
-//                 alert('Login failed!');
-//             }
-//         } catch (error) {
-//             console.error('Error couldnt login', error);
-//             alert('An error occurred during registration. Please try again later.');
-//         }
-//     });
-// }
 
 
 async function registerHandler() {
@@ -1135,61 +1055,6 @@ const pong = new Pong();
 
 pong.gameLoop();
 window.onpopstate = () => router.init();
-// handleLocation();
-
-
-// async function registerHandler() {
-// 	const loginBox = document.getElementById('loginBox');
-// 	if (loginBox) {
-// 		loginBox.remove();
-// 	}
-
-// 	if (!registerFormHTML) {
-// 		registerFormHTML = await fetch("/users/register.html").then(response => {
-// 			if (!response.ok) throw new Error('Failed to fetch registration form');
-// 			return response.text();
-// 		});
-// 	}
-
-// 	const userContainer = document.getElementById('userContainer');
-// 	userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
-
-// 	const registerForm = document.getElementById('registerForm');
-// 	if (registerForm) {
-// 		registerForm.addEventListener('submit', async (event) => {
-// 			event.preventDefault();
-
-// 			const formData = new FormData(registerForm);
-
-// 			try {
-// 				const response = await fetch('/users/create-user', {
-// 					method: 'POST',
-// 					body: formData
-// 				});
-
-// 				if (response.ok) {
-// 					const result = await response.json();
-// 					console.log(result.otp);
-// 					if (result.otp && result.otp.html) {
-// 						userContainer.innerHTML = '';
-// 						const qrHTML = result.otp.html;
-// 						document.getElementById('userContainer').insertAdjacentHTML('beforeend', qrHTML);
-// 					} else {
-// 						alert('Registration successful');
-// 					}
-// 				} else {
-// 					const errorData = await response.json();
-// 					alert(`Registration failed: ${errorData.detail}`);
-// 				}
-// 			} catch (error) {
-// 				console.error('Error registering user:', error);
-// 				alert('An error occurred during registration. Please try again later.');
-// 			}
-// 		});
-// 	} else {
-// 		console.error('Register form not found');
-// 	}
-// }
 
 const gameToggle = document.getElementById('check');
 gameToggle.addEventListener('change', (event) => {
