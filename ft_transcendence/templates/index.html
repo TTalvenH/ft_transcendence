@@ -50,34 +50,36 @@
 <body>
     <div id="root">
 		<div id="ui">
-			<div id="sidePanel" class="sidePanel col-1 d-flex flex-column justify-content-start align-items-center pt-5">
-				<div id="startButton" >
-					<a href="/pong" onclick="route(event)">
-						<button class="button mb-4">PLAY</button>
-					</a>
-				</div>
-				<div style="display: none" id="profileButton">
-					<a href="/profile" onclick="route(event)">
-						<button class="button mb-4">PROFILE</button>
-					</a>
-				</div>
-				<div style="display: none" id="logoutButton">
-					<button class="button mb-4">LOG OUT</button>
-				</div>
-				<div id="loginButton">
-					<a href="/login" onclick="route(event)">
-						<button class="button mb-4">LOGIN</button>
-					</a>
-				</div>
-				<div class="toggleGame">
-					<div class="gameToggle">
-						<input type="checkbox" id="check">
-						<label for="check" class="checkButton">
-							<span class="pong">PONG</span>
-							<span class="knockoff">KNOCKOFF</span>
-						</label>
+			<div id="sidePanelDiv" class="sidePanelDiv">
+				<div id="sidePanel" class="sidePanel col-1 d-flex flex-column justify-content-start align-items-center pt-5">
+					<div id="startButton" >
+						<a href="/pong" onclick="route(event)">
+							<button class="button mb-4">PLAY</button>
+						</a>
 					</div>
-					{% comment %} <p>PONG</p> {% endcomment %}
+					<div style="display: none" id="profileButton">
+						<a href="/profile" onclick="route(event)">
+							<button class="button mb-4">PROFILE</button>
+						</a>
+					</div>
+					<div style="display: none" id="logoutButton">
+						<button class="button mb-4">LOG OUT</button>
+					</div>
+					<div id="loginButton">
+						<a href="/login" onclick="route(event)">
+							<button class="button mb-4">LOGIN</button>
+						</a>
+					</div>
+					<div class="toggleGame">
+						<div class="gameToggle">
+							<input type="checkbox" id="check">
+							<label for="check" class="checkButton">
+								<span class="pong">PONG</span>
+								<span class="knockoff">KNOCKOFF</span>
+							</label>
+						</div>
+						{% comment %} <p>PONG</p> {% endcomment %}
+					</div>
 				</div>
 			</div>
 			<div class="container" id="userContainer"></div>

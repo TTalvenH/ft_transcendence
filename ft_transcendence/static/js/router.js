@@ -73,6 +73,8 @@ router.get('/pong', pongHandler);
 
 router.get('/profile', profileHandler);
 
+router.get('/tournament', tournamentInfoHandler);
+
 class User {
 	setUser(data) {
 		const user = {
@@ -143,6 +145,10 @@ function showToast(msg, error) {
 
 	toastDiv.classList.add('toast');
 	toastDiv.innerHTML = msg;
+	console.log(msg.length);
+	if (msg.length > 80) {
+		toastDiv.style.minWidth = '450px';
+	}
 	console.log(toastDiv);
 	toastBox.appendChild(toastDiv);
 	if (error) {
@@ -194,6 +200,38 @@ function handleSidePanel() {
 
 const logoutButton = document.getElementById('logoutButton');
 logoutButton.addEventListener('click', logOutHandler);
+
+async function tournamentInfoHandler() {
+	console.log('tournamentInfoHandler');
+	const userData = currentUser.getUser();
+	const urlParams = new URLSearchParams(window.location.search);
+	let id = urlParams.get('id');
+	if (!id) {
+		history.pushState({}, "", "/");
+		router.init();
+		return;
+	}
+	const response = await fetch(`/pong/get_tournament_info/${id}/`, {
+		method: 'GET',
+		headers: {
+			'Authorization': 'Bearer ' + userData.accessToken
+		},
+	})
+	if (!response.ok) {
+		showToast(somethingWentWrong, true);
+		return;
+	}
+	const data = await response.text();
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
+	userContainer.insertAdjacentHTML('beforeend', data);
+
+	const cancelButton = document.getElementById('cancel');
+	cancelButton.addEventListener('click', () => {
+		history.pushState({}, "", "/profile");
+		router.init();
+	});
+}
 
 async function logOutHandler() {
 	const userData = currentUser.getUser();
@@ -418,7 +456,7 @@ async function profileHandler() {
 	if (!username) {
 		if (!userData) {
 			history.pushState({}, "", "/");
-			handleLocation();
+			router.init();
 			return;
 		}
 		username = userData.username;
@@ -438,7 +476,7 @@ async function profileHandler() {
 	} else {
 		showToast(somethingWentWrong, true);
 		history.pushState({}, "", "/");
-		handleLocation();
+		router.init();
 		return;
 	}
 
@@ -671,7 +709,7 @@ async function handleRegisterSubmit(event) {
             await handleRegistrationResponse(result);
         } else {
             const errorResult = await response.json();
-            showToast(`Error: ${errorResult.detail || 'Something went wrong'}`, true);
+            showToast(circle_xmark + `${errorResult.detail || 'Something went wrong'}`, true);
         }
     } catch (error) {
         showToast('Something went wrong', true);
@@ -801,7 +839,7 @@ async function one_v_oneHandler() {
 					userContainer.innerHTML = "";
 					ui.style.display = 'none';
 					const data = {
-						tournament_match: true,
+						tournament_match: false,
 						player1: {
 							username: userData.username,
 							id: userData.id
@@ -837,6 +875,7 @@ async function one_v_oneHandler() {
 							userContainer.innerHTML = "";
 							ui.style.display = 'none';
 							const data = {
+								tournament_match: false,
 								player1: {
 									username: userData.username,
 									id: userData.id
@@ -1076,8 +1115,8 @@ async function tournamentHandler() {
 let tournamentData = null;
 
 function nextMatch(gameData) {
-	const ui = document.getElementById('ui');
-	ui.style.display = 'block';
+	const sidePanelDiv = document.getElementById('sidePanelDiv');
+	sidePanelDiv.style.display = 'none';
 	const userContainer = document.getElementById('userContainer');
 	userContainer.innerHTML = "";
 	userContainer.insertAdjacentHTML('beforeend', window.tournamentMatchHTML);
@@ -1089,8 +1128,7 @@ function nextMatch(gameData) {
 
 	const nextMatch = document.getElementById('nextMatch');
 	nextMatch.addEventListener('click', async () => {
-		const ui = document.getElementById('ui');
-		ui.style.display = 'none';
+		userContainer.innerHTML = "";
 		pong.startGame(gameData);
 	})
 }
@@ -1127,31 +1165,31 @@ export async function handleMatchEnd(gameData) {
 	console.log("handleMatchEnd called");
 	if (gameData) {
 		console.log("gamedata = " + JSON.stringify(gameData));
-		const body = {
-			game: gameData.game,
-			tournament_match: gameData.tournament_match,
-			player1: gameData.player1.id,
-			player1Hp: gameData.player1.hitpoints,
-			player2: gameData.player2.id,
-			player2Hp: gameData.player2.hitpoints,
-			timePlayed: gameData.matchTimeLength,
-			dateTime: gameData.dateTime
-		}
-		console.log(JSON.stringify(body));
+		// const body = {
+		// 	game: gameData.game,
+		// 	tournament_match: gameData.tournament_match,
+		// 	player1: gameData.player1.id,
+		// 	player1Hp: gameData.player1.hitpoints,
+		// 	player2: gameData.player2.id,
+		// 	player2Hp: gameData.player2.hitpoints,
+		// 	timePlayed: gameData.matchTimeLength,
+		// 	dateTime: gameData.dateTime
+		// }
+		// console.log(JSON.stringify(body));
 		const response = await fetch('/pong/create-match', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 				'Authorization': 'Bearer ' + userData.accessToken,
 			},
-			body: JSON.stringify(body)
+			body: JSON.stringify(gameData)
 		});
 		if (response.ok) {
-			const data = await response.json();
 			if (isTournament) {
+				const data = await response.json();
 				console.log('is tournament = ' + isTournament);
 				matchIds.push(data.id);
-				const winner = gameData.player1.hitpoints > gameData.player2.hitpoints ? gameData.player1 : gameData.player2;
+				const winner = gameData.player1Hp > gameData.player2Hp ? {username: gameData.player1Name, id: gameData.player1} : {username: gameData.player2Name, id: gameData.player2};
 				console.log('winner = ' + winner.username);
 				if (!tournamentData[2].player1) {
 					tournamentData[2].player1 = winner;
@@ -1179,24 +1217,23 @@ export async function handleMatchEnd(gameData) {
 					isTournament = false;
 				} else {
 					console.log('matchIds asd = ' + matchIds.length);
-					setTimeout(() => {
-						nextMatch(tournamentData[matchIds.length]);
-					}, 5000);
+					// setTimeout(() => {
+					// 	nextMatch(tournamentData[matchIds.length]);
+					// }, 5000);
+					nextMatch(tournamentData[matchIds.length]);
 				}
-			} else {
-				if (matchIds.length > 0) {
-					matchIds = [];
-				} 
 			}
 		} else {
 			showToast(somethingWentWrong, true);
 		}
-	}
-	if (!isTournament) {
-		setTimeout(() => {
-			const ui = document.getElementById('ui');
-			ui.style.display = 'block';
+		if (!isTournament) {
+			if (matchIds.length > 0) {
+				matchIds = [];
+				isTournament = false;
+			}
+			const sidePanelDiv = document.getElementById('sidePanelDiv');
+			sidePanelDiv.style.display = 'block';
 			router.init();
-		}, 5000);
+		}
 	}
 }

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.decorators import api_view, authentication_classes
 from django.contrib.auth.models import User
-from .models import Match
+from .models import Match, Tournament
 from .serializers import MatchSerializer, MatchCreateSerializer, TournamentSerializer, TournamentCreateSerializer
 from users.decorators import update_last_active
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -43,6 +43,13 @@ def endMatch(request):
 @api_view(['GET'])
 def game_menu_template(request):
 	return render(request, 'pong/gameMenu.html')
+
+@api_view(['GET'])
+def get_tournament_info(request, tournament_id):
+	tournament_serializer = TournamentSerializer(instance=Tournament.objects.get(id=tournament_id), many=False)
+	print(tournament_serializer.data)
+	print(tournament_id)
+	return render(request, 'pong/tournament_info.html', tournament_serializer.data)
 
 
 @api_view(['GET'])

@@ -156,12 +156,12 @@
 						{% for match in tournament_history %}
 							<tr>
 								<td>
-									<a class="link" href="/tournament?id={{ match.id }}">
+									<a class="link" href="/tournament?id={{ match.id }}" onclick="route(event)">
 										{{ match.game }}
 									</a>
 								</td>
 								<td>
-									<a class="link" href="/tournament?id={{ match.id }}">
+									<a class="link" href="/tournament?id={{ match.id }}" onclick="route(event)">
 										{{ match.dateTime }}
 									</a>
 								</td>

@@ -306,29 +306,44 @@ export class Pong
 
 		
 		//todo add game type. tournament or 1v1
+		// const gameOverData = {
+		// 	tournament_match: this.gameData.tournament_match,
+		// 	game: this.gameGlobals.game,
+		// 	player1: {
+		// 		username: this.gameData.player1.username,
+		// 		id: this.gameData.player1.id,
+		// 		hitpoints: player1.hitPoints,
+		// 	},
+		// 	player2: {
+		// 		username: this.gameData.player2.username,
+		// 		id: this.gameData.player2.id,
+		// 		hitpoints: player2.hitPoints,
+		// 	},
+		// 	winner: winner,
+		// 	matchTimeLength: this.matchTime.getElapsedTime().toFixed(2) + "s",
+		// 	dateTime: this.matchDate,
+		// };
+
 		const gameOverData = {
+			game: this.gameGlobals.game ? 'Knockoff' : 'Pong',
 			tournament_match: this.gameData.tournament_match,
-			game: this.gameGlobals.game,
-			player1: {
-				username: this.gameData.player1.username,
-				id: this.gameData.player1.id,
-				hitpoints: player1.hitPoints,
-			},
-			player2: {
-				username: this.gameData.player2.username,
-				id: this.gameData.player2.id,
-				hitpoints: player2.hitPoints,
-			},
-			winner: winner,
-			matchTimeLength: this.matchTime.getElapsedTime().toFixed(2) + "s",
+			player1: this.gameData.player1.id,
+			player1Name: this.gameData.player1.username,
+			player1Hp: player1.hitPoints,
+			player2: this.gameData.player2.id,
+			player2Name: this.gameData.player2.username,
+			player2Hp: player2.hitPoints,
+			timePlayed: this.matchTime.getElapsedTime().toFixed(2) + "s",
 			dateTime: this.matchDate,
 		};
 
 		goal1.material.emissiveIntensity = 1;
 		goal2.material.emissiveIntensity = 1;
 		gameOverEvent.detail.gameOverData = gameOverData;
-		handleMatchEnd(gameOverData);
 		this.winnerLoop();
+		setTimeout(() => {
+			handleMatchEnd(gameOverData);
+		}, 5000)
 		this.gameGlobals.gameState = GameStates.GAMEOVER;
 	}
 

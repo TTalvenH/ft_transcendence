@@ -118,15 +118,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/pong/create-match
 Content-Type: application/json
 
-{
-	"game": "Pong",
-	"tournament_match": "false",
-	"player1": 46,
-	"player1Hp": 6,
-	"player2": 44,
-	"player2Hp": 4,
-	"timePlayed": "30 minutes"
-}
+{"game":"Pong","tournament_match":false,"player1":44,"player2":46,"timePlayed":"12.18s","dateTime":"2024-06-07T09:05:46.139Z"}
 
 
 ###
@@ -144,6 +136,14 @@ Content-Type: application/json
 ###
 
 GET http://127.0.0.1:8000/pong/tournament_match.html
+Content-Type: application/json
+
+{ "haloo": "Haloo"}
+
+
+###
+
+GET http://127.0.0.1:8000/pong/get_tournament_info/1/
 Content-Type: application/json
 
 { "haloo": "Haloo"}
