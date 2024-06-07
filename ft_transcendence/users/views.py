@@ -182,11 +182,9 @@ def loginUser(request):
 	if not user:
 		return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-	otp_verified = user.otp_verified
-	if otp_verified and email_otp_enabled:
+	if user.email_otp_enabled and user.email_otp_verified:
 		otp_code = generate_email_otp()
 		user.email_otp_code = otp_code
-		user.email_otp_enabled = True
 		user.save()
 		send_mail(
 			'Your OTP Code',
@@ -197,7 +195,7 @@ def loginUser(request):
 		)
 
 	serializer = UserSerializer(instance=user)
-	response_data = {'otp_required': user.otp_enabled, 'email_otp_required': user.email_otp_enabled, 'otp_verified': otp_verified, 'user': serializer.data}
+	response_data = {'otp_required': user.otp_enabled, 'email_otp_required': user.email_otp_enabled, 'otp_verified': user.otp_verified, 'email_otp_required': user.email_otp_enabled, 'user': serializer.data}
 	# print(response_data)
 
 	user.update_last_active()
@@ -260,37 +258,31 @@ def validateOtpAndLogin(request):
 
 @api_view(['POST'])
 def verifyOTP(request):
-    user = get_object_or_404(CustomUser, username=request.data.get('username'))
-    otp = request.data.get('otp')
+	user = get_object_or_404(CustomUser, username=request.data.get('username'))
+	otp = request.data.get('otp')
 
-    if not otp:
-        return Response({'detail': 'OTP required.'}, status=status.HTTP_400_BAD_REQUEST)
+	if not otp:
+		return Response({'detail': 'OTP required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    # Check if the user has TOTP enabled
-    otp_verified = False
-    if user.otp_enabled:
-        try:
-            device = TOTPDevice.objects.get(user=user, name='default')
-            totp = pyotp.TOTP(device.key)
-            if totp.verify(otp):
-                otp_verified = True
-        except TOTPDevice.DoesNotExist:
-            return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
+	if user.otp_enabled:
+		try:
+			device = TOTPDevice.objects.get(user=user, name='default')
+			totp = pyotp.TOTP(device.key)
+			if totp.verify(otp):
+				user.otp_verified = True
+		except TOTPDevice.DoesNotExist:
+			return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
 
+	if user.email_otp_enabled:
+		if otp == user.email_otp_code:
+			user.email_otp_verified = True
 
-    if user.email_otp_enabled:
-        if otp == user.email_otp_code:
-           otp_verified = True
-
-    # If either TOTP or email OTP is verified, consider it successful
-    if otp_verified:
-        user.otp_verified = True
-        user.save()
-        return Response({'detail': 'OTP verified successfully.'}, status=status.HTTP_200_OK)
-    else:
-        return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
-
-
+	# If either TOTP or email OTP is verified, consider it successful
+	if user.otp_verified or user.email_otp_verified:
+		user.save()
+		return Response({'detail': 'OTP verified successfully.'}, status=status.HTTP_200_OK)
+	else:
+		return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 # This function is an api_view that can be accessed with a GET request
@@ -389,33 +381,85 @@ def otpSetupView(request):
 
 from rest_framework.parsers import MultiPartParser
 
+# @api_view(['PUT'])
+# @authentication_classes([JWTAuthentication])
+# @update_last_active
+# @permission_classes([IsAuthenticated])
+# @parser_classes([MultiPartParser])
+# def updateUserProfile(request):
+# 	# Retrieve user from the database
+# 	user = get_object_or_404(CustomUser, id=request.user.id)
+
+# 	# Serialize the user data
+# 	profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True, context={'request': request})
+# 	if profile_serializer.is_valid():
+# 		profile_serializer.save()
+# 		authFormSwitch = request.data.get('otp_enabled')
+# 		otp_setup_needed = False
+# 		if authFormSwitch == 'true' and not user.otp_verified:
+# 			otp_setup_needed = True
+# 		user_serializer = UserSerializer(instance=user)
+# 		return Response({'user': user_serializer.data, 'otp_setup_needed': otp_setup_needed})
+# 	detail = {'detail': 'Invalid data'}
+# 	if profile_serializer.errors.get('username'):
+# 		detail = {'detail': 'Username taken.'}
+# 	elif profile_serializer.errors.get('email'):
+# 		detail = {'detail': profile_serializer.errors.get('email')}
+# 	elif profile_serializer.errors.get('password'):
+# 		detail = {'detail': 'Missing required fields.'}
+# 	return Response(detail, status=400)
+
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])
 @update_last_active
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser])
 def updateUserProfile(request):
-	# Retrieve user from the database
-	user = get_object_or_404(CustomUser, id=request.user.id)
+    user = get_object_or_404(CustomUser, id=request.user.id)
+    profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True, context={'request': request})
 
-	# Serialize the user data
-	profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True, context={'request': request})
-	if profile_serializer.is_valid():
-		profile_serializer.save()
-		formSwitch = request.data.get('otp_enabled')
-		otp_setup_needed = False
-		if formSwitch == 'true' and not user.otp_verified:
-			otp_setup_needed = True
-		user_serializer = UserSerializer(instance=user)
-		return Response({'user': user_serializer.data, 'otp_setup_needed': otp_setup_needed})
-	detail = {'detail': 'Invalid data'}
-	if profile_serializer.errors.get('username'):
-		detail = {'detail': 'Username taken.'}
-	elif profile_serializer.errors.get('email'):
-		detail = {'detail': profile_serializer.errors.get('email')}
-	elif profile_serializer.errors.get('password'):
-		detail = {'detail': 'Missing required fields.'}
-	return Response(detail, status=400)
+    if profile_serializer.is_valid():
+        profile_serializer.save()
+        
+        authFormSwitchOtp = request.data.get('otp_enabled')
+        otp_setup_needed = False
+        if authFormSwitchOtp == 'true':
+            if not user.otp_verified:
+                otp_setup_needed = True
+        elif authFormSwitchOtp == 'false':
+            user.otp_verified = False
+            user.otp_enabled = False
+            user.save()
+
+        authFormSwitchEmailOtp = request.data.get('email_otp_enabled')
+        email_otp_setup_needed = False
+        if authFormSwitchEmailOtp == 'true':
+            if not user.email_otp_verified:
+                email_otp_setup_needed = True
+        elif authFormSwitchEmailOtp == 'false':
+            user.email_otp_verified = False
+            user.email_otp_enabled = False
+            user.save()
+
+        user_serializer = UserSerializer(instance=user)
+        return Response({
+            'user': user_serializer.data, 
+            'otp_setup_needed': otp_setup_needed, 
+            'email_otp_setup_needed': email_otp_setup_needed
+        })
+
+    detail = {'detail': 'Invalid data'}
+    if profile_serializer.errors.get('username'):
+        detail = {'detail': 'Username taken.'}
+    elif profile_serializer.errors.get('email'):
+        detail = {'detail': profile_serializer.errors.get('email')}
+    elif profile_serializer.errors.get('password'):
+        detail = {'detail': 'Missing required fields.'}
+    return Response(detail, status=400)
+
+
+
+
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])

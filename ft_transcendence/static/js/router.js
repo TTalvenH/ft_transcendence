@@ -259,13 +259,20 @@ async function editProfileHandler() {
 
 	const updateProfileForm = document.getElementById('updateProfileForm');
 	const otpEnabledInput = document.getElementById('otpEnabled');
+	const emailOtpEnabledInput = document.getElementById('emailOtpEnabled');
 	const flexSwitch2FA = document.getElementById('flexSwitch2FA');
+	const flexSwitchEmailOtp = document.getElementById('flexSwitchEmailOtp');
 
-	// Set the hidden input value based on the switch's initial state
+	// Set the hidden input values based on the switches' initial states
 	otpEnabledInput.value = flexSwitch2FA.checked;
+	emailOtpEnabledInput.value = flexSwitchEmailOtp.checked;
 
 	flexSwitch2FA.addEventListener('change', () => {
 		otpEnabledInput.value = flexSwitch2FA.checked;
+	});
+
+	flexSwitchEmailOtp.addEventListener('change', () => {
+		emailOtpEnabledInput.value = flexSwitchEmailOtp.checked;
 	});
 
 	updateProfileForm.addEventListener('submit', async (event) => {
@@ -290,14 +297,18 @@ async function editProfileHandler() {
 				current_user_data.username = data.user.username;
 				current_user_data.id = data.user.id;
 				localStorage.setItem('currentUser', JSON.stringify(current_user_data));
-				if (data.otp_setup_needed) {
+				
+				if (data.otp_setup_needed || data.email_otp_setup_needed) {
 					const otpResponse = await fetch('/users/otpSetup-profile', {
 						method: 'POST',
 						headers: {
 							'Authorization': 'Bearer ' + userData.accessToken,
 							'Content-Type': 'application/json'
 						},
-						body: JSON.stringify({ enable_otp: true })
+						body: JSON.stringify({ 
+							enable_otp: data.otp_setup_needed, 
+							enable_email_otp: data.email_otp_setup_needed 
+						})
 					});
 					
 					if (otpResponse.ok) {
@@ -308,14 +319,12 @@ async function editProfileHandler() {
 						showToast(`Error: ${otpError.detail || 'OTP setup failed'}`, true);
 						return;
 					}
-				}
-				else {
+				} else {
 					showToast(profileSuccess, false);
 					history.pushState({}, "", "/profile");
 					router.init();
 				}
-			} 
-			else {
+			} else {
 				const data = await response.json();
 				if (data)
 					showToast(circle_xmark + data.detail, true);
@@ -346,6 +355,7 @@ async function editProfileHandler() {
 		}
 	});
 }
+
 
 async function handleOtpVerification(data) {
     const userContainer = document.getElementById('userContainer');
@@ -737,7 +747,7 @@ async function handleOtpVerificationSubmit(event, username) {
     const otpForm = event.target;
     const otpFormData = new FormData(otpForm);
     otpFormData.append('username', username);
-	console.log('hi there2');
+	// console.log('hi there2');
     try {
         const verifyResponse = await fetch('/users/verify-otp', {
             method: 'POST',
