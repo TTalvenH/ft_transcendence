@@ -292,11 +292,13 @@ async function editProfileHandler() {
 				body: formData
 			});
 			if (response.ok) {
+				console.log('response: ' , response.data);
 				const data = await response.json();
 				let current_user_data = JSON.parse(localStorage.getItem('currentUser'));
 				current_user_data.username = data.user.username;
 				current_user_data.id = data.user.id;
 				localStorage.setItem('currentUser', JSON.stringify(current_user_data));
+				console.log('respose from updateuser', data.data);
 				
 				if (data.otp_setup_needed || data.email_otp_setup_needed) {
 					const otpResponse = await fetch('/users/otpSetup-profile', {

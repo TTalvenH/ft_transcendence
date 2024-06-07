@@ -356,28 +356,32 @@ def getUserPorfile(request, username):
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def otpSetupView(request):
-    user = get_object_or_404(CustomUser, id=request.user.id)
-    otp_data = setupOTP(user)
-    if not otp_data['created']:
-        return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+	user = get_object_or_404(CustomUser, id=request.user.id)
+	otp_data = setupOTP(user)
+	enable_otp = request.POST.get('enable_otp')  # Default to 'false' if not found
+	enable_email_otp = request.POST.get('enable_otp_email')  # Default to 'false' if not found
+	print(enable_otp)
+	print(enable_email_otp)
+	if not otp_data['created']:
+		return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    django_request = HttpRequest()
-    django_request.method = 'GET'
-    django_request.user = request.user
-    csrf_token = get_token(request)
-    context = {
-        **otp_data['context'],
-        'csrf_token': csrf_token,
-    }
+	django_request = HttpRequest()
+	django_request.method = 'GET'
+	django_request.user = request.user
+	csrf_token = get_token(request)
+	context = {
+		**otp_data['context'],
+		'csrf_token': csrf_token,
+	}
 
-    qr_html = render_to_string('users/qr.html', context, request=django_request)
-    response_data = {
-        'otp': otp_data,
-        'qr_html': qr_html,
-        'username': user.username
-    }
+	qr_html = render_to_string('users/qr.html', context, request=django_request)
+	response_data = {
+		'otp': otp_data,
+		'qr_html': qr_html,
+		'username': user.username
+	}
 
-    return Response(response_data, status=status.HTTP_201_CREATED)
+	return Response(response_data, status=status.HTTP_201_CREATED)
 
 from rest_framework.parsers import MultiPartParser
 
@@ -415,47 +419,47 @@ from rest_framework.parsers import MultiPartParser
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser])
 def updateUserProfile(request):
-    user = get_object_or_404(CustomUser, id=request.user.id)
-    profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True, context={'request': request})
+	user = get_object_or_404(CustomUser, id=request.user.id)
+	profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True, context={'request': request})
 
-    if profile_serializer.is_valid():
-        profile_serializer.save()
-        
-        authFormSwitchOtp = request.data.get('otp_enabled')
-        otp_setup_needed = False
-        if authFormSwitchOtp == 'true':
-            if not user.otp_verified:
-                otp_setup_needed = True
-        elif authFormSwitchOtp == 'false':
-            user.otp_verified = False
-            user.otp_enabled = False
-            user.save()
+	if profile_serializer.is_valid():
+		profile_serializer.save()
+		
+		authFormSwitchOtp = request.data.get('otp_enabled')
+		otp_setup_needed = False
+		if authFormSwitchOtp == 'true':
+			if not user.otp_verified:
+				otp_setup_needed = True
+		elif authFormSwitchOtp == 'false':
+			user.otp_verified = False
+			user.otp_enabled = False
+			user.save()
 
-        authFormSwitchEmailOtp = request.data.get('email_otp_enabled')
-        email_otp_setup_needed = False
-        if authFormSwitchEmailOtp == 'true':
-            if not user.email_otp_verified:
-                email_otp_setup_needed = True
-        elif authFormSwitchEmailOtp == 'false':
-            user.email_otp_verified = False
-            user.email_otp_enabled = False
-            user.save()
+		authFormSwitchEmailOtp = request.data.get('email_otp_enabled')
+		email_otp_setup_needed = False
+		if authFormSwitchEmailOtp == 'true':
+			if not user.email_otp_verified:
+				email_otp_setup_needed = True
+		elif authFormSwitchEmailOtp == 'false':
+			user.email_otp_verified = False
+			user.email_otp_enabled = False
+			user.save()
 
-        user_serializer = UserSerializer(instance=user)
-        return Response({
-            'user': user_serializer.data, 
-            'otp_setup_needed': otp_setup_needed, 
-            'email_otp_setup_needed': email_otp_setup_needed
-        })
+		user_serializer = UserSerializer(instance=user)
+		return Response({
+			'user': user_serializer.data, 
+			'otp_setup_needed': otp_setup_needed, 
+			'email_otp_setup_needed': email_otp_setup_needed
+		})
 
-    detail = {'detail': 'Invalid data'}
-    if profile_serializer.errors.get('username'):
-        detail = {'detail': 'Username taken.'}
-    elif profile_serializer.errors.get('email'):
-        detail = {'detail': profile_serializer.errors.get('email')}
-    elif profile_serializer.errors.get('password'):
-        detail = {'detail': 'Missing required fields.'}
-    return Response(detail, status=400)
+	detail = {'detail': 'Invalid data'}
+	if profile_serializer.errors.get('username'):
+		detail = {'detail': 'Username taken.'}
+	elif profile_serializer.errors.get('email'):
+		detail = {'detail': profile_serializer.errors.get('email')}
+	elif profile_serializer.errors.get('password'):
+		detail = {'detail': 'Missing required fields.'}
+	return Response(detail, status=400)
 
 
 
