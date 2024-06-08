@@ -357,29 +357,45 @@ def getUserPorfile(request, username):
 @permission_classes([IsAuthenticated])
 def otpSetupView(request):
 	user = get_object_or_404(CustomUser, id=request.user.id)
-	otp_data = setupOTP(user)
-	enable_otp = request.POST.get('enable_otp')  # Default to 'false' if not found
-	enable_email_otp = request.POST.get('enable_otp_email')  # Default to 'false' if not found
+	enable_otp = request.data.get('enable_otp', False)  # Default to 'false' if not found
+	enable_email_otp = request.data.get('enable_email_otp', False)  # Default to 'false' if not found
 	print(enable_otp)
 	print(enable_email_otp)
-	if not otp_data['created']:
-		return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
-	django_request = HttpRequest()
-	django_request.method = 'GET'
-	django_request.user = request.user
-	csrf_token = get_token(request)
-	context = {
-		**otp_data['context'],
-		'csrf_token': csrf_token,
-	}
+	if enable_otp:
+		otp_data = setupOTP(user)
+		if not otp_data['created']:
+			return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
-	qr_html = render_to_string('users/qr.html', context, request=django_request)
-	response_data = {
-		'otp': otp_data,
-		'qr_html': qr_html,
-		'username': user.username
-	}
+		django_request = HttpRequest()
+		django_request.method = 'GET'
+		django_request.user = request.user
+		csrf_token = get_token(request)
+		context = {
+			**otp_data['context'],
+			'csrf_token': csrf_token,
+		}
+
+		qr_html = render_to_string('users/qr.html', context, request=django_request)
+		response_data = {
+			'otp': otp_data,
+			'qr_html': qr_html,
+			'username': user.username
+		}
+	elif enable_email_otp:
+		otp_code = generate_email_otp()
+		user.email_otp_code = otp_code
+		user.email_otp_verified = False
+		user.email_otp_enabled = True
+		user.save()
+		send_mail(
+                'Your OTP Code',
+                f'Your OTP code is {otp_code}',
+                'customer.support.pong@example.com',
+                [user.email],
+                fail_silently=False,
+            )
+		return Response({'detail': 'OTP code sent.'}, status=status.HTTP_200_OK)
 
 	return Response(response_data, status=status.HTTP_201_CREATED)
 
@@ -436,10 +452,10 @@ def updateUserProfile(request):
 			user.save()
 
 		authFormSwitchEmailOtp = request.data.get('email_otp_enabled')
-		email_otp_setup_needed = False
+		email_otp_setup_needed = "false"
 		if authFormSwitchEmailOtp == 'true':
 			if not user.email_otp_verified:
-				email_otp_setup_needed = True
+				email_otp_setup_needed = 'True'
 		elif authFormSwitchEmailOtp == 'false':
 			user.email_otp_verified = False
 			user.email_otp_enabled = False

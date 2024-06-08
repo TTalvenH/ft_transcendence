@@ -18,7 +18,6 @@ const verificationFailed = '<i class="fa-regular fa-circle-xmark"></i> Verificat
 const notVerified = '<i class="fa-regular fa-circle-xmark"></i> OTP was activated but not verified';
 const reActivate = '<i class="fa-regular fa-circle-xmark"></i> Please setup 2FA in profile settings';
 
-
 class Router {
 	constructor() {
 		this.routes = [];
@@ -217,6 +216,7 @@ async function logOutHandler() {
 	}
 }
 
+
 async function homeHandler() {
 	const userContainer = document.getElementById('userContainer');
 	userContainer.innerHTML = "";
@@ -225,144 +225,163 @@ async function homeHandler() {
 async function editProfileHandler() {
 	const userData = JSON.parse(localStorage.getItem('currentUser'));
 	const userContainer = document.getElementById('userContainer');
-	const updateProfileResponse = await fetch("/users/update_profile.html", {
-		method: 'GET',
-		headers: {
-			'Authorization': 'Bearer ' + userData.accessToken,
-		},
-	});
-	if (!updateProfileResponse.ok) {
-		showToast(somethingWentWrong, true);
-		return;
-	}
-	const updateProfileHTML = await updateProfileResponse.text();
-	userContainer.innerHTML = "";
-	userContainer.insertAdjacentHTML('beforeend', updateProfileHTML);
-
-	const input = document.getElementById('imageInput');
-	const profileImage = document.getElementById('profileImage');
-	let selectedFile = null;
-
-	input.addEventListener('change', async (event) => {
-		selectedFile = input.files[0];
-		if (selectedFile) {
-			var reader = new FileReader();
-			reader.onload = function(e) {
-				profileImage.src = e.target.result;
-				profileImage.onload = function() {
-					profileImage.style.display = 'block';
-				}
-			}
-			reader.readAsDataURL(selectedFile);
+	
+	try {
+		const updateProfileResponse = await fetch("/users/update_profile.html", {
+			method: 'GET',
+			headers: {
+				'Authorization': 'Bearer ' + userData.accessToken,
+			},
+		});
+		
+		if (!updateProfileResponse.ok) {
+			showToast(somethingWentWrong, true);
+			return;
 		}
-	});
+		
+		const updateProfileHTML = await updateProfileResponse.text();
+		userContainer.innerHTML = "";
+		userContainer.insertAdjacentHTML('beforeend', updateProfileHTML);
 
-	const updateProfileForm = document.getElementById('updateProfileForm');
-	const otpEnabledInput = document.getElementById('otpEnabled');
-	const emailOtpEnabledInput = document.getElementById('emailOtpEnabled');
-	const flexSwitch2FA = document.getElementById('flexSwitch2FA');
-	const flexSwitchEmailOtp = document.getElementById('flexSwitchEmailOtp');
+		const input = document.getElementById('imageInput');
+		const profileImage = document.getElementById('profileImage');
+		let selectedFile = null;
 
-	// Set the hidden input values based on the switches' initial states
-	otpEnabledInput.value = flexSwitch2FA.checked;
-	emailOtpEnabledInput.value = flexSwitchEmailOtp.checked;
-
-	flexSwitch2FA.addEventListener('change', () => {
-		otpEnabledInput.value = flexSwitch2FA.checked;
-	});
-
-	flexSwitchEmailOtp.addEventListener('change', () => {
-		emailOtpEnabledInput.value = flexSwitchEmailOtp.checked;
-	});
-
-	updateProfileForm.addEventListener('submit', async (event) => {
-		try {
-			event.preventDefault();
-			const userData = currentUser.getUser();
-			const formData = new FormData(updateProfileForm);
+		input.addEventListener('change', async (event) => {
+			selectedFile = input.files[0];
 			if (selectedFile) {
-				formData.append('image', selectedFile);
+				const reader = new FileReader();
+				reader.onload = function(e) {
+					profileImage.src = e.target.result;
+					profileImage.onload = function() {
+						profileImage.style.display = 'block';
+					}
+				}
+				reader.readAsDataURL(selectedFile);
 			}
+		});
 
-			const response = await fetch('/users/update-user-profile', {
-				method: 'PUT',
-				headers: {
-					'Authorization': 'Bearer ' + userData.accessToken
-				},
-				body: formData
-			});
-			if (response.ok) {
-				console.log('response: ' , response.data);
-				const data = await response.json();
-				let current_user_data = JSON.parse(localStorage.getItem('currentUser'));
-				current_user_data.username = data.user.username;
-				current_user_data.id = data.user.id;
-				localStorage.setItem('currentUser', JSON.stringify(current_user_data));
-				console.log('respose from updateuser', data.data);
-				
-				if (data.otp_setup_needed || data.email_otp_setup_needed) {
-					const otpResponse = await fetch('/users/otpSetup-profile', {
-						method: 'POST',
-						headers: {
-							'Authorization': 'Bearer ' + userData.accessToken,
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify({ 
-							enable_otp: data.otp_setup_needed, 
-							enable_email_otp: data.email_otp_setup_needed 
-						})
-					});
-					
-					if (otpResponse.ok) {
-						const otpResult = await otpResponse.json();
-						await handleOtpVerification(otpResult);
+		const updateProfileForm = document.getElementById('updateProfileForm');
+		const otpEnabledInput = document.getElementById('otpEnabled');
+		const emailOtpEnabledInput = document.getElementById('emailOtpEnabled');
+		const flexSwitch2FA = document.getElementById('flexSwitch2FA');
+		const flexSwitchEmailOtp = document.getElementById('flexSwitchEmailOtp');
+
+		// Set the hidden input values based on the switches' initial states
+		otpEnabledInput.value = flexSwitch2FA.checked;
+		emailOtpEnabledInput.value = flexSwitchEmailOtp.checked;
+
+		flexSwitch2FA.addEventListener('change', () => {
+			otpEnabledInput.value = flexSwitch2FA.checked;
+		});
+
+		flexSwitchEmailOtp.addEventListener('change', () => {
+			emailOtpEnabledInput.value = flexSwitchEmailOtp.checked;
+		});
+
+		updateProfileForm.addEventListener('submit', async (event) => {
+			event.preventDefault();
+			try {
+				const userData = JSON.parse(localStorage.getItem('currentUser'));
+				const formData = new FormData(updateProfileForm);
+				if (selectedFile) {
+					formData.append('image', selectedFile);
+				}
+
+				const response = await fetch('/users/update-user-profile', {
+					method: 'PUT',
+					headers: {
+						'Authorization': 'Bearer ' + userData.accessToken
+					},
+					body: formData
+				});
+
+				if (response.ok) {
+					const data = await response.json();
+					let current_user_data = JSON.parse(localStorage.getItem('currentUser'));
+					current_user_data.username = data.user.username;
+					current_user_data.id = data.user.id;
+					localStorage.setItem('currentUser', JSON.stringify(current_user_data));
+
+					if (data.otp_setup_needed || data.email_otp_setup_needed) {
+						const otpResponse = await fetch('/users/otpSetup-profile', {
+							method: 'POST',
+							headers: {
+								'Authorization': 'Bearer ' + userData.accessToken,
+								'Content-Type': 'application/json'
+							},
+							body: JSON.stringify({ 
+								enable_otp: data.otp_setup_needed, 
+								enable_email_otp: data.email_otp_setup_needed 
+							})
+						});
+
+						if (otpResponse.ok) {
+							const otpResult = await otpResponse.json();
+							console.log(otpResult);
+							await handleOtpVerification(otpResult);
+						} else {
+							const otpError = await otpResponse.json();
+							showToast(`Error: ${otpError.detail || 'OTP setup failed'}`, true);
+							return;
+						}
 					} else {
-						const otpError = await otpResponse.json();
-						showToast(`Error: ${otpError.detail || 'OTP setup failed'}`, true);
-						return;
+						showToast(profileSuccess, false);
+						history.pushState({}, "", "/profile");
+						router.init();
 					}
 				} else {
-					showToast(profileSuccess, false);
-					history.pushState({}, "", "/profile");
-					router.init();
+					const data = await response.json();
+					if (data) {
+						showToast(circle_xmark + data.detail, true);
+					} else {
+						showToast(somethingWentWrong, true);
+					}
 				}
-			} else {
-				const data = await response.json();
-				if (data)
-					showToast(circle_xmark + data.detail, true);
-				else
-					showToast(somethingWentWrong, true);
-			}	
-		}
-		catch (error) {
-			showToast(somethingWentWrong, true);
-		}
-	});
+			} catch (error) {
+				console.error('Error during profile update:', error);
+				showToast(somethingWentWrong, true);
+			}
+		});
 
-	const checkBox = document.getElementById('flexSwitchCheckDefault');
-	checkBox.addEventListener('change', (event) => {
-		const passwordFields = document.querySelectorAll('.passwordField');
-		if (event.target.checked) {
-			passwordFields.forEach((passwordField) => {
-				const passwordInput = passwordField.getElementsByTagName('input')[0];
-				passwordInput.setAttribute('required', '');
-				passwordField.style.display = 'block';
-			});
-		} else {
-			passwordFields.forEach((passwordField) => {
-				const passwordInput = passwordField.getElementsByTagName('input')[0];
-				passwordInput.removeAttribute('required', '');
-				passwordField.style.display = 'none';
-			});
-		}
-	});
+		const checkBox = document.getElementById('flexSwitchCheckDefault');
+		checkBox.addEventListener('change', (event) => {
+			const passwordFields = document.querySelectorAll('.passwordField');
+			if (event.target.checked) {
+				passwordFields.forEach((passwordField) => {
+					const passwordInput = passwordField.getElementsByTagName('input')[0];
+					passwordInput.setAttribute('required', '');
+					passwordField.style.display = 'block';
+				});
+			} else {
+				passwordFields.forEach((passwordField) => {
+					const passwordInput = passwordField.getElementsByTagName('input')[0];
+					passwordInput.removeAttribute('required', '');
+					passwordField.style.display = 'none';
+				});
+			}
+		});
+	} catch (error) {
+		console.error('Error during profile HTML fetch:', error);
+		showToast(somethingWentWrong, true);
+	}
 }
+
 
 
 async function handleOtpVerification(data) {
     const userContainer = document.getElementById('userContainer');
     userContainer.innerHTML = '';
-    userContainer.insertAdjacentHTML('beforeend', data.qr_html);
+	console.log('hi mom');
+    if (data.qr_html)
+		userContainer.insertAdjacentHTML('beforeend', data.qr_html);
+	else {
+		if (!window.otpFormHTML) {
+			window.otpFormHTML = await fetchHTML("/users/qr_prompt.html");
+		}
+		userContainer.insertAdjacentHTML('beforeend', window.otpFormHTML);
+		console.log('Inserted OTP form HTML');
+	}
 
 	const otpForm = document.getElementById('otpForm');
 	if (otpForm) {
