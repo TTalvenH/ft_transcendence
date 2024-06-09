@@ -386,6 +386,7 @@ async function handleOtpVerification(data) {
 	const otpForm = document.getElementById('otpForm');
 	if (otpForm) {
 		console.log('OTP form found');
+		console.log(data.username);
 		otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmitFromProfile(event, data.username));
 	} else {
 		console.error('OTP form not found');

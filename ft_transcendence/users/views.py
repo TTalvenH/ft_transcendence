@@ -256,9 +256,11 @@ def validateOtpAndLogin(request):
 #     user.save()
 #     return Response({'detail': 'OTP verified successfully.'}, status=status.HTTP_200_OK)
 
+
 @api_view(['POST'])
 def verifyOTP(request):
 	user = get_object_or_404(CustomUser, username=request.data.get('username'))
+	print('asd')
 	otp = request.data.get('otp')
 
 	if not otp:
@@ -270,17 +272,15 @@ def verifyOTP(request):
 			totp = pyotp.TOTP(device.key)
 			if totp.verify(otp):
 				user.otp_verified = True
+				user.save()
+				return Response({'detail': 'OTP verified successfully.'}, status=status.HTTP_200_OK)
 		except TOTPDevice.DoesNotExist:
 			return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-	if user.email_otp_enabled:
-		if otp == user.email_otp_code:
-			user.email_otp_verified = True
-
-	# If either TOTP or email OTP is verified, consider it successful
-	if user.otp_verified or user.email_otp_verified:
+	if user.email_otp_enabled and otp == user.email_otp_code:
+		user.email_otp_verified = True
 		user.save()
-		return Response({'detail': 'OTP verified successfully.'}, status=status.HTTP_200_OK)
+		return Response({'detail': 'Email OTP verified successfully.'}, status=status.HTTP_200_OK)
 	else:
 		return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -395,7 +395,9 @@ def otpSetupView(request):
                 [user.email],
                 fail_silently=False,
             )
-		return Response({'detail': 'OTP code sent.'}, status=status.HTTP_200_OK)
+		response_data = {
+			'username': user.username
+		}
 
 	return Response(response_data, status=status.HTTP_201_CREATED)
 
@@ -452,10 +454,10 @@ def updateUserProfile(request):
 			user.save()
 
 		authFormSwitchEmailOtp = request.data.get('email_otp_enabled')
-		email_otp_setup_needed = "false"
+		email_otp_setup_needed = False
 		if authFormSwitchEmailOtp == 'true':
 			if not user.email_otp_verified:
-				email_otp_setup_needed = 'True'
+				email_otp_setup_needed = True
 		elif authFormSwitchEmailOtp == 'false':
 			user.email_otp_verified = False
 			user.email_otp_enabled = False
