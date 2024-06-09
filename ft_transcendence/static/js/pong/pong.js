@@ -369,7 +369,7 @@ export class Pong
 		}
 	}
 	gameLoop() {
-		requestAnimationFrame(() => this.gameLoop());
+		//requestAnimationFrame(() => this.gameLoop());
 		if ( this.gameGlobals.gameState === GameStates.LOADING) {
 			return;
 		}
