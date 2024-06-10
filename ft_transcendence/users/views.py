@@ -108,7 +108,6 @@ def createUser(request):
             context['csrf_token'] = csrf_token
             qr_html = render_to_string('users/qr.html', context, request=django_request)
 
-        print(f"enable_email_otp: {enable_email_otp}")  # Debugging line to check enable_email_otp
         if enable_email_otp == 'true':
             otp_code = generate_email_otp()
             user.email_otp_code = otp_code
@@ -121,7 +120,6 @@ def createUser(request):
                 [user.email],
                 fail_silently=False,
             )
-            print('Email OTP enabled')  # Debugging line to check if the email OTP setup is reached
             otp_data['email_otp'] = 'Email OTP enabled. Check your email for the OTP code.'
 
         response_data = { 
@@ -196,8 +194,6 @@ def loginUser(request):
 
 	serializer = UserSerializer(instance=user)
 	response_data = {'otp_required': user.otp_enabled, 'email_otp_required': user.email_otp_enabled, 'otp_verified': user.otp_verified, 'email_otp_required': user.email_otp_enabled, 'user': serializer.data}
-	# print(response_data)
-
 	user.update_last_active()
 	token = create_jwt_pair_for_user(user)
 	response_data.update({'tokens': token, 'user': serializer.data})
@@ -232,29 +228,6 @@ def validateOtpAndLogin(request):
 	serializer = UserSerializer(instance=user)
 
 	return Response({'tokens': token, 'user': serializer.data}, status=status.HTTP_200_OK)
-
-
-
-# @api_view(['POST'])
-# def verifyOTP(request):
-#     user = get_object_or_404(CustomUser, username=request.data.get('username'))
-#     otp = request.data.get('otp')
-
-#     if not otp:
-#         return Response({'detail': 'OTP required.'}, status=status.HTTP_400_BAD_REQUEST)
-
-#     try:
-#         device = TOTPDevice.objects.get(user=user, name='default')
-#         totp = pyotp.TOTP(device.key)
-
-#         if not totp.verify(otp):
-#             return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
-#     except TOTPDevice.DoesNotExist:
-#         return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-#     user.otp_verified = True
-#     user.save()
-#     return Response({'detail': 'OTP verified successfully.'}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])

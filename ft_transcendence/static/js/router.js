@@ -17,6 +17,7 @@ const circle_check = '<i class="fa-regular fa-circle-check"></i>';
 const verificationFailed = '<i class="fa-regular fa-circle-xmark"></i> Verification failed';
 const notVerified = '<i class="fa-regular fa-circle-xmark"></i> OTP was activated but not verified';
 const reActivate = '<i class="fa-regular fa-circle-xmark"></i> Please setup 2FA in profile settings';
+const onlyOneMethod = 'Please select only one of the 2FA methods'
 
 class Router {
 	constructor() {
@@ -281,6 +282,10 @@ async function editProfileHandler() {
 
 		updateProfileForm.addEventListener('submit', async (event) => {
 			event.preventDefault();
+			if (otpEnabledInput.value === 'true' && emailOtpEnabledInput.value === 'true') {
+				showToast(onlyOneMethod, true);
+				return;
+			}
 			try {
 				const userData = JSON.parse(localStorage.getItem('currentUser'));
 				const formData = new FormData(updateProfileForm);
@@ -584,8 +589,8 @@ async function handleLoginSubmit(event) {
         });
         if (response.ok) {
             loginData = await response.json();
-			console.log('loginData');
-			console.log(loginData);
+			// console.log('loginData');
+			// console.log(loginData);
             currentUsername = formData.get('username');
 			if (loginData.email_otp_required)
 			{
@@ -637,9 +642,6 @@ async function loadOtpForm() {
 		otpForm.addEventListener('submit', handleOtpSubmit);
     }
 }
-
-
-
 
 async function handleOtpSubmit(event) {
 	event.preventDefault();
@@ -696,12 +698,19 @@ async function handleRegisterSubmit(event) {
     
     const registerForm = event.target;
     const formData = new FormData(registerForm);
-    
+
 	// Log the FormData to ensure it's correct
 	for (var pair of formData.entries()) {
 		console.log(pair[0]+ ': ' + pair[1]);
 	}
-
+    const otpEnabled = formData.get('enable_otp') === 'true';
+    const emailOtpEnabled = formData.get('enable_otp_email') === 'true';
+	console.log(emailOtpEnabled);
+	console.log(otpEnabled);
+    if (otpEnabled && emailOtpEnabled) {
+        showToast(onlyOneMethod, true);
+        return;
+    }
     try {
         const response = await fetch('/users/create-user', {
             method: 'POST',
