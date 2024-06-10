@@ -125,3 +125,59 @@
 	margin-top: 9px;
     color: #ffffff;
 }
+
+.inputBox.selectBox {
+    padding: 0.625rem 1.25rem; /* Adjust padding to match button style */
+    background-color: rgba(233, 68, 225, 0.1); /* Match button background */
+    color: #fff; /* Match button text color */
+    cursor: pointer; /* Make it clickable like a button */
+	border: 2px solid #27defa;
+    border-radius: 0.625rem; /* Match button border radius */
+    outline: none; /* Remove focus outline */
+    display: inline-block; /* Align with inline elements like buttons */
+    position: relative; /* Needed for positioning the custom dropdown arrow */
+}
+
+.inputBox.selectBox select {
+    appearance: none; /* Remove default browser styling */
+    -webkit-appearance: none; /* Additional vendor prefix for Safari */
+    -moz-appearance: none; /* Additional vendor prefix for Firefox */
+    background-color: transparent; /* Make the dropdown transparent */
+    border: none; /* Remove border */
+    color: inherit; /* Inherit text color from parent */
+    padding: 0; /* Remove default padding */
+    width: 110%; /* Take full width of its container */
+    height: 100%; /* Match the height of the container */
+    cursor: pointer; /* Make it clickable like a button */
+    font-size: 1rem; /* Match button font size */
+    transition: background-color 0.3s ease; /* Smooth transition effect */
+    /* border-radius: 0.312rem; Match button border radius */
+}
+
+.inputBox.selectBox select:hover {
+    background-color: #1cb1f5; /* Hover effect similar to button */
+}
+
+/* Hide the default dropdown arrow */
+.inputBox.selectBox select::-ms-expand {
+    display: none;
+}
+
+/* Optional: Add a custom dropdown arrow if needed */
+.inputBox.selectBox::after {
+    content: '▼'; /* Custom dropdown arrow */
+    position: absolute;
+    right: 7px; /* Position the arrow */
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none; /* Prevent clicks on the arrow */
+    color: #fff; /* Match button text color */
+	border: none;
+}
+
+/* Adjust the hover effect for the entire container when hovering over the select */
+.inputBox.selectBox:hover::after {
+    color: #000; /* Example hover effect for the arrow */
+	border: none;
+}
+

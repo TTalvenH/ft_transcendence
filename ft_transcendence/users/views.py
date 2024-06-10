@@ -89,8 +89,8 @@ def createUser(request):
     if serializer.is_valid():
         user = serializer.save()
 
-        enable_otp = request.POST.get('enable_otp', 'false')  # Default to 'false' if not found
-        enable_email_otp = request.POST.get('enable_otp_email', 'false')  # Default to 'false' if not found
+        enable_otp = request.POST.get('enable_otp', 'false')
+        enable_email_otp = request.POST.get('enable_otp_email', 'false')
 
         otp_data = {}
         qr_html = None

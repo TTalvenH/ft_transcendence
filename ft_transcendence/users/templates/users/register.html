@@ -31,21 +31,14 @@
         </div>
         <div class="actionRow">
             <button class="button" type="submit">SIGN UP</button>
-            <div class="inputBox checkboxBox">
-                <input type="checkbox" id="enable_otp" name="enable_otp" value="true">
-            </div>
-            <div class="checkboxlabel">
-                <label for="enable_otp">Enable Two-Factor-Auth</label>
-            </div>
-            <div class="inputBox checkboxBox">
-                <input type="checkbox" id="enable_otp_email" name="enable_otp_email" value="true">
-            </div>
-            <div class="checkboxlabel">
-                <label for="enable_otp_email">Enable Email 2FA</label>
+            <div class="inputBox selectBox">
+                <select name="two_factor_method" id="two_factor_method">
+                    <option value="">Select 2FA Method</option>
+                    <option value="otp">Authenticator App</option>
+                    <option value="email">Email</option>
+                </select>
             </div>
         </div>
-    </form>
-</div>
 
 
 <!-- <div class="box smoothAppear" id="registerBox">

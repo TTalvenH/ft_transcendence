@@ -716,7 +716,6 @@ async function handleRegisterSubmit(event) {
             method: 'POST',
             body: formData
         });
-
         if (response.ok) {
             const result = await response.json();
             await handleRegistrationResponse(result);
