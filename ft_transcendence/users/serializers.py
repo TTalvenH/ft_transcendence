@@ -35,6 +35,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 		required=True,
 		validators=[UniqueValidator(queryset=CustomUser.objects.all())]
 	)
+	two_factor_method = serializers.CharField(required=False, write_only=True)
 
 	class Meta:
 		"""
@@ -44,7 +45,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 		"""
 
 		model = CustomUser
-		fields = ['username', 'email', 'password', 'confirm_password']
+		fields = ['username', 'email', 'password', 'confirm_password', 'two_factor_method']
 
 	def validate(self, attrs):
 		"""
@@ -80,6 +81,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 		user = CustomUser.objects.create(
 			username=validated_data['username'],
 			email=validated_data['email'],
+            two_factor_method=validated_data.get('two_factor_method', 'none')
 		)
 
 		user.set_password(validated_data['password'])

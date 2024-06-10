@@ -84,58 +84,56 @@ from django.template.loader import render_to_string
 
 @api_view(['POST'])
 def createUser(request):
-    print(request.POST)  # Debugging line to print all request POST data
-    serializer = RegisterUserSerializer(data=request.data)
-    if serializer.is_valid():
-        user = serializer.save()
+	print(request.POST)  # Debugging line to print all request POST data
+	serializer = RegisterUserSerializer(data=request.data)
+	if serializer.is_valid():
+		user = serializer.save()
+		two_factor_method = user.two_factor_method
+		print(two_factor_method)
+		otp_data = {}
+		qr_html = None
 
-        enable_otp = request.POST.get('enable_otp', 'false')
-        enable_email_otp = request.POST.get('enable_otp_email', 'false')
+		if two_factor_method == 'otp':
+			otp_data = setupOTP(user)
+			if not otp_data['created']:
+				return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        otp_data = {}
-        qr_html = None
+			django_request = HttpRequest()
+			django_request.method = 'GET'
+			django_request.user = request.user
+			csrf_token = get_token(request)
+			context = otp_data.get('context', {})
+			context['csrf_token'] = csrf_token
+			qr_html = render_to_string('users/qr.html', context, request=django_request)
 
-        if enable_otp == 'true':
-            otp_data = setupOTP(user)
-            if not otp_data['created']:
-                return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+		elif two_factor_method == 'email':
+			otp_code = generate_email_otp()
+			user.email_otp_code = otp_code
+			user.email_otp_enabled = True
+			user.save()
+			send_mail(
+				'Your OTP Code',
+				f'Your OTP code is {otp_code}',
+				'customer.support.pong@example.com',
+				[user.email],
+				fail_silently=False,
+			)
+			otp_data['email_otp'] = 'Email OTP enabled. Check your email for the OTP code.'
 
-            django_request = HttpRequest()
-            django_request.method = 'GET'
-            django_request.user = request.user
-            csrf_token = get_token(request)
-            context = otp_data.get('context', {})
-            context['csrf_token'] = csrf_token
-            qr_html = render_to_string('users/qr.html', context, request=django_request)
+		response_data = { 
+			'user': serializer.data,
+			'otp': otp_data,
+			'qr_html': qr_html
+		}
 
-        if enable_email_otp == 'true':
-            otp_code = generate_email_otp()
-            user.email_otp_code = otp_code
-            user.email_otp_enabled = True
-            user.save()
-            send_mail(
-                'Your OTP Code',
-                f'Your OTP code is {otp_code}',
-                'customer.support.pong@example.com',
-                [user.email],
-                fail_silently=False,
-            )
-            otp_data['email_otp'] = 'Email OTP enabled. Check your email for the OTP code.'
+		return Response(response_data, status=status.HTTP_201_CREATED)
 
-        response_data = { 
-            'user': serializer.data,
-            'otp': otp_data,
-            'qr_html': qr_html
-        }
-
-        return Response(response_data, status=status.HTTP_201_CREATED)
-
-    detail = {'detail': 'Invalid data'}
-    if serializer.errors.get('username'):
-        detail = {'detail': 'Username taken'}
-    elif serializer.errors.get('email'):
-        detail = {'detail': 'Email taken'}
-    return Response(detail, status=status.HTTP_400_BAD_REQUEST)
+	detail = {'detail': 'Invalid data'}
+	if serializer.errors.get('username'):
+		detail = {'detail': 'Username taken'}
+	elif serializer.errors.get('email'):
+		detail = {'detail': 'Email taken'}
+	return Response(detail, status=status.HTTP_400_BAD_REQUEST)
 
 
 from random import randint

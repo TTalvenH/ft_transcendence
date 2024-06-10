@@ -3,9 +3,10 @@ from .models import CustomUser
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 
 class CreateUserForm(UserCreationForm):
+	two_factor_method = forms.ChoiceField(choices=[('app', 'Auth-app'), ('email', 'Email')], required=False)
 	class Meta:
 		model = CustomUser
-		fields = ['username', 'email', 'password']
+		fields = ['username', 'email', 'password', 'two_factor_method']
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
