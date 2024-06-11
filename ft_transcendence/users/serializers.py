@@ -119,7 +119,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'image', 'username', 'friends', 'last_active',
             'old_password', 'new_password', 'confirm_password',
-            'email', 'otp_enabled', 'email_otp_enabled'
+            'email', 'two_factor_method'
         ]
         read_only_fields = ['id', 'friends', 'last_active']
         extra_kwargs = {'username': {'required': False}}
@@ -157,12 +157,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             instance.set_password(new_password)
             instance.save()
 
-        if not instance.otp_enabled:
+        if not instance.two_factor_method:
             instance.otp_verified = False
-            instance.save()
-
-        if not instance.email_otp_enabled:
-            instance.email_otp_verified = False
             instance.save()
 
         return instance

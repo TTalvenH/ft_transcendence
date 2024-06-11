@@ -404,29 +404,25 @@ from rest_framework.parsers import MultiPartParser
 @parser_classes([MultiPartParser])
 def updateUserProfile(request):
 	user = get_object_or_404(CustomUser, id=request.user.id)
+	# print(request.data)
 	profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True, context={'request': request})
 
 	if profile_serializer.is_valid():
 		profile_serializer.save()
 		
-		authFormSwitchOtp = request.data.get('otp_enabled')
-		otp_setup_needed = False
-		if authFormSwitchOtp == 'true':
-			if not user.otp_verified:
-				otp_setup_needed = True
-		elif authFormSwitchOtp == 'false':
-			user.otp_verified = False
-			user.otp_enabled = False
-			user.save()
+		# print('2fa :', user.two_factor_method)
 
-		authFormSwitchEmailOtp = request.data.get('email_otp_enabled')
+		otp_setup_needed = False
 		email_otp_setup_needed = False
-		if authFormSwitchEmailOtp == 'true':
-			if not user.email_otp_verified:
+		TwoFactorMethod = user.two_factor_method
+		
+		if TwoFactorMethod == 'app':
+				otp_setup_needed = True
+		elif TwoFactorMethod == 'email':
+			if not user.otp_verified:
 				email_otp_setup_needed = True
-		elif authFormSwitchEmailOtp == 'false':
-			user.email_otp_verified = False
-			user.email_otp_enabled = False
+		elif user.two_factor_method == 'None':
+			user.two_factor_method = 'None'
 			user.save()
 
 		user_serializer = UserSerializer(instance=user)

@@ -262,27 +262,42 @@ async function editProfileHandler() {
 			}
 		});
 
+		// const otpEnabledInput = document.getElementById('otpEnabled');
+		// const emailOtpEnabledInput = document.getElementById('emailOtpEnabled');
+		
+		
+		// flexSwitch2FA.addEventListener('change', () => {
+			// 	otpEnabledInput.value = flexSwitch2FA.checked;
+			// });
+			
+			// flexSwitchEmailOtp.addEventListener('change', () => {
+				// 	emailOtpEnabledInput.value = flexSwitchEmailOtp.checked;
+				// });
+				
+				
 		const updateProfileForm = document.getElementById('updateProfileForm');
-		const otpEnabledInput = document.getElementById('otpEnabled');
-		const emailOtpEnabledInput = document.getElementById('emailOtpEnabled');
 		const flexSwitch2FA = document.getElementById('flexSwitch2FA');
 		const flexSwitchEmailOtp = document.getElementById('flexSwitchEmailOtp');
-
-		// Set the hidden input values based on the switches' initial states
-		otpEnabledInput.value = flexSwitch2FA.checked;
-		emailOtpEnabledInput.value = flexSwitchEmailOtp.checked;
-
-		flexSwitch2FA.addEventListener('change', () => {
-			otpEnabledInput.value = flexSwitch2FA.checked;
-		});
-
-		flexSwitchEmailOtp.addEventListener('change', () => {
-			emailOtpEnabledInput.value = flexSwitchEmailOtp.checked;
-		});
-
+		const twoFactorMethodInput = document.getElementById('2FA');
+	
+		// Function to handle checkbox changes
+		function updateTwoFactorMethod() {
+			let method = '';
+			if (flexSwitch2FA.checked) {
+				method = 'app';
+			} else if (flexSwitchEmailOtp.checked) {
+				method = 'email';
+			}
+			twoFactorMethodInput.value = method;
+		}
+		
+		// Attach event listeners to the checkboxes
+		flexSwitch2FA.addEventListener('change', updateTwoFactorMethod);
+		flexSwitchEmailOtp.addEventListener('change', updateTwoFactorMethod);
+		
 		updateProfileForm.addEventListener('submit', async (event) => {
 			event.preventDefault();
-			if (otpEnabledInput.value === 'true' && emailOtpEnabledInput.value === 'true') {
+			if (flexSwitch2FA.checked && flexSwitchEmailOtp.checked) {
 				showToast(onlyOneMethod, true);
 				return;
 			}
