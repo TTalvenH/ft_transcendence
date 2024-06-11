@@ -5,12 +5,15 @@ from users.models import CustomUser
 class MatchSerializer(serializers.ModelSerializer):
 	player1_username = serializers.CharField(source='player1.username', read_only=True)
 	player2_username = serializers.CharField(source='player2.username', read_only=True)
+	date = serializers.SerializerMethodField()
 
 	class Meta:
 		model = Match
 		fields = [
 			'id',
 			'game',
+			'date',
+			'dateTime',
 			'player1',
 			'player1_username',
 			'player1Hp',
@@ -18,9 +21,10 @@ class MatchSerializer(serializers.ModelSerializer):
 			'player2_username',
 			'player2Hp',
 			'timePlayed',
-			'dateTime'
 		]
 		read_only_fields = ['id', 'player1_username', 'player2_username']
+	def get_date(self, obj):
+		return obj.dateTime.date().isoformat()
 
 class MatchCreateSerializer(serializers.ModelSerializer):
 	player1 = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
@@ -61,18 +65,23 @@ class TournamentSerializer(serializers.ModelSerializer):
 	match_one = MatchSerializer()
 	match_two = MatchSerializer()
 	match_final = MatchSerializer()
+	date = serializers.SerializerMethodField()
 
 	class Meta:
 		model = Tournament
 		fields = [
 			'id',
 			'game',
+			'date',
 			'dateTime',
 			'match_one',
 			'match_two',
 			'match_final',
 		]
 		read_only_fields = ['id']
+
+	def get_date(self, obj):
+		return obj.dateTime.date().isoformat()
 
 class TournamentCreateSerializer(serializers.ModelSerializer):
 	match_one = serializers.PrimaryKeyRelatedField(queryset=Match.objects.all())
@@ -82,6 +91,7 @@ class TournamentCreateSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Tournament
 		fields = [
+			'game',
 			'match_one',
 			'match_two',
 			'match_final'
@@ -89,12 +99,14 @@ class TournamentCreateSerializer(serializers.ModelSerializer):
 
 	def create(self, validated_data):
 		# Extract matches from the validated data
+		game = validated_data.pop('game')
 		match_one = validated_data.pop('match_one')
 		match_two = validated_data.pop('match_two')
 		match_final = validated_data.pop('match_final')
 
 		# Create the tournament
 		tournament = Tournament.objects.create(
+			game=game,
 			match_one=match_one,
 			match_two=match_two,
 			match_final=match_final

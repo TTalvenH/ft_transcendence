@@ -69,7 +69,7 @@ router.get('/register', registerHandler);
 
 router.get('/edit-profile', editProfileHandler);
 
-router.get('/pong', pongHandler);
+router.get('/match', pongHandler);
 
 router.get('/profile', profileHandler);
 
@@ -89,7 +89,6 @@ class User {
 		expirationDate.setDate(expirationDate.getDate() + 5);
 
 		document.cookie = `refresh=${data.tokens.refresh}; expires=${expirationDate.toUTCString()}; path=/;`;
-		console.log(document.cookie);
 		localStorage.setItem('currentUser', JSON.stringify(user));
 	}
 
@@ -103,7 +102,6 @@ class User {
 
 	async refreshToken() {
 		let user = this.getUser();
-		console.log(user);
 		// check if latest refresh was more than 15 minutes ago
 		if (user && user.latestRefresh < Date.now() - 15*60*1000) {
 			console.log('refreshing token, latestRefresh = ' + new Intl.DateTimeFormat('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date(user.latestRefresh)));
@@ -111,7 +109,6 @@ class User {
 				const cookie = document.cookie.split('; ').find(row => row.startsWith('refresh='));
 				const refreshToken = cookie ? cookie.split('=')[1] : null;
 				const body = refreshToken ? JSON.stringify({refresh: refreshToken}) : null;
-				console.log(body);
 				const response = await fetch('http://127.0.0.1:8000/users/token/refresh_token', {
 					method: 'POST',
 					headers: {
@@ -836,8 +833,8 @@ async function one_v_oneHandler() {
 				await currentUser.refreshToken();
 				if (mode === "guest") {
 					const ui = document.getElementById('ui');
-					userContainer.innerHTML = "";
 					ui.style.display = 'none';
+					userContainer.innerHTML = "";
 					const data = {
 						tournament_match: false,
 						player1: {
@@ -1160,22 +1157,42 @@ router.init();
 let isTournament = false;
 let matchIds = [];
 
+async function handleTournamentData(data, gameData) {
+	matchIds.push(data.id);
+	const winner = gameData.player1Hp > gameData.player2Hp ? {username: gameData.player1Name, id: gameData.player1} : {username: gameData.player2Name, id: gameData.player2};
+	if (!tournamentData[2].player1) {
+		tournamentData[2].player1 = winner;
+	} else {
+		tournamentData[2].player2 = winner;
+	}
+	if (matchIds.length === 3) {
+		const tournament_response = await fetch('/pong/create-tournament', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer ' + userData.accessToken,
+			},
+			body: JSON.stringify({
+				game: gameData.game,
+				match_one: matchIds[0],
+				match_two: matchIds[1],
+				match_final: matchIds[2],
+			})
+		})
+		if (tournament_response.error) {
+			showToast(somethingWentWrong, true);
+		}
+		matchIds = [];
+		isTournament = false;
+	} else {
+		nextMatch(tournamentData[matchIds.length]);
+	}
+}
+
 export async function handleMatchEnd(gameData) {
 	const userData = JSON.parse(localStorage.getItem('currentUser'));
 	console.log("handleMatchEnd called");
 	if (gameData) {
-		console.log("gamedata = " + JSON.stringify(gameData));
-		// const body = {
-		// 	game: gameData.game,
-		// 	tournament_match: gameData.tournament_match,
-		// 	player1: gameData.player1.id,
-		// 	player1Hp: gameData.player1.hitpoints,
-		// 	player2: gameData.player2.id,
-		// 	player2Hp: gameData.player2.hitpoints,
-		// 	timePlayed: gameData.matchTimeLength,
-		// 	dateTime: gameData.dateTime
-		// }
-		// console.log(JSON.stringify(body));
 		const response = await fetch('/pong/create-match', {
 			method: 'POST',
 			headers: {
@@ -1187,41 +1204,7 @@ export async function handleMatchEnd(gameData) {
 		if (response.ok) {
 			if (isTournament) {
 				const data = await response.json();
-				console.log('is tournament = ' + isTournament);
-				matchIds.push(data.id);
-				const winner = gameData.player1Hp > gameData.player2Hp ? {username: gameData.player1Name, id: gameData.player1} : {username: gameData.player2Name, id: gameData.player2};
-				console.log('winner = ' + winner.username);
-				if (!tournamentData[2].player1) {
-					tournamentData[2].player1 = winner;
-				} else {
-					tournamentData[2].player2 = winner;
-				}
-				if (matchIds.length === 3) {
-					const tournament_response = await fetch('/pong/create-tournament', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							'Authorization': 'Bearer ' + userData.accessToken,
-						},
-						body: JSON.stringify({
-							game: gameData.game,
-							match_one: matchIds[0],
-							match_two: matchIds[1],
-							match_final: matchIds[2],
-						})
-					})
-					if (tournament_response.error) {
-						showToast(somethingWentWrong, true);
-					}
-					matchIds = [];
-					isTournament = false;
-				} else {
-					console.log('matchIds asd = ' + matchIds.length);
-					// setTimeout(() => {
-					// 	nextMatch(tournamentData[matchIds.length]);
-					// }, 5000);
-					nextMatch(tournamentData[matchIds.length]);
-				}
+				await handleTournamentData(data, gameData);
 			}
 		} else {
 			showToast(somethingWentWrong, true);
@@ -1231,6 +1214,8 @@ export async function handleMatchEnd(gameData) {
 				matchIds = [];
 				isTournament = false;
 			}
+			const ui = document.getElementById('ui');
+			ui.style.display = 'block';
 			const sidePanelDiv = document.getElementById('sidePanelDiv');
 			sidePanelDiv.style.display = 'block';
 			router.init();

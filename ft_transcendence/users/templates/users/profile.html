@@ -138,7 +138,7 @@
 								{% else %}
 									<td style="color: red;">{{ match.player1Hp }} - {{ match.player2Hp }}</td>
 								{% endif %}
-								<td>{{ match.dateTime }}</td>
+								<td>{{ match.date }}</td>
 							</tr>
 						{% endfor %}
 					</tbody>
@@ -162,7 +162,7 @@
 								</td>
 								<td>
 									<a class="link" href="/tournament?id={{ match.id }}" onclick="route(event)">
-										{{ match.dateTime }}
+										{{ match.date }}
 									</a>
 								</td>
 							</tr>

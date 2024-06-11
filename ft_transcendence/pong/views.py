@@ -94,5 +94,6 @@ def create_tournament(request):
 
 	if tournament_serializer.is_valid():
 		tournament_serializer.save()
+		print('tournament data = {}'.format(tournament_serializer.data))
 		return Response(tournament_serializer.data, status=status.HTTP_201_CREATED)
 	return Response(tournament_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -166,10 +166,12 @@ export class Pong
 
 	startGame(data) {
 		this.gameData = data;
+		this.gameData.game = this.gameGlobals.gameState ? 'KnockOff' : 'Pong';
+
 		const user1Name = this.entities['User1Name']
 		const user2Name = this.entities['User2Name']
 		
-		console.log(data);
+		console.log('startgamedata game = ' + this.gameData.game);
 		user1Name.setText(data.player1.username);
 		user2Name.setText(data.player2.username);
 		user1Name.text = data.player1.username;
@@ -325,7 +327,7 @@ export class Pong
 		// };
 
 		const gameOverData = {
-			game: this.gameGlobals.game ? 'Knockoff' : 'Pong',
+			game: this.gameData.game,
 			tournament_match: this.gameData.tournament_match,
 			player1: this.gameData.player1.id,
 			player1Name: this.gameData.player1.username,
@@ -336,7 +338,7 @@ export class Pong
 			timePlayed: this.matchTime.getElapsedTime().toFixed(2) + "s",
 			dateTime: this.matchDate,
 		};
-
+		console.log('game = ' + gameOverData.game)
 		goal1.material.emissiveIntensity = 1;
 		goal2.material.emissiveIntensity = 1;
 		gameOverEvent.detail.gameOverData = gameOverData;
