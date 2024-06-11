@@ -592,12 +592,12 @@ async function handleLoginSubmit(event) {
 			// console.log('loginData');
 			// console.log(loginData);
             currentUsername = formData.get('username');
-			if (loginData.email_otp_required)
+			if (loginData.two_factor_method && loginData.otp_verified)
 			{
 				loginForm.remove();
                 await loadOtpForm();
 			}
-			else if (loginData.otp_required && !loginData.otp_verified) {
+			else if (loginData.two_factor_method && !loginData.otp_verified) {
 				showToast(loginSuccess, false);
 				showToast(notVerified, true);
 				showToast(reActivate, false);
@@ -605,10 +605,6 @@ async function handleLoginSubmit(event) {
 				history.pushState({}, "", "/");
 				router.init()
 			}
-            else if (loginData.otp_required && loginData.otp_verified) {
-                loginForm.remove();
-                await loadOtpForm();
-            }
 			else {
 				showToast(loginSuccess, false);
 				currentUser.setUser(loginData);
@@ -638,7 +634,7 @@ async function loadOtpForm() {
 	console.log('hello');
     const otpForm = document.getElementById('otpForm');
     if (otpForm) {
-		console.log(otpForm);
+		console.log('otpForm: ', otpForm);
 		otpForm.addEventListener('submit', handleOtpSubmit);
     }
 }
@@ -703,14 +699,13 @@ async function handleRegisterSubmit(event) {
 	for (var pair of formData.entries()) {
 		console.log(pair[0]+ ': ' + pair[1]);
 	}
-    const otpEnabled = formData.get('enable_otp') === 'true';
-    const emailOtpEnabled = formData.get('enable_otp_email') === 'true';
-	console.log(emailOtpEnabled);
-	console.log(otpEnabled);
-    if (otpEnabled && emailOtpEnabled) {
-        showToast(onlyOneMethod, true);
-        return;
-    }
+    // const otpEnabled = formData.get('two_factor_method') === 'app';
+	// console.log(emailOtpEnabled);
+	// console.log(otpEnabled);
+    // if (otpEnabled && emailOtpEnabled) {
+    //     showToast(onlyOneMethod, true);
+    //     return;
+    // }
     try {
         const response = await fetch('/users/create-user', {
             method: 'POST',
@@ -718,6 +713,7 @@ async function handleRegisterSubmit(event) {
         });
         if (response.ok) {
             const result = await response.json();
+			console.log(result);
             await handleRegistrationResponse(result);
         } else {
             const errorResult = await response.json();

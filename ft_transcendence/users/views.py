@@ -89,11 +89,11 @@ def createUser(request):
 	if serializer.is_valid():
 		user = serializer.save()
 		two_factor_method = user.two_factor_method
-		print(two_factor_method)
+		print('method is', two_factor_method)
 		otp_data = {}
 		qr_html = None
 
-		if two_factor_method == 'otp':
+		if two_factor_method == 'app': 
 			otp_data = setupOTP(user)
 			if not otp_data['created']:
 				return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -105,6 +105,11 @@ def createUser(request):
 			context = otp_data.get('context', {})
 			context['csrf_token'] = csrf_token
 			qr_html = render_to_string('users/qr.html', context, request=django_request)
+			response_data = { 
+				'user': serializer.data,
+				'otp': otp_data,
+				'qr_html': qr_html
+			}
 
 		elif two_factor_method == 'email':
 			otp_code = generate_email_otp()
@@ -119,12 +124,10 @@ def createUser(request):
 				fail_silently=False,
 			)
 			otp_data['email_otp'] = 'Email OTP enabled. Check your email for the OTP code.'
-
-		response_data = { 
-			'user': serializer.data,
-			'otp': otp_data,
-			'qr_html': qr_html
-		}
+			response_data = { 
+				'user': serializer.data,
+				'otp': otp_data,
+			}
 
 		return Response(response_data, status=status.HTTP_201_CREATED)
 
@@ -145,16 +148,11 @@ def generate_email_otp():
 
 def setupOTP(user):
 	device, created = TOTPDevice.objects.get_or_create(user=user, name='default')
-
 	key = pyotp.random_base32()
 	device.key = key
 	device.save()
 
-	user.otp_enabled = True
-	user.save()
-
 	uri = pyotp.totp.TOTP(key).provisioning_uri(name=user.username, issuer_name="pong")
-
 	qr = qrcode.make(uri)
 	buffered = BytesIO()
 	qr.save(buffered, format="PNG")
@@ -164,7 +162,6 @@ def setupOTP(user):
 		'qr_code_url': img_str,
 	}
 
-	user.otp_verified = True
 	return {
 		'detail': 'OTP device created successfully.',
 		'created': True,
@@ -178,7 +175,7 @@ def loginUser(request):
 	if not user:
 		return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-	if user.email_otp_enabled and user.email_otp_verified:
+	if user.two_factor_method == 'email' and user.otp_verified:
 		otp_code = generate_email_otp()
 		user.email_otp_code = otp_code
 		user.save()
@@ -191,7 +188,7 @@ def loginUser(request):
 		)
 
 	serializer = UserSerializer(instance=user)
-	response_data = {'otp_required': user.otp_enabled, 'email_otp_required': user.email_otp_enabled, 'otp_verified': user.otp_verified, 'email_otp_required': user.email_otp_enabled, 'user': serializer.data}
+	response_data = {'two_factor_method': user.two_factor_method, 'otp_verified': user.otp_verified, 'user': serializer.data}
 	user.update_last_active()
 	token = create_jwt_pair_for_user(user)
 	response_data.update({'tokens': token, 'user': serializer.data})
@@ -203,22 +200,18 @@ def loginUser(request):
 def validateOtpAndLogin(request):
 	user = get_object_or_404(CustomUser, username=request.data['username'])
 	otp = request.data.get('otp')
-	email_otp = user.email_otp_code
 
-	if user.otp_enabled and not otp:
+	if user.two_factor_method and not otp:
 		return Response({'detail': 'OTP required.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-	if user.email_otp_enabled and not email_otp:
-		return Response({'detail': 'Email OTP required.'}, status=status.HTTP_401_UNAUTHORIZED)
-
-	if user.otp_enabled:
+	if user.two_factor_method == 'app':
 		device = TOTPDevice.objects.get(user=user, name='default')
 		totp = pyotp.TOTP(device.key)
 		if not totp.verify(otp):
 			return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-	if user.email_otp_enabled:
-		if email_otp != user.email_otp_code:
+	if user.two_factor_method == 'email':
+		if otp != user.email_otp_code:
 			return Response({'detail': 'Invalid Email OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
 
 	user.update_last_active()
@@ -231,13 +224,15 @@ def validateOtpAndLogin(request):
 @api_view(['POST'])
 def verifyOTP(request):
 	user = get_object_or_404(CustomUser, username=request.data.get('username'))
-	print('asd')
+	two_factor_method = user.two_factor_method
 	otp = request.data.get('otp')
-
-	if not otp:
+	print('method is', two_factor_method)
+	print('otp is', otp)
+	print('user code: ', user.email_otp_code)
+	if not two_factor_method:
 		return Response({'detail': 'OTP required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-	if user.otp_enabled:
+	if two_factor_method == 'app':
 		try:
 			device = TOTPDevice.objects.get(user=user, name='default')
 			totp = pyotp.TOTP(device.key)
@@ -248,8 +243,8 @@ def verifyOTP(request):
 		except TOTPDevice.DoesNotExist:
 			return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-	if user.email_otp_enabled and otp == user.email_otp_code:
-		user.email_otp_verified = True
+	if user.two_factor_method == 'email' and otp == user.email_otp_code:
+		user.otp_verified = True
 		user.save()
 		return Response({'detail': 'Email OTP verified successfully.'}, status=status.HTTP_200_OK)
 	else:
