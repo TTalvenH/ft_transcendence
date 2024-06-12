@@ -114,7 +114,6 @@ def createUser(request):
 		elif two_factor_method == 'email':
 			otp_code = generate_email_otp()
 			user.email_otp_code = otp_code
-			user.email_otp_enabled = True
 			user.save()
 			send_mail(
 				'Your OTP Code',
@@ -175,7 +174,7 @@ def loginUser(request):
 	if not user:
 		return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-	if user.two_factor_method == 'email' and user.otp_verified:
+	if user.two_factor_method == 'email' and user.email_otp_verified:
 		otp_code = generate_email_otp()
 		user.email_otp_code = otp_code
 		user.save()
@@ -186,12 +185,12 @@ def loginUser(request):
 			[user.email],
 			fail_silently=False,
 		)
-
 	serializer = UserSerializer(instance=user)
-	response_data = {'two_factor_method': user.two_factor_method, 'otp_verified': user.otp_verified, 'user': serializer.data}
+	response_data = {'two_factor_method': user.two_factor_method, 'otp_verified': user.otp_verified, 'email_otp_verified': user.email_otp_verified, 'user': serializer.data}
 	user.update_last_active()
 	token = create_jwt_pair_for_user(user)
 	response_data.update({'tokens': token, 'user': serializer.data})
+	print(response_data)
 
 	return Response(response_data, status=status.HTTP_200_OK)
 
@@ -244,7 +243,8 @@ def verifyOTP(request):
 			return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
 
 	if user.two_factor_method == 'email' and otp == user.email_otp_code:
-		user.otp_verified = True
+		user.email_otp_verified = True
+		print('hi dad')
 		user.save()
 		return Response({'detail': 'Email OTP verified successfully.'}, status=status.HTTP_200_OK)
 	else:
@@ -323,13 +323,13 @@ def getUserPorfile(request, username):
 @permission_classes([IsAuthenticated])
 def otpSetupView(request):
 	user = get_object_or_404(CustomUser, id=request.user.id)
-	enable_otp = request.data.get('enable_otp', False)  # Default to 'false' if not found
-	enable_email_otp = request.data.get('enable_email_otp', False)  # Default to 'false' if not found
-	print(enable_otp)
-	print(enable_email_otp)
+
+	enable_otp = request.data.get('enable_otp')
+	enable_email_otp = request.data.get('enable_email_otp')
 
 	if enable_otp:
 		otp_data = setupOTP(user)
+		user.otp_verified = False
 		if not otp_data['created']:
 			return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -348,11 +348,11 @@ def otpSetupView(request):
 			'qr_html': qr_html,
 			'username': user.username
 		}
+
 	elif enable_email_otp:
 		otp_code = generate_email_otp()
 		user.email_otp_code = otp_code
 		user.email_otp_verified = False
-		user.email_otp_enabled = True
 		user.save()
 		send_mail(
                 'Your OTP Code',
@@ -361,41 +361,14 @@ def otpSetupView(request):
                 [user.email],
                 fail_silently=False,
             )
-		response_data = {
-			'username': user.username
-		}
+		user.two_factor_method = 'email'
+		response_data = {'username': user.username }
+	else:
+		response_data = {'detail': 'No setup needed'}
 
 	return Response(response_data, status=status.HTTP_201_CREATED)
 
 from rest_framework.parsers import MultiPartParser
-
-# @api_view(['PUT'])
-# @authentication_classes([JWTAuthentication])
-# @update_last_active
-# @permission_classes([IsAuthenticated])
-# @parser_classes([MultiPartParser])
-# def updateUserProfile(request):
-# 	# Retrieve user from the database
-# 	user = get_object_or_404(CustomUser, id=request.user.id)
-
-# 	# Serialize the user data
-# 	profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True, context={'request': request})
-# 	if profile_serializer.is_valid():
-# 		profile_serializer.save()
-# 		authFormSwitch = request.data.get('otp_enabled')
-# 		otp_setup_needed = False
-# 		if authFormSwitch == 'true' and not user.otp_verified:
-# 			otp_setup_needed = True
-# 		user_serializer = UserSerializer(instance=user)
-# 		return Response({'user': user_serializer.data, 'otp_setup_needed': otp_setup_needed})
-# 	detail = {'detail': 'Invalid data'}
-# 	if profile_serializer.errors.get('username'):
-# 		detail = {'detail': 'Username taken.'}
-# 	elif profile_serializer.errors.get('email'):
-# 		detail = {'detail': profile_serializer.errors.get('email')}
-# 	elif profile_serializer.errors.get('password'):
-# 		detail = {'detail': 'Missing required fields.'}
-# 	return Response(detail, status=400)
 
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])
@@ -409,19 +382,16 @@ def updateUserProfile(request):
 
 	if profile_serializer.is_valid():
 		profile_serializer.save()
-		
 		# print('2fa :', user.two_factor_method)
-
 		otp_setup_needed = False
 		email_otp_setup_needed = False
 		TwoFactorMethod = user.two_factor_method
 		
-		if TwoFactorMethod == 'app':
-				otp_setup_needed = True
-		elif TwoFactorMethod == 'email':
-			if not user.otp_verified:
-				email_otp_setup_needed = True
-		elif user.two_factor_method == 'None':
+		if TwoFactorMethod == 'app' and not user.otp_verified:
+			otp_setup_needed = True
+		elif TwoFactorMethod == 'email' and not user.email_otp_verified:
+			email_otp_setup_needed = True
+		else:
 			user.two_factor_method = 'None'
 			user.save()
 

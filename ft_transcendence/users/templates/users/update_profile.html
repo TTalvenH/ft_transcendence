@@ -58,7 +58,7 @@
                 <input type="hidden" name="two_factor_method" id="2FA" value="{{ user.two_factor_method }}">
 
                 <div class="form-check form-switch" style="color: white; margin-bottom: 20px;">
-                    <input class="form-check-input" type="checkbox" id="flexSwitchEmailOtp" {% if user.otp_verified and user.two_factor_method == 'email' %}checked{% endif %}>
+                    <input class="form-check-input" type="checkbox" id="flexSwitchEmailOtp" {% if user.email_otp_verified and user.two_factor_method == 'email' %}checked{% endif %}>
                     <label class="form-check-label" for="flexSwitchEmailOtp">Two-Factor Email Authentication</label>
                 </div>
 

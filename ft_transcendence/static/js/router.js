@@ -607,12 +607,13 @@ async function handleLoginSubmit(event) {
 			// console.log('loginData');
 			// console.log(loginData);
             currentUsername = formData.get('username');
-			if (loginData.two_factor_method && loginData.otp_verified)
+			console.log('stuff:', loginData.two_factor_method, loginData.otp_verified, loginData.otp_email_verified);
+			if (loginData.two_factor_method && (loginData.otp_verified || loginData.email_otp_verified))
 			{
 				loginForm.remove();
                 await loadOtpForm();
 			}
-			else if (loginData.two_factor_method && !loginData.otp_verified) {
+			else if (loginData.two_factor_method && (!loginData.otp_verified && !loginData.email_otp_verified)) {
 				showToast(loginSuccess, false);
 				showToast(notVerified, true);
 				showToast(reActivate, false);
@@ -628,6 +629,7 @@ async function handleLoginSubmit(event) {
 			}
 		}
 		else {
+			// prints object object if wrong password
 			const errorData = await response.json()
 			showToast(errorData, true);
 		}
@@ -685,6 +687,7 @@ async function handleOtpSubmit(event) {
         alert('An error occurred during OTP validation. Please try again later.');
     }
 }
+
 
 async function registerHandler() {
     const userContainer = document.getElementById('userContainer');
