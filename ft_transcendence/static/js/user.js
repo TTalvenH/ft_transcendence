@@ -1,3 +1,6 @@
+
+import { router } from "./main.js"
+
 class User {
 	setUser(data) {
 		const user = {
@@ -57,4 +60,4 @@ class User {
 	}
 };
 
-export {User}
+export { User }

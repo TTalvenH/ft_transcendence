@@ -29,6 +29,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# not good for prodution 
+import os
+
+os.environ['SSL_CERT_FILE'] = '/usr/local/etc/openssl@3/cert.pem' 
 
 # Application definition
 
@@ -206,3 +210,4 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'customer.service.pong@gmail.com' #put to env
 EMAIL_HOST_PASSWORD = 'fqih dkpd wtxa jgby' #put to env
+

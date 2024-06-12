@@ -13,8 +13,8 @@ import { HealthBarEntity } from './entities/HealthBarEntity.js';
 import { CameraEntity } from './entities/CameraEntity.js';
 import { TextEntity } from './entities/TextEntity.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-import { gameOverEvent, handleMatchEnd } from '../router.js';
-
+// import { gameOverEvent } from '../router.js';
+import { handleMatchEnd } from '../gameHandler.js'
 import * as COLORS from './colors.js';
 import { KnockoffPlayerEntity } from './entities/knockoffPlayerEntity.js';
 import { PowerUpEntity } from './entities/PowerUpEntity.js';

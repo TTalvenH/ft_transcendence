@@ -45,14 +45,14 @@
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     
     <!-- Main JS -->
-    <script type="module-shim" defer src="{% static 'js/router.js' %}"></script>
+    <script type="module-shim" defer src="{% static 'js/main.js' %}"></script>
 </head>
 <body>
     <div id="root">
 		<div id="ui">
 			<div id="sidePanelDiv" class="sidePanelDiv">
 				<div id="sidePanel" class="sidePanel col-1 d-flex flex-column justify-content-start align-items-center pt-5">
-					<div id="startButton" >
+					<div style="display: none" id="startButton" >
 						<a href="/match" onclick="route(event)">
 							<button class="button mb-4">PLAY</button>
 						</a>

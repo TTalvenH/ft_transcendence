@@ -35,6 +35,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 		required=True,
 		validators=[UniqueValidator(queryset=CustomUser.objects.all())]
 	)
+	two_factor_method = serializers.CharField(required=False, write_only=True)
 
 	class Meta:
 		"""
@@ -44,7 +45,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 		"""
 
 		model = CustomUser
-		fields = ['username', 'email', 'password', 'confirm_password']
+		fields = ['username', 'email', 'password', 'confirm_password', 'two_factor_method']
 
 	def validate(self, attrs):
 		"""
@@ -80,6 +81,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 		user = CustomUser.objects.create(
 			username=validated_data['username'],
 			email=validated_data['email'],
+            two_factor_method=validated_data.get('two_factor_method', 'none')
 		)
 
 		user.set_password(validated_data['password'])
@@ -102,78 +104,58 @@ class FriendSerializer(serializers.ModelSerializer):
 		return last_active >= five_minutes_ago
 
 class UserProfileSerializer(serializers.ModelSerializer):
-	friends = FriendSerializer(many=True)  # Use the nested serializer
-	old_password = serializers.CharField(
-		write_only=True,
-		required=False,
-	)
-	new_password = serializers.CharField(
-		write_only=True,
-		required=False,
-		validators=[validate_password]
-	)
-	confirm_password = serializers.CharField(
-		write_only=True,
-		required=False
-	)
-	class Meta:
-		model = CustomUser
-		fields = ['id', 'image', 'username', 'friends', 'last_active', 'old_password', 'new_password', 'confirm_password', 'email', 'otp_enabled',]
-		read_only_fields = ['id', 'friends', 'match_history', 'last_active']
-		extra_kwargs = {
-			'username': {'required': False}  # Make username field optional for partial updates
-		}
-	def validate(self, attrs):
-		user = self.context['request'].user
-		print('HELLOOOO')
-		if 'new_password' in attrs and 'confirm_password' in attrs and 'old_password' in attrs:
-			print('heellloooo22')
-			if not user.check_password(attrs.get('old_password', '')):
-				raise serializers.ValidationError({"old_password": "Wrong password."})
-			if attrs['new_password'] != attrs['confirm_password']:
-				raise serializers.ValidationError({"password": "Password fields didn't match."})
-			password = attrs['new_password']
-			print('password is = {}'.format(password))
-			if len(password) < 8:
-				raise serializers.ValidationError({"new_password": "Password must be at least 8 characters long."})
-			if not re.search(r'[A-Z]', password):
-				raise serializers.ValidationError({"new_password": "Password must contain at least one uppercase letter."})
-			if not re.search(r'[a-z]', password):
-				raise serializers.ValidationError({"new_password": "Password must contain at least one lowercase letter."})
-			if not re.search(r'\d', password):
-				raise serializers.ValidationError({"new_password": "Password must contain at least one number."})
-			if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-				raise serializers.ValidationError({"new_password": "Password must contain at least one special character."})
-		elif 'new_password' in attrs or 'confirm_password' in attrs or 'old_password' in attrs:
-			raise serializers.ValidationError({"password": "Missing required field."})
-		return attrs
-	
-	def update(self, instance, validated_data):
-		new_password = validated_data.pop('new_password', None)
-		validated_data.pop('confirm_password', None)
-		validated_data.pop('old_password', None)
+    friends = FriendSerializer(many=True)
+    old_password = serializers.CharField(write_only=True, required=False)
+    new_password = serializers.CharField(write_only=True, required=False, validators=[validate_password])
+    confirm_password = serializers.CharField(write_only=True, required=False)
 
-		old_username = instance.username
+    class Meta:
+        model = CustomUser
+        fields = [
+            'id', 'image', 'username', 'friends', 'last_active',
+            'old_password', 'new_password', 'confirm_password',
+            'email', 'two_factor_method'
+        ]
+        read_only_fields = ['id', 'friends', 'last_active']
+        extra_kwargs = {'username': {'required': False}}
 
-		instance = super().update(instance, validated_data)
+    def validate(self, attrs):
+        user = self.context['request'].user
+        if 'new_password' in attrs and 'confirm_password' in attrs and 'old_password' in attrs:
+            if not user.check_password(attrs.get('old_password', '')):
+                raise serializers.ValidationError({"old_password": "Wrong password."})
+            if attrs['new_password'] != attrs['confirm_password']:
+                raise serializers.ValidationError({"password": "Password fields didn't match."})
+            password = attrs['new_password']
+            if len(password) < 8:
+                raise serializers.ValidationError({"new_password": "Password must be at least 8 characters long."})
+            if not re.search(r'[A-Z]', password):
+                raise serializers.ValidationError({"new_password": "Password must contain at least one uppercase letter."})
+            if not re.search(r'[a-z]', password):
+                raise serializers.ValidationError({"new_password": "Password must contain at least one lowercase letter."})
+            if not re.search(r'\d', password):
+                raise serializers.ValidationError({"new_password": "Password must contain at least one number."})
+            if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+                raise serializers.ValidationError({"new_password": "Password must contain at least one special character."})
+        elif 'new_password' in attrs or 'confirm_password' in attrs or 'old_password' in attrs:
+            raise serializers.ValidationError({"password": "Missing required field."})
+        return attrs
 
-		if new_password:
-			instance.set_password(new_password)
-			instance.save()
-		if instance.otp_enabled == False:
-			instance.otp_verified = False
-			instance.save()
+    def update(self, instance, validated_data):
+        new_password = validated_data.pop('new_password', None)
+        validated_data.pop('confirm_password', None)
+        validated_data.pop('old_password', None)
 
+        instance = super().update(instance, validated_data)
 
-		# Update match_history entries with the user's new name
-		# for match in instance.match_history.all():
-		# 	if match.player1Name == old_username:
-		# 		match.player1Name = instance.username
-		# 	elif match.player2Name == old_username:
-		# 		match.player2Name = instance.username
-		# 	if match.winner == old_username:
-		# 		match.winner = instance.username
-		# 	match.save()
-		# 	print('player 1 = {}, player 2 = {}, winner = {}'.format(match.player1Name, match.player2Name, match.winner))
+        if new_password:
+            instance.set_password(new_password)
 
-		return instance
+        if not instance.two_factor_method:
+            instance.otp_verified = False
+            instance.email_otp_verified = False
+            instance.email_otp_code = None
+        
+        instance.save()
+
+        return instance
