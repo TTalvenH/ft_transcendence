@@ -51,7 +51,6 @@ def get_tournament_info(request, tournament_id):
 	print(tournament_id)
 	return render(request, 'pong/tournament_info.html', tournament_serializer.data)
 
-
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @update_last_active
@@ -81,12 +80,12 @@ def tournament_match_template(request):
 
 @api_view(['POST'])
 def create_match(request):
-	match_serializer = MatchCreateSerializer(data=request.data)
+    match_serializer = MatchCreateSerializer(data=request.data, partial=True)
 
-	if match_serializer.is_valid():
-		match_serializer.save()
-		return Response(match_serializer.data, status=status.HTTP_201_CREATED)
-	return Response(match_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if match_serializer.is_valid():
+        match_serializer.save()
+        return Response(match_serializer.data, status=status.HTTP_201_CREATED)
+    return Response(match_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def create_tournament(request):

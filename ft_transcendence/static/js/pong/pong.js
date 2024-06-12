@@ -166,7 +166,7 @@ export class Pong
 
 	startGame(data) {
 		this.gameData = data;
-		this.gameData.game = this.gameGlobals.gameState ? 'KnockOff' : 'Pong';
+		this.gameData.game = this.gameGlobals.game ? 'KnockOff' : 'Pong';
 
 		const user1Name = this.entities['User1Name']
 		const user2Name = this.entities['User2Name']

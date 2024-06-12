@@ -24,7 +24,7 @@ class Router {
 		this.currentPath = '';
 		this.currenSearchParams = '';
 	}
-	get(path, handler) {
+	set(path, handler) {
 		// Check if path and handler are provided
 		if (!path || !handler) throw new Error('path and handler are required');
 		// Check if path is a string
@@ -41,7 +41,7 @@ class Router {
 		this.routes.push(route);
 	}
 
-	async init() {
+	async handleLocation() {
 		handleSidePanel();
 		this.currentPath = window.location.pathname;
 		this.currenSearchParams = window.location.search;
@@ -61,19 +61,19 @@ class Router {
 
 const router = new Router();
 
-router.get('/', homeHandler);
+router.set('/', homeHandler);
 
-router.get('/login', loginHandler);
+router.set('/login', loginHandler);
 
-router.get('/register', registerHandler);
+router.set('/register', registerHandler);
 
-router.get('/edit-profile', editProfileHandler);
+router.set('/edit-profile', editProfileHandler);
 
-router.get('/match', pongHandler);
+router.set('/match', gameHandler);
 
-router.get('/profile', profileHandler);
+router.set('/profile', profileHandler);
 
-router.get('/tournament', tournamentInfoHandler);
+router.set('/tournament', tournamentInfoHandler);
 
 class User {
 	setUser(data) {
@@ -125,7 +125,7 @@ class User {
 				else {
 					this.removeUser();
 					window.pushState({}, "", "/");
-					router.init();
+					router.handleLocation();
 				}
 			} catch (error) {
 				showToast(somethingWentWrong, true);
@@ -205,7 +205,7 @@ async function tournamentInfoHandler() {
 	let id = urlParams.get('id');
 	if (!id) {
 		history.pushState({}, "", "/");
-		router.init();
+		router.handleLocation();
 		return;
 	}
 	const response = await fetch(`/pong/get_tournament_info/${id}/`, {
@@ -226,7 +226,7 @@ async function tournamentInfoHandler() {
 	const cancelButton = document.getElementById('cancel');
 	cancelButton.addEventListener('click', () => {
 		history.pushState({}, "", "/profile");
-		router.init();
+		router.handleLocation();
 	});
 }
 
@@ -243,7 +243,7 @@ async function logOutHandler() {
 		currentUser.removeUser();
 		showToast(logoutSuccess, false);
 		history.pushState({}, "", "/");
-		router.init();
+		router.handleLocation();
 	} else {
 		showToast(logoutFail, true);
 	}
@@ -344,7 +344,7 @@ async function editProfileHandler() {
 				else {
 					showToast(profileSuccess, false);
 					history.pushState({}, "", "/profile");
-					router.init();
+					router.handleLocation();
 				}
 			} 
 			else {
@@ -411,7 +411,7 @@ async function handleOtpVerificationSubmitFromProfile(event, username) {
 			const verifyResult = await verifyResponse.json();
 			showToast(profileSuccess, false);
 			history.pushState({}, "", "/profile");
-			router.init();
+			router.handleLocation();
 		} else {
 			showToast(verificationFailed, true);
 		}
@@ -453,7 +453,7 @@ async function profileHandler() {
 	if (!username) {
 		if (!userData) {
 			history.pushState({}, "", "/");
-			router.init();
+			router.handleLocation();
 			return;
 		}
 		username = userData.username;
@@ -473,7 +473,7 @@ async function profileHandler() {
 	} else {
 		showToast(somethingWentWrong, true);
 		history.pushState({}, "", "/");
-		router.init();
+		router.handleLocation();
 		return;
 	}
 
@@ -597,7 +597,7 @@ async function handleLoginSubmit(event) {
 				showToast(reActivate, false);
 				currentUser.setUser(loginData);
 				history.pushState({}, "", "/");
-				router.init()
+				router.handleLocation()
 			}
             else if (loginData.otp_required && loginData.otp_verified) {
                 loginForm.remove();
@@ -656,7 +656,7 @@ async function handleOtpSubmit(event) {
 			showToast(loginSuccess, false);
 			currentUser.setUser(otpData);
 			history.pushState({}, "", "/");
-			router.init()
+			router.handleLocation()
         } else {
 			showToast(verificationFailed, true);
         }
@@ -749,7 +749,7 @@ async function handleRegistrationResponse(result) {
 
 	showToast('Registration successful', false);
 	history.pushState({}, "", "/");
-	router.init();
+	router.handleLocation();
 }
 
 
@@ -773,7 +773,7 @@ async function handleOtpVerificationSubmit(event, username) {
             userContainer.innerHTML = '';
             showToast('Registration successful', false);
             history.pushState({}, "", "/");
-			router.init();
+			router.handleLocation();
         } else {
             showToast(verificationFailed, true);
         }
@@ -825,7 +825,7 @@ async function one_v_oneHandler() {
 			const cancelButton = document.getElementById('cancel');
 			cancelButton.addEventListener('click', () => {
 				history.pushState({}, "", "/pong");
-				router.init();
+				router.handleLocation();
 			})
 
 
@@ -843,7 +843,7 @@ async function one_v_oneHandler() {
 						},
 						player2: {
 							username: "Guest",
-							id: -1
+							id: null
 						}
 					}
 					pong.startGame(data);
@@ -923,7 +923,7 @@ async function controlsHandler() {
 			const cancelButton = document.getElementById('cancel');
 			cancelButton.addEventListener('click', () => {
 				history.pushState({}, "", "/pong");
-				router.init();
+				router.handleLocation();
 			})
 		} else {
 			showToast(somethingWentWrong, true);
@@ -935,11 +935,11 @@ async function controlsHandler() {
 	}
 }
 
-async function pongHandler() {
+async function gameHandler() {
 	const userData = currentUser.getUser();
 	if (!userData) {
 		history.pushState({}, "", "/");
-		router.init();
+		router.handleLocation();
 		return ;
 	}
 	const userContainer = document.getElementById('userContainer');
@@ -980,7 +980,7 @@ async function tournamentHandler() {
 	const userData = currentUser.getUser();
 	if (!userData) {
 		history.pushState({}, "", "/");
-		router.init();
+		router.handleLocation();
 		return ;
 	}
 	const userContainer = document.getElementById('userContainer');
@@ -998,7 +998,7 @@ async function tournamentHandler() {
 		const cancelButton = document.getElementById('cancel');
 		cancelButton.addEventListener('click', () => {
 			history.pushState({}, "", "/pong");
-			router.init();
+			router.handleLocation();
 		})
 
 		let players = [{username: userData.username, id: userData.id}];
@@ -1049,8 +1049,13 @@ async function tournamentHandler() {
 		
 		const startTournament = document.getElementById('startTournament');
 		startTournament.addEventListener('click', async () => {
+			console.log('gamestate is = ' + pong.gameGlobals.gameState);
 			if (players.length < 4) {
 				showToast(circle_xmark + 'Please add at least 3 players', true);
+				return ;
+			}
+			if (pong.gameGlobals.gameState !== GameStates.MENU) {
+				showToast(circle_xmark + 'Game loading', true);
 				return ;
 			}
 			console.log(players);
@@ -1099,7 +1104,7 @@ async function tournamentHandler() {
 				if (!window.tournamentMatchHTML) {
 					window.tournamentMatchHTML = await response.text();
 				}
-				nextMatch(tournamentData[0]);
+				nextMatch(tournamentData[0], 'Match One');
 			} else {
 				showToast(somethingWentWrong, true);
 			}
@@ -1111,7 +1116,7 @@ async function tournamentHandler() {
 
 let tournamentData = null;
 
-function nextMatch(gameData) {
+function nextMatch(gameData, matchHeaderText) {
 	const sidePanelDiv = document.getElementById('sidePanelDiv');
 	sidePanelDiv.style.display = 'none';
 	const userContainer = document.getElementById('userContainer');
@@ -1123,8 +1128,15 @@ function nextMatch(gameData) {
 	player_two.innerHTML = gameData.player2.username;
 	isTournament = true;
 
+	const matchHeader = document.getElementById('matchHeader');
+	matchHeader.innerText = matchHeaderText;
+
 	const nextMatch = document.getElementById('nextMatch');
 	nextMatch.addEventListener('click', async () => {
+		if (pong.gameGlobals.gameState !== GameStates.MENU) {
+			showToast(circle_xmark + 'Game loading', true);
+			return ;
+		}
 		userContainer.innerHTML = "";
 		pong.startGame(gameData);
 	})
@@ -1138,13 +1150,13 @@ window.route = (event) => {
 		return ;
 	}
 	window.history.pushState({}, "", event.currentTarget.href);
-	router.init();
+	router.handleLocation();
 };
 
 const pong = new Pong();
 
 pong.gameLoop();
-window.onpopstate = () => router.init();
+window.onpopstate = () => router.handleLocation();
 
 const gameToggle = document.getElementById('check');
 gameToggle.addEventListener('change', (event) => {
@@ -1152,13 +1164,15 @@ gameToggle.addEventListener('change', (event) => {
 	gameToggle.disabled = true;
 });
 
-router.init();
+router.handleLocation();
 
 let isTournament = false;
 let matchIds = [];
 
 async function handleTournamentData(data, gameData) {
+	const userData = JSON.parse(localStorage.getItem('currentUser'));
 	matchIds.push(data.id);
+	console.log(matchIds);
 	const winner = gameData.player1Hp > gameData.player2Hp ? {username: gameData.player1Name, id: gameData.player1} : {username: gameData.player2Name, id: gameData.player2};
 	if (!tournamentData[2].player1) {
 		tournamentData[2].player1 = winner;
@@ -1185,7 +1199,10 @@ async function handleTournamentData(data, gameData) {
 		matchIds = [];
 		isTournament = false;
 	} else {
-		nextMatch(tournamentData[matchIds.length]);
+		let matchHeader = 'Match Two'
+		if (matchIds.length === 2)
+			matchHeader = 'Final Match'
+		nextMatch(tournamentData[matchIds.length], matchHeader);
 	}
 }
 
@@ -1218,7 +1235,9 @@ export async function handleMatchEnd(gameData) {
 			ui.style.display = 'block';
 			const sidePanelDiv = document.getElementById('sidePanelDiv');
 			sidePanelDiv.style.display = 'block';
-			router.init();
+			router.handleLocation();
 		}
 	}
 }
+
+export {Router}
