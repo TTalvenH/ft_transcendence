@@ -326,10 +326,14 @@ def otpSetupView(request):
 
 	enable_otp = request.data.get('enable_otp')
 	enable_email_otp = request.data.get('enable_email_otp')
+	print('enable_otp', enable_otp)
+	print('enable_email_otp', enable_email_otp)
 
 	if enable_otp:
-		otp_data = setupOTP(user)
 		user.otp_verified = False
+		user.two_factor_method = 'app'
+		user.save()
+		otp_data = setupOTP(user)
 		if not otp_data['created']:
 			return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -350,9 +354,10 @@ def otpSetupView(request):
 		}
 
 	elif enable_email_otp:
+		user.email_otp_verified = False
+		user.two_factor_method = 'email'
 		otp_code = generate_email_otp()
 		user.email_otp_code = otp_code
-		user.email_otp_verified = False
 		user.save()
 		send_mail(
                 'Your OTP Code',
@@ -361,10 +366,13 @@ def otpSetupView(request):
                 [user.email],
                 fail_silently=False,
             )
-		user.two_factor_method = 'email'
 		response_data = {'username': user.username }
-	else:
-		response_data = {'detail': 'No setup needed'}
+	# else:
+	# 	user.two_factor_method = 'None'
+	# 	user.email_otp_verified = False
+	# 	user.otp_verified = False
+	# 	user.save()
+	# 	response_data = {'detail': 'No setup needed'}
 
 	return Response(response_data, status=status.HTTP_201_CREATED)
 

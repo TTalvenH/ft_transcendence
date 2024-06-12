@@ -387,8 +387,6 @@ async function editProfileHandler() {
 	}
 }
 
-
-
 async function handleOtpVerification(data) {
     const userContainer = document.getElementById('userContainer');
     userContainer.innerHTML = '';

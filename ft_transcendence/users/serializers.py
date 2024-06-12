@@ -159,6 +159,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
         if not instance.two_factor_method:
             instance.otp_verified = False
+            instance.email_otp_verified = False
+            instance.email_otp_code = None
             instance.save()
 
         return instance
