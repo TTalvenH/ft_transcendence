@@ -600,26 +600,25 @@ async function handleLoginSubmit(event) {
             method: 'POST',
             body: formData
         });
-        if (response.ok) {
-            loginData = await response.json();
-			// console.log('loginData');
-			// console.log(loginData);
-            currentUsername = formData.get('username');
-			console.log('stuff:', loginData.two_factor_method, loginData.otp_verified, loginData.otp_email_verified);
-			if (loginData.two_factor_method && (loginData.otp_verified || loginData.email_otp_verified))
-			{
+		if (response.ok) {
+			loginData = await response.json();
+			currentUsername = formData.get('username');
+			console.log('stuff is:', loginData.two_factor_method, loginData.otp_verified, loginData.email_otp_verified);
+			
+			if (loginData.two_factor_method && (loginData.otp_verified || loginData.email_otp_verified)) {
+				console.log("Condition 1 met");
 				loginForm.remove();
-                await loadOtpForm();
-			}
-			else if (loginData.two_factor_method && (!loginData.otp_verified && !loginData.email_otp_verified)) {
+				await loadOtpForm();
+			} else if ((loginData.two_factor_method === 'app' || loginData.two_factor_method === 'email') && (!loginData.otp_verified && !loginData.email_otp_verified)) {
+				console.log("Condition 2 met");
 				showToast(loginSuccess, false);
 				showToast(notVerified, true);
 				showToast(reActivate, false);
 				currentUser.setUser(loginData);
 				history.pushState({}, "", "/");
-				router.init()
-			}
-			else {
+				router.init();
+			} else {
+				console.log("Else block executed");
 				showToast(loginSuccess, false);
 				currentUser.setUser(loginData);
 				history.pushState({}, "", "/");

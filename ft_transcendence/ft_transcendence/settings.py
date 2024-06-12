@@ -32,7 +32,7 @@ ALLOWED_HOSTS = []
 # not good for prodution 
 import os
 
-os.environ['SSL_CERT_FILE'] = '/usr/local/etc/openssl@3/cert.pem' 
+os.environ['SSL_CERT_FILE'] = '/etc/pki/tls/cert.pem' 
 
 # Application definition
 
