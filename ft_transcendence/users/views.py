@@ -84,7 +84,7 @@ from django.template.loader import render_to_string
 
 @api_view(['POST'])
 def createUser(request):
-	print(request.POST)  # Debugging line to print all request POST data
+	# print(request.POST)
 	serializer = RegisterUserSerializer(data=request.data)
 	if serializer.is_valid():
 		user = serializer.save()
@@ -127,6 +127,8 @@ def createUser(request):
 				'user': serializer.data,
 				'otp': otp_data,
 			}
+		else:
+			response_data = { 'user': serializer.data }
 
 		return Response(response_data, status=status.HTTP_201_CREATED)
 
@@ -244,7 +246,6 @@ def verifyOTP(request):
 
 	if user.two_factor_method == 'email' and otp == user.email_otp_code:
 		user.email_otp_verified = True
-		print('hi dad')
 		user.save()
 		return Response({'detail': 'Email OTP verified successfully.'}, status=status.HTTP_200_OK)
 	else:
@@ -331,6 +332,7 @@ def otpSetupView(request):
 
 	if enable_otp:
 		user.otp_verified = False
+		user.email_otp_verified = False
 		user.two_factor_method = 'app'
 		user.save()
 		otp_data = setupOTP(user)
@@ -355,6 +357,7 @@ def otpSetupView(request):
 
 	elif enable_email_otp:
 		user.email_otp_verified = False
+		user.otp_verified = False
 		user.two_factor_method = 'email'
 		otp_code = generate_email_otp()
 		user.email_otp_code = otp_code
@@ -390,10 +393,14 @@ def updateUserProfile(request):
 
 	if profile_serializer.is_valid():
 		profile_serializer.save()
-		# print('2fa :', user.two_factor_method)
 		otp_setup_needed = False
 		email_otp_setup_needed = False
 		TwoFactorMethod = user.two_factor_method
+		user_serializer = UserSerializer(instance=user)
+		print('2fa :', TwoFactorMethod)
+		print(user.otp_verified)
+		print(user.email_otp_verified)
+		
 		
 		if TwoFactorMethod == 'app' and not user.otp_verified:
 			otp_setup_needed = True
@@ -403,7 +410,6 @@ def updateUserProfile(request):
 			user.two_factor_method = 'None'
 			user.save()
 
-		user_serializer = UserSerializer(instance=user)
 		return Response({
 			'user': user_serializer.data, 
 			'otp_setup_needed': otp_setup_needed, 
