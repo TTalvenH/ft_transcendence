@@ -1,4 +1,6 @@
-import { circle_check, circle_xmark, pong, router } from "./main.js";
+import { pong, router } from "./main.js";
+import { circle_xmark } from "./utils.js"
+import { currentUser } from "./user.js"
 
 async function gameHandler() {
 	const userData = currentUser.getUser();
@@ -74,7 +76,8 @@ async function one_v_oneHandler() {
 
 			const cancelButton = document.getElementById('cancel');
 			cancelButton.addEventListener('click', () => {
-				history.pushState({}, "", "/pong");
+				console.log("joujou")
+				history.pushState({}, "", "/match");
 				router.handleLocation();
 			})
 
@@ -169,7 +172,7 @@ async function controlsHandler() {
 			userContainer.insertAdjacentHTML('beforeend', html);
 			const cancelButton = document.getElementById('cancel');
 			cancelButton.addEventListener('click', () => {
-				history.pushState({}, "", "/pong");
+				history.pushState({}, "", "/match");
 				router.handleLocation();
 			})
 		} else {
@@ -212,7 +215,7 @@ async function tournamentHandler() {
 
 		const cancelButton = document.getElementById('cancel');
 		cancelButton.addEventListener('click', () => {
-			history.pushState({}, "", "/pong");
+			history.pushState({}, "", "/match");
 			router.handleLocation();
 		})
 
@@ -258,7 +261,6 @@ async function tournamentHandler() {
 					}
 					showToast(circle_xmark + 'Something went wrong', true);
 				}
-				// input.focus();
 			})
 		}
 		
@@ -293,22 +295,6 @@ async function tournamentHandler() {
 					player2: null,
 				}
 			]
-			// tournamentData = {
-			// 	type: 'tournament',
-			// 	match_one: {
-			// 		player1: players[0],
-			// 		player2: players[1],
-			// 	},
-			// 	match_two: {
-			// 		player1: players[2],
-			// 		player2: players[3],
-			// 	},
-			// 	match_three: {
-			// 		player1: null,
-			// 		player2: null,
-			// 	}
-
-			// }
 			const response = await fetch("/pong/tournament_match.html", {
 				method: "GET",
 				headers: {

@@ -1,5 +1,5 @@
-
 import { router } from "./main.js"
+import { circle_xmark } from "./utils.js"
 
 class User {
 	setUser(data) {
@@ -54,10 +54,10 @@ class User {
 					router.handleLocation();
 				}
 			} catch (error) {
-				showToast(somethingWentWrong, true);
+				showToast(circle_xmark + 'Something went wrong', true);
 			}
 		}
 	}
 };
 
-export { User }
+export const currentUser = new User();

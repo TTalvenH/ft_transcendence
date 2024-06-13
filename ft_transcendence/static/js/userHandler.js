@@ -1,5 +1,6 @@
-import { showToast } from "./utils.js"
-import { circle_check, circle_xmark, router, user as currentUser } from "./main.js"
+import { showToast, circle_check, circle_xmark } from "./utils.js"
+import { router } from "./main.js"
+import { currentUser } from "./user.js";
 
 async function editProfileHandler() {
 	const userData = JSON.parse(localStorage.getItem('currentUser'));
@@ -14,7 +15,7 @@ async function editProfileHandler() {
 		});
 		
 		if (!updateProfileResponse.ok) {
-			showToast(somethingWentWrong, true);
+			showToast(circle_xmark + 'Something went wrong', true);
 			return;
 		}
 		
@@ -277,9 +278,9 @@ async function profileHandler() {
 				showToast(circle_check + 'Friend added successfully', false);
 			} else {
 				if (response.status === 400) {
-					showToast(addFriendAlreadyFriend, true);
+					showToast(circle_xmark + 'User already a friend', true);
 				} else {
-					showToast(addFriendFail, true);
+					showToast(circle_xmark + 'User not found', true);
 				}
 			}
 		}
@@ -530,7 +531,6 @@ async function handleRegistrationResponse(result) {
 	}
 }
 
-
 async function handleOtpVerificationSubmit(event, username) {
     event.preventDefault();
     
@@ -553,7 +553,7 @@ async function handleOtpVerificationSubmit(event, username) {
             history.pushState({}, "", "/");
 			router.handleLocation();
         } else {
-            showToast(verificationFailed, true);
+            showToast(circle_xmark + 'Verification failed', true);
         }
     } catch (error) {
         showToast('Something went wrong', true);

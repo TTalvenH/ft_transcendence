@@ -1,4 +1,8 @@
-import { pong, router, user as currentUser } from "./main.js"
+import { pong, router } from "./main.js"
+import { currentUser } from "./user.js";
+
+const circle_xmark = '<i class="fa-regular fa-circle-xmark"></i>';
+const circle_check = '<i class="fa-regular fa-circle-check"></i>';
 
 const gameToggle = document.getElementById('check');
 gameToggle.addEventListener('change', (event) => {
@@ -58,11 +62,11 @@ logoutButton.addEventListener('click', async () => {
     });
     if (response.ok) {
         currentUser.removeUser();
-        showToast(logoutSuccess, false);
+        showToast(circle_check + 'You are now logged out', false);
         history.pushState({}, "", "/");
         router.handleLocation();
     } else {
-        showToast(logoutFail, true);
+        showToast(circle_xmark + 'Log out failed', true);
     }
 });
 
@@ -91,4 +95,4 @@ function createFriendRow(friend) {
 	friendBodyEl.appendChild(friendRow);
 }
 
-export { showToast, handleSidePanel, createFriendRow }
+export { showToast, handleSidePanel, createFriendRow, circle_check, circle_xmark }

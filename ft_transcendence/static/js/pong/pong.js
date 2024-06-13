@@ -13,7 +13,6 @@ import { HealthBarEntity } from './entities/HealthBarEntity.js';
 import { CameraEntity } from './entities/CameraEntity.js';
 import { TextEntity } from './entities/TextEntity.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-// import { gameOverEvent } from '../router.js';
 import { handleMatchEnd } from '../gameHandler.js'
 import * as COLORS from './colors.js';
 import { KnockoffPlayerEntity } from './entities/knockoffPlayerEntity.js';
@@ -304,28 +303,6 @@ export class Pong
 		} else {
 			return;
 		}
-
-
-		
-		//todo add game type. tournament or 1v1
-		// const gameOverData = {
-		// 	tournament_match: this.gameData.tournament_match,
-		// 	game: this.gameGlobals.game,
-		// 	player1: {
-		// 		username: this.gameData.player1.username,
-		// 		id: this.gameData.player1.id,
-		// 		hitpoints: player1.hitPoints,
-		// 	},
-		// 	player2: {
-		// 		username: this.gameData.player2.username,
-		// 		id: this.gameData.player2.id,
-		// 		hitpoints: player2.hitPoints,
-		// 	},
-		// 	winner: winner,
-		// 	matchTimeLength: this.matchTime.getElapsedTime().toFixed(2) + "s",
-		// 	dateTime: this.matchDate,
-		// };
-
 		const gameOverData = {
 			game: this.gameData.game,
 			tournament_match: this.gameData.tournament_match,
@@ -341,7 +318,6 @@ export class Pong
 		console.log('game = ' + gameOverData.game)
 		goal1.material.emissiveIntensity = 1;
 		goal2.material.emissiveIntensity = 1;
-		gameOverEvent.detail.gameOverData = gameOverData;
 		this.winnerLoop();
 		setTimeout(() => {
 			handleMatchEnd(gameOverData);

@@ -1,26 +1,6 @@
-//variables where we save the html content when it is first fetched
-let loginFormHTML;
-let registerFormHTML;
-const loginSuccess = '<i class="fa-regular fa-circle-check"></i> Login Success';
-const loginFail = '<i class="fa-regular fa-circle-xmark"></i> Login Fail';
-const registerSuccess = '<i class="fa-regular fa-circle-check"></i> Registeration Success';
-const registerFail = '<i class="fa-regular fa-circle-xmark"></i> Registeration Fail';
-const logoutSuccess = '<i class="fa-regular fa-circle-check"></i> You have been logged out';
-const logoutFail = '<i class="fa-regular fa-circle-xmark"></i> Logout Failed';
-const somethingWentWrong = '<i class="fa-regular fa-circle-xmark"></i> Something went wrong';
-const profileSuccess = '<i class="fa-regular fa-circle-check"></i>  Profile updated successfully';
-const addFriendSuccess = '<i class="fa-regular fa-circle-check"></i>  Friend added successfully';
-const addFriendFail = '<i class="fa-regular fa-circle-xmark"></i>  User not found';
-const addFriendAlreadyFriend = '<i class="fa-regular fa-circle-xmark"></i>  User already a friend';
-const circle_xmark = '<i class="fa-regular fa-circle-xmark"></i>';
-const circle_check = '<i class="fa-regular fa-circle-check"></i>';
-const verificationFailed = '<i class="fa-regular fa-circle-xmark"></i> Verification failed';
-const notVerified = '<i class="fa-regular fa-circle-xmark"></i> OTP was activated but not verified';
-const reActivate = '<i class="fa-regular fa-circle-xmark"></i> Please setup 2FA in profile settings';
-const onlyOneMethod = 'Please select only one of the 2FA methods'
 
 import { handleSidePanel } from "./utils.js";
-import { user as currentUser } from "./main.js"
+import { currentUser } from "./user.js";
 
 class Router {
 	constructor() {
@@ -29,11 +9,8 @@ class Router {
 		this.currenSearchParams = '';
 	}
 	set(path, handler) {
-		// Check if path and handler are provided
 		if (!path || !handler) throw new Error('path and handler are required');
-		// Check if path is a string
 		if (typeof path !== 'string') throw new TypeError('path must be a string');
-		// Check if handler is a function
 		if (typeof handler !== 'function') throw new TypeError('handler must be a function');
 		this.routes.forEach(route => {
 			if (route.path === path) throw new Error(`Route with path ${path} already exists`);
@@ -875,7 +852,7 @@ class Router {
 
 // 			const cancelButton = document.getElementById('cancel');
 // 			cancelButton.addEventListener('click', () => {
-// 				history.pushState({}, "", "/pong");
+// 				history.pushState({}, "", "/match");
 // 				router.handleLocation();
 // 			})
 
@@ -973,7 +950,7 @@ class Router {
 // 			userContainer.insertAdjacentHTML('beforeend', html);
 // 			const cancelButton = document.getElementById('cancel');
 // 			cancelButton.addEventListener('click', () => {
-// 				history.pushState({}, "", "/pong");
+// 				history.pushState({}, "", "/match");
 // 				router.handleLocation();
 // 			})
 // 		} else {
@@ -1048,7 +1025,7 @@ class Router {
 
 // 		const cancelButton = document.getElementById('cancel');
 // 		cancelButton.addEventListener('click', () => {
-// 			history.pushState({}, "", "/pong");
+// 			history.pushState({}, "", "/match");
 // 			router.handleLocation();
 // 		})
 
