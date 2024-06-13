@@ -1,9 +1,8 @@
-import { Router } from "./router.js";
+import { router } from "./router.js";
 import { Pong } from "./pong/pong.js";
 import { gameHandler } from "./gameHandler.js";
 import { loginHandler, registerHandler, editProfileHandler, profileHandler, tournamentInfoHandler, homeHandler } from "./userHandler.js";
 
-const router = new Router();
 const pong = new Pong();
 
 router.set('/', homeHandler);

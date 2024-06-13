@@ -1278,4 +1278,4 @@ class Router {
 // 	}
 // }
 
-export { Router }
+export const router = new Router();

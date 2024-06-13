@@ -95,4 +95,11 @@ function createFriendRow(friend) {
 	friendBodyEl.appendChild(friendRow);
 }
 
-export { showToast, handleSidePanel, createFriendRow, circle_check, circle_xmark }
+function cancelButtonClick(path) {
+	console.log('mulli2');
+
+	history.pushState({}, "", path);
+	router.handleLocation();
+}
+
+export { showToast, handleSidePanel, createFriendRow, cancelButtonClick, circle_check, circle_xmark }

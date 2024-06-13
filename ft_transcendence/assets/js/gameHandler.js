@@ -1,6 +1,7 @@
-import { pong, router } from "./main.js";
-import { circle_xmark } from "./utils.js"
+import { pong } from "./main.js";
+import { cancelButtonClick, circle_xmark, showToast } from "./utils.js"
 import { currentUser } from "./user.js"
+import { router } from "./router.js"
 
 async function gameHandler() {
 	const userData = currentUser.getUser();
@@ -24,165 +25,296 @@ async function gameHandler() {
 		showToast(circle_xmark + 'Something went wrong', true);
 	}
 
-	const one_v_oneButton = document.getElementById('one_v_one');
-	one_v_oneButton.addEventListener('click', one_v_oneHandler);
+	document.getElementById('one_v_one').addEventListener('click', one_v_oneHandler);
 
-	const controlsButton = document.getElementById('controls');
-	controlsButton.addEventListener('click', controlsHandler);
+	document.getElementById('controls').addEventListener('click', controlsHandler);
 
-	const tournamentButton = document.getElementById('tournament');
-	tournamentButton.addEventListener('click', tournamentHandler);
+	document.getElementById('tournament').addEventListener('click', tournamentHandler);
 }
 
-async function one_v_oneHandler() {
+function guestButtonClick() {
+	console.log('mulli');
+
+	const startGameButton = document.getElementById('startGame');
+	const buttons = document.getElementById('buttons');
+	const guestHeader = document.getElementById('guestHeader');
+
+	buttons.remove();
+	guestHeader.style.display = "block";
+	startGameButton.style.display = "block";
+}
+
+function userButtonClick() {
+	console.log('mulli1');
+
+	const startGameButton = document.getElementById('startGame');
+	const buttons = document.getElementById('buttons');
+	buttons.remove();
+
+	const username = document.getElementById('username');
+	username.style.display = "block";
+	startGameButton.style.display = "block";
+}
+
+function one_v_oneStartButtonClick(mode) {
+	console.log(mode);
 	const userData = currentUser.getUser();
-	try {
-		const one_v_oneResponse = await fetch("/pong/1v1.html", {
-			method: "GET",
+	currentUser.refreshToken();
+	if (mode === "guest") {
+		const ui = document.getElementById('ui');
+		ui.style.display = 'none';
+		userContainer.innerHTML = "";
+		const data = {
+			tournament_match: false,
+			player1: {
+				username: userData.username,
+				id: userData.id
+			},
+			player2: {
+				username: "Guest",
+				id: null
+			}
+		};
+		pong.startGame(data);
+		return;
+	}
+	const username_input = document.getElementById('username_input');
+	if (username_input) {
+		const username = username_input.value;
+		if (!username) {
+			showToast(circle_xmark + 'Please enter a username', true);
+			return;
+		}
+		console.log(username);
+		fetch(`/users/get-user/${username}/`, {
+			method: "POST",
 			headers: {
 				'Authorization': `Bearer ${userData.accessToken}`,
 			}
-		});
-		if (one_v_oneResponse.ok) {
-			const one_v_oneHTML = await one_v_oneResponse.text();
+		})
+		.then(response => {
+			if (!response.ok) {
+				throw new Error('User fetch failed');
+			}
+			return response.json();
+		})
+		.then(player2Data => {
+			console.log(player2Data);
+			const ui = document.getElementById('ui');
 			userContainer.innerHTML = "";
-			userContainer.insertAdjacentHTML('beforeend', one_v_oneHTML);
-			const startGameButton = document.getElementById('startGame');
-
-			let mode = "guest";
-
-			const guestButton = document.getElementById('guestButton');
-			guestButton.addEventListener('click', async () => {
-				const buttons = document.getElementById('buttons');
-				const guestHeader = document.getElementById('guestHeader');
-
-				buttons.remove();
-
-				guestHeader.style.display = "block";
-				startGameButton.style.display = "block";
-			});
-
-			const userButton = document.getElementById('userButton');
-			userButton.addEventListener('click', async () => {
-				const buttons = document.getElementById('buttons');
-				buttons.remove();
-
-				const username = document.getElementById('username');
-				username.style.display = "block";
-
-				startGameButton.style.display = "block";
-				mode = "user";
-			})
-
-			const cancelButton = document.getElementById('cancel');
-			cancelButton.addEventListener('click', () => {
-				console.log("joujou")
-				history.pushState({}, "", "/match");
-				router.handleLocation();
-			})
-
-
-			startGameButton.addEventListener('click', async () => {
-				await currentUser.refreshToken();
-				if (mode === "guest") {
-					const ui = document.getElementById('ui');
-					ui.style.display = 'none';
-					userContainer.innerHTML = "";
-					const data = {
-						tournament_match: false,
-						player1: {
-							username: userData.username,
-							id: userData.id
-						},
-						player2: {
-							username: "Guest",
-							id: null
-						}
-					}
-					pong.startGame(data);
-					return ;
+			ui.style.display = 'none';
+			const data = {
+				tournament_match: false,
+				player1: {
+					username: userData.username,
+					id: userData.id
+				},
+				player2: {
+					username: player2Data.username,
+					id: player2Data.id
 				}
-				const username_input = document.getElementById('username_input');
-				if (username_input) {
-					const username = username_input.value;
-					if (!username) {
-						showToast(circle_xmark + 'Please enter a username', true);
-						return ;
-					}
-					// todo check if user exists
-					console.log(username);
-					try {
-						const response = await fetch(`/users/get-user/${username}/`, {
-							method: "POST",
-							headers: {
-								'Authorization': `Bearer ${userData.accessToken}`,
-							}
-						})
-						if (response.ok) {
-							const player2Data = await response.json();
-							console.log(player2Data);
-							const ui = document.getElementById('ui');
-							userContainer.innerHTML = "";
-							ui.style.display = 'none';
-							const data = {
-								tournament_match: false,
-								player1: {
-									username: userData.username,
-									id: userData.id
-								},
-								player2: {
-									username: player2Data.username,
-									id: player2Data.id
-								}
-							}
-							pong.startGame(data);
-						} else {
-							showToast(circle_xmark + 'Something went wrong', true);
-						}
-					}
-					catch (error) {
-						showToast(circle_xmark + 'Something went wrong', true);
-					}
-				}
-			})
-		} else {
+			};
+			pong.startGame(data);
+		})
+		.catch(error => {
 			showToast(circle_xmark + 'Something went wrong', true);
-		}
-	} catch (error) {
-		showToast(circle_xmark + 'Something went wrong', true);
+		});
 	}
 }
 
-async function controlsHandler() {
+function one_v_oneHandler() {
+	const userData = currentUser.getUser();
+	fetch("/pong/1v1.html", {
+		method: "GET",
+		headers: {
+			'Authorization': `Bearer ${userData.accessToken}`,
+		}
+	})
+	.then(one_v_oneResponse => {
+		if (!one_v_oneResponse.ok) {
+			throw new Error('Failed to fetch 1v1 HTML');
+		}
+		return one_v_oneResponse.text();
+	})
+	.then(one_v_oneHTML => {
+		const userContainer = document.getElementById('userContainer');
+		userContainer.innerHTML = "";
+		userContainer.insertAdjacentHTML('beforeend', one_v_oneHTML);
+		let mode = 'guest';
+		
+		document.getElementById('guestButton').addEventListener('click', guestButtonClick);
+
+		// Using arrow functions to pass the correct arguments without immediate invocation
+		document.getElementById('userButton').addEventListener('click', () => {
+			mode = 'user'
+			userButtonClick();
+		});
+
+		document.getElementById('cancel').addEventListener('click', () => cancelButtonClick("/match"));
+
+		document.getElementById('startGame').addEventListener('click', () => one_v_oneStartButtonClick(mode));
+	})
+	.catch(error => {
+		console.log(error);
+		showToast(circle_xmark + 'Something went wrong', true);
+	});
+}
+
+
+// async function one_v_oneHandler() {
+// 	const userData = currentUser.getUser();
+// 	try {
+// 		const one_v_oneResponse = await fetch("/pong/1v1.html", {
+// 			method: "GET",
+// 			headers: {
+// 				'Authorization': `Bearer ${userData.accessToken}`,
+// 			}
+// 		});
+// 		if (one_v_oneResponse.ok) {
+// 			const one_v_oneHTML = await one_v_oneResponse.text();
+// 			userContainer.innerHTML = "";
+// 			userContainer.insertAdjacentHTML('beforeend', one_v_oneHTML);
+// 			const startGameButton = document.getElementById('startGame');
+
+// 			let mode = "guest";
+
+// 			const guestButton = document.getElementById('guestButton');
+// 			guestButton.addEventListener('click', async () => {
+// 				const buttons = document.getElementById('buttons');
+// 				const guestHeader = document.getElementById('guestHeader');
+
+// 				buttons.remove();
+
+// 				guestHeader.style.display = "block";
+// 				startGameButton.style.display = "block";
+// 			});
+
+// 			const userButton = document.getElementById('userButton');
+// 			userButton.addEventListener('click', async () => {
+// 				const buttons = document.getElementById('buttons');
+// 				buttons.remove();
+
+// 				const username = document.getElementById('username');
+// 				username.style.display = "block";
+
+// 				startGameButton.style.display = "block";
+// 				mode = "user";
+// 			})
+
+// 			const cancelButton = document.getElementById('cancel');
+// 			cancelButton.addEventListener('click', () => {
+// 				console.log("joujou")
+// 				history.pushState({}, "", "/match");
+// 				router.handleLocation();
+// 			})
+
+
+// 			startGameButton.addEventListener('click', async () => {
+// 				await currentUser.refreshToken();
+// 				if (mode === "guest") {
+// 					const ui = document.getElementById('ui');
+// 					ui.style.display = 'none';
+// 					userContainer.innerHTML = "";
+// 					const data = {
+// 						tournament_match: false,
+// 						player1: {
+// 							username: userData.username,
+// 							id: userData.id
+// 						},
+// 						player2: {
+// 							username: "Guest",
+// 							id: null
+// 						}
+// 					}
+// 					pong.startGame(data);
+// 					return ;
+// 				}
+// 				const username_input = document.getElementById('username_input');
+// 				if (username_input) {
+// 					const username = username_input.value;
+// 					if (!username) {
+// 						showToast(circle_xmark + 'Please enter a username', true);
+// 						return ;
+// 					}
+// 					// todo check if user exists
+// 					console.log(username);
+// 					try {
+// 						const response = await fetch(`/users/get-user/${username}/`, {
+// 							method: "POST",
+// 							headers: {
+// 								'Authorization': `Bearer ${userData.accessToken}`,
+// 							}
+// 						})
+// 						if (response.ok) {
+// 							const player2Data = await response.json();
+// 							console.log(player2Data);
+// 							const ui = document.getElementById('ui');
+// 							userContainer.innerHTML = "";
+// 							ui.style.display = 'none';
+// 							const data = {
+// 								tournament_match: false,
+// 								player1: {
+// 									username: userData.username,
+// 									id: userData.id
+// 								},
+// 								player2: {
+// 									username: player2Data.username,
+// 									id: player2Data.id
+// 								}
+// 							}
+// 							pong.startGame(data);
+// 						} else {
+// 							showToast(circle_xmark + 'Something went wrong', true);
+// 						}
+// 					}
+// 					catch (error) {
+// 						showToast(circle_xmark + 'Something went wrong', true);
+// 					}
+// 				}
+// 			})
+// 		} else {
+// 			showToast(circle_xmark + 'Something went wrong', true);
+// 		}
+// 	} catch (error) {
+// 		showToast(circle_xmark + 'Something went wrong', true);
+// 	}
+// }
+
+function controlsHandler() {
+	console.log('testijou')
 	const userData = currentUser.getUser();
 	if (!userData) {
 		return;
 	}
-	try {
-		const userContainer = document.getElementById('userContainer');
-		userContainer.innerHTML = "";
-		const response = await fetch("/pong/controls.html", {
-			method: "GET",
-			headers: {
-				'Authorization': `Bearer ${userData.accessToken}`,
-			}
+
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
+
+	fetch("/pong/controls.html", {
+		method: "GET",
+		headers: {
+			'Authorization': `Bearer ${userData.accessToken}`,
+		}
+	})
+	.then(response => {
+		if (!response.ok) {
+			throw new Error('Failed to fetch controls HTML');
+		}
+		return response.text();
+	})
+	.then(html => {
+		userContainer.insertAdjacentHTML('beforeend', html);
+
+		const cancelButton = document.getElementById('cancel');
+		cancelButton.addEventListener('click', () => {
+			history.pushState({}, "", "/match");
+			router.handleLocation();
 		});
-		if (response.ok) {
-			const html = await response.text();
-			userContainer.insertAdjacentHTML('beforeend', html);
-			const cancelButton = document.getElementById('cancel');
-			cancelButton.addEventListener('click', () => {
-				history.pushState({}, "", "/match");
-				router.handleLocation();
-			})
-		} else {
-			showToast(circle_xmark + 'Something went wrong', true);
-		}	
-	}
-	catch (error) {
+	})
+	.catch(error => {
 		console.error(error);
 		showToast(circle_xmark + 'Something went wrong', true);
-	}
+	});
 }
 
 function shuffleArray(array) {

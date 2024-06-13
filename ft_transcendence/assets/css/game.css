@@ -89,20 +89,14 @@
 	align-items: center;
 }
 
-.controls-playerOne {
+.controls-playerTwo {
 	position: absolute;
 	color: #fff;
 	left: 40px;
 }
 
-.controls-playerTwo {
+.controls-playerOne {
 	position: absolute;
 	color: #fff;
 	right: 40px;
-}
-
-.controls-pause {
-	position: absolute;
-	bottom: 30px;
-	color: #fff;
 }

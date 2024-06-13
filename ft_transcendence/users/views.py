@@ -462,6 +462,7 @@ def get_user(request, username):
 
 @api_view(['GET'])
 def check_existance(request, username):
+	print()
 	user = get_object_or_404(CustomUser, username=username)
 	print('llllllllll')
 	print(user)
