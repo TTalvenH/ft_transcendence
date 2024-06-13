@@ -23,4 +23,5 @@ urlpatterns = [
 	path('log-out-view', views.logOut, name="log-out"),
 	path('token/refresh_token', TokenRefreshView.as_view(), name="refresh_token"),
 	path('get-user/<str:username>/', views.get_user, name="get-user"),
+	path('check_existance/<str:username>/', views.check_existance, name="check-existance"),
 ]

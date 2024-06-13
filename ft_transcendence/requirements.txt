@@ -7,3 +7,4 @@ Pillow
 pyotp
 django_otp
 qrcode
+psycopg2-binary==2.9.9

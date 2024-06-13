@@ -459,3 +459,10 @@ def logOut(request):
 def get_user(request, username):
 	user = get_object_or_404(CustomUser, username=username)
 	return Response({'username': user.username, 'id': user.id}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def check_existance(request, username):
+	user = get_object_or_404(CustomUser, username=username)
+	print('llllllllll')
+	print(user)
+	return Response(status=status.HTTP_200_OK)

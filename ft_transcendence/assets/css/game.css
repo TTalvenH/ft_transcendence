@@ -1,0 +1,108 @@
+.gameMenu {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 250px;
+	border-radius: 0.625rem;
+	border: 2px solid #f141f1;
+	padding-top: 80px;
+	padding-bottom: 50px;
+	background: rgba(100, 18, 96, 0.453);
+	border-radius: 0.625rem;
+	box-shadow: 0 0 30px #f141f1;
+}
+
+.menuHeader {
+	text-align: center;
+	position: absolute;
+	top: 30px;
+}
+
+.menuHeader h6 {
+	color: #fff;
+}
+
+.menuHeader h2 {
+	color: #fff;
+}
+
+.gameBox {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 400px;
+	min-height: 350px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	transform: translate(-50%, -50%);
+	background: rgba(100, 18, 96, 0.453);
+	border-radius: 0.625rem;
+	box-shadow: 0 0 30px #f141f1;
+	border: #f141f1 2px solid;
+}
+
+.gameBox h2 {
+	max-width: 330px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	transform: translateY(200%);
+	margin: 20px;
+	padding: 0;
+	color: #fff;
+	text-align: center;
+}
+
+.gameBox h1 {
+	padding: 30px;
+	color: #fff;
+	text-align: center;
+}
+
+.choosePlayer {
+	position: absolute;
+	margin-bottom: 40px;
+	right: 50%;
+	transform: translateX(50%);
+}
+
+.controls {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background: rgba(100, 18, 96, 0.453);
+	border-radius: 0.625rem;
+	border: 2px solid #f141f1;
+	box-shadow: 0 0 30px #f141f1;
+	height: 400px;
+	width: 400px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+}
+
+.controls-playerOne {
+	position: absolute;
+	color: #fff;
+	left: 40px;
+}
+
+.controls-playerTwo {
+	position: absolute;
+	color: #fff;
+	right: 40px;
+}
+
+.controls-pause {
+	position: absolute;
+	bottom: 30px;
+	color: #fff;
+}
