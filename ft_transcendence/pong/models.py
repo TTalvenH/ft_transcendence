@@ -5,17 +5,21 @@ from django.utils import timezone
 # Create your models here.
 
 class Match(models.Model):
-	game = models.CharField(max_length=20, default='Pong')
-	tournament_match = models.BooleanField(default=False)
-	player1 = models.ForeignKey(CustomUser, related_name='player1_matches', on_delete=models.CASCADE)
-	player1Hp = models.IntegerField()
-	player2 = models.ForeignKey(CustomUser, related_name='player2_matches', on_delete=models.CASCADE)
-	player2Hp = models.IntegerField()
-	timePlayed = models.CharField(max_length=20)
-	dateTime = models.DateTimeField(default=timezone.now)
+    game = models.CharField(max_length=20, default='Pong')
+    tournament_match = models.BooleanField(default=False)
+    player1 = models.ForeignKey(CustomUser, related_name='player1_matches', on_delete=models.CASCADE)
+    player1Hp = models.IntegerField()
+    player2 = models.ForeignKey(CustomUser, related_name='player2_matches', on_delete=models.CASCADE, null=True, blank=True)
+    player2Hp = models.IntegerField()  # This remains non-nullable
+    timePlayed = models.CharField(max_length=20)
+    dateTime = models.DateTimeField(default=timezone.now)
 
-	def __str__(self):
-		return f'{self.player1.username} vs. {self.player2.username} on {self.dateTime}'
+    def __str__(self):
+        if self.player2:
+            return f'{self.player1.username} vs. {self.player2.username} on {self.dateTime}'
+        else:
+            return f'{self.player1.username} vs. Guest on {self.dateTime}'
+
 
 
 class Tournament(models.Model):

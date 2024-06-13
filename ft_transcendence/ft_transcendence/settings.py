@@ -74,9 +74,6 @@ ROOT_URLCONF = 'ft_transcendence.urls'
 
 # CORS_ALLOW_ALL_ORIGINS = True #RM LATER AND THE CORSHEADERS + MIDDLEWARE
 
-ROOT_URLCONF = 'ft_transcendence.urls'
-
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

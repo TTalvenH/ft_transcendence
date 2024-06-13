@@ -68,7 +68,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 		if not re.search(r'\d', password):
 			raise serializers.ValidationError({"password": "Password must contain at least one number."})
 		if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-			raise serializers.ValidationError({"password": "Password must contain at least one special character."})
+			raise serializers.ValidationError({"password": "Password must contain a special character."})
 		return attrs
 
 	def create(self, validated_data):
@@ -102,11 +102,6 @@ class FriendSerializer(serializers.ModelSerializer):
 		now = timezone.now()
 		five_minutes_ago = now - timezone.timedelta(minutes=1)
 		return last_active >= five_minutes_ago
-
-# class MatchHistorySerializer(serializers.ModelSerializer):
-# 	class Meta:
-# 		model = PongMatch
-# 		fields = ['id', 'player1Name', 'player1Hp', 'player2Name', 'player2Hp', 'winner', 'timePlayed', 'dateTime']
 
 class UserProfileSerializer(serializers.ModelSerializer):
     friends = FriendSerializer(many=True)
@@ -157,12 +152,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
         if new_password:
             instance.set_password(new_password)
-            instance.save()
 
         if not instance.two_factor_method:
             instance.otp_verified = False
             instance.email_otp_verified = False
             instance.email_otp_code = None
-            instance.save()
+        
+        instance.save()
 
         return instance

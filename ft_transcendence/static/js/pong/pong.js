@@ -13,8 +13,8 @@ import { HealthBarEntity } from './entities/HealthBarEntity.js';
 import { CameraEntity } from './entities/CameraEntity.js';
 import { TextEntity } from './entities/TextEntity.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-import { gameOverEvent, handleMatchEnd } from '../router.js';
-
+// import { gameOverEvent } from '../router.js';
+import { handleMatchEnd } from '../gameHandler.js'
 import * as COLORS from './colors.js';
 import { KnockoffPlayerEntity } from './entities/knockoffPlayerEntity.js';
 import { PowerUpEntity } from './entities/PowerUpEntity.js';
@@ -166,13 +166,16 @@ export class Pong
 
 	startGame(data) {
 		this.gameData = data;
+		this.gameData.game = this.gameGlobals.game ? 'KnockOff' : 'Pong';
+
 		const user1Name = this.entities['User1Name']
 		const user2Name = this.entities['User2Name']
 		
-		user1Name.setText(data.player1);
-		user2Name.setText(data.player2);
-		user1Name.text = data.player1;
-		user2Name.text = data.player2;
+		console.log('startgamedata game = ' + this.gameData.game);
+		user1Name.setText(data.player1.username);
+		user2Name.setText(data.player2.username);
+		user1Name.text = data.player1.username;
+		user2Name.text = data.player2.username;
 		this.startCountDown();
 	}
 
@@ -302,29 +305,47 @@ export class Pong
 			return;
 		}
 
+
+		
 		//todo add game type. tournament or 1v1
+		// const gameOverData = {
+		// 	tournament_match: this.gameData.tournament_match,
+		// 	game: this.gameGlobals.game,
+		// 	player1: {
+		// 		username: this.gameData.player1.username,
+		// 		id: this.gameData.player1.id,
+		// 		hitpoints: player1.hitPoints,
+		// 	},
+		// 	player2: {
+		// 		username: this.gameData.player2.username,
+		// 		id: this.gameData.player2.id,
+		// 		hitpoints: player2.hitPoints,
+		// 	},
+		// 	winner: winner,
+		// 	matchTimeLength: this.matchTime.getElapsedTime().toFixed(2) + "s",
+		// 	dateTime: this.matchDate,
+		// };
+
 		const gameOverData = {
-			game: this.gameGlobals.game,
-			player1: {
-				username: this.gameData.player1,
-				id: this.gameData.player1_id,
-				hitpoints: player1.hitPoints,
-			},
-			player2: {
-				name: this.gameData.player2,
-				id: this.gameData.player2_id,
-				hitpoints: player2.hitPoints,
-			},
-			winner: winner,
-			matchTimeLength: this.matchTime.getElapsedTime().toFixed(2) + "s",
+			game: this.gameData.game,
+			tournament_match: this.gameData.tournament_match,
+			player1: this.gameData.player1.id,
+			player1Name: this.gameData.player1.username,
+			player1Hp: player1.hitPoints,
+			player2: this.gameData.player2.id,
+			player2Name: this.gameData.player2.username,
+			player2Hp: player2.hitPoints,
+			timePlayed: this.matchTime.getElapsedTime().toFixed(2) + "s",
 			dateTime: this.matchDate,
 		};
-
+		console.log('game = ' + gameOverData.game)
 		goal1.material.emissiveIntensity = 1;
 		goal2.material.emissiveIntensity = 1;
 		gameOverEvent.detail.gameOverData = gameOverData;
-		handleMatchEnd(gameOverData);
 		this.winnerLoop();
+		setTimeout(() => {
+			handleMatchEnd(gameOverData);
+		}, 5000)
 		this.gameGlobals.gameState = GameStates.GAMEOVER;
 	}
 
@@ -369,7 +390,7 @@ export class Pong
 		}
 	}
 	gameLoop() {
-		//requestAnimationFrame(() => this.gameLoop());
+		requestAnimationFrame(() => this.gameLoop());
 		if ( this.gameGlobals.gameState === GameStates.LOADING) {
 			return;
 		}
