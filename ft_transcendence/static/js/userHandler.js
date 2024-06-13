@@ -40,20 +40,6 @@ async function editProfileHandler() {
 				reader.readAsDataURL(selectedFile);
 			}
 		});
-
-		// const otpEnabledInput = document.getElementById('otpEnabled');
-		// const emailOtpEnabledInput = document.getElementById('emailOtpEnabled');
-		
-		
-		// flexSwitch2FA.addEventListener('change', () => {
-			// 	otpEnabledInput.value = flexSwitch2FA.checked;
-			// });
-			
-			// flexSwitchEmailOtp.addEventListener('change', () => {
-				// 	emailOtpEnabledInput.value = flexSwitchEmailOtp.checked;
-				// });
-				
-				
 		const updateProfileForm = document.getElementById('updateProfileForm');
 		const flexSwitch2FA = document.getElementById('flexSwitch2FA');
 		const flexSwitchEmailOtp = document.getElementById('flexSwitchEmailOtp');
@@ -125,7 +111,7 @@ async function editProfileHandler() {
 							return;
 						}
 					} else {
-						showToast(circle_xmark + 'Profile updated successfully', false);
+						showToast(circle_check + 'Profile updated successfully', false);
 						history.pushState({}, "", "/profile");
 						router.handleLocation();
 					}
@@ -323,53 +309,43 @@ async function loginHandler() {
 // could remove this function or use it in everything
 
 async function fetchHTML(url) {
-    try {
-        const response = await fetch(url);
-        if (response.ok) {
-            return response.text();
-        } else {
-            console.error(`Error fetching ${url}: ${response.statusText}`);
-            alert(`Error loading form. Please try again later.`);
-            return '';
-        }
-    } catch (error) {
-        console.error('Fetch error:', error);
-        alert('An error occurred while loading the form. Please try again later.');
-        return '';
-    }
+	try {
+		const response = await fetch(url);
+		if (response.ok) {
+			return response.text();
+		} else {
+			showToast(circle_xmark + 'Something went wrong', true);
+			return '';
+		}
+	} catch (error) {
+		showToast(circle_xmark + 'Something went wrong', true);
+		return '';
+	}
 }
 
 let loginData = null;
 let currentUsername = null;
 
 async function handleLoginSubmit(event) {
-    event.preventDefault();
-    const loginForm = event.target;
-    let formData = new FormData(loginForm);
-    try {
-        let response = await fetch('/users/login-user', {
-            method: 'POST',
-            body: formData
-        });
-        if (response.ok) {
-            loginData = await response.json();
-			// console.log('loginData');
-			// console.log(loginData);
-            currentUsername = formData.get('username');
-			console.log('stuff:', loginData.two_factor_method, loginData.otp_verified, loginData.otp_email_verified);
-			if (loginData.two_factor_method && (loginData.otp_verified || loginData.email_otp_verified))
-			{
+	event.preventDefault();
+	const loginForm = event.target;
+	let formData = new FormData(loginForm);
+	try {
+		let response = await fetch('/users/login-user', {
+			method: 'POST',
+			body: formData
+		});
+		if (response.ok) {
+			loginData = await response.json();
+			currentUsername = formData.get('username');
+			console.log('stuff is:', loginData.two_factor_method, loginData.otp_verified, loginData.email_otp_verified);
+			
+			if ((loginData.two_factor_method === 'app' && loginData.otp_verified) || (loginData.two_factor_method === 'email' && loginData.email_otp_verified)) {
+				console.log("Condition 1 met");
 				loginForm.remove();
-                await loadOtpForm();
-			}
-			else if (loginData.two_factor_method && (!loginData.otp_verified && !loginData.email_otp_verified)) {
-				showToast(circle_check + 'Login success', false);
-				showToast(circle_xmark, + "Please verify your profile", true);
-				currentUser.setUser(loginData);
-				history.pushState({}, "", "/");
-				router.handleLocation()
-			}
-			else {
+				await loadOtpForm();
+			} else {
+				console.log("Else block executed");
 				showToast(circle_check + 'Login success', false);
 				currentUser.setUser(loginData);
 				history.pushState({}, "", "/");
@@ -377,15 +353,13 @@ async function handleLoginSubmit(event) {
 			}
 		}
 		else {
-			// prints object object if wrong password
-			const errorData = await response.json()
-			showToast(circle_xmark + 'Something went wrong', true);
+			showToast(circle_xmark + 'Login error', true);
 		}
 		}
 	catch (error) {
 		console.log(error);
-        showToast(circle_xmark + 'Something went wrong', true);
-    }
+		showToast(circle_xmark + 'Something went wrong', true);
+	}
 }
 
 async function loadOtpForm() {
@@ -423,7 +397,7 @@ async function handleOtpSubmit(event) {
 		console.log(otpResponse.data);
         if (otpResponse.ok) {
 			const otpData = await otpResponse.json();
-			showToast(circle_check + 'Login success', true);
+			showToast(circle_check + 'Login success', false);
 			currentUser.setUser(otpData);
 			history.pushState({}, "", "/");
 			router.handleLocation()
@@ -440,11 +414,11 @@ async function registerHandler() {
     const userContainer = document.getElementById('userContainer');
     userContainer.innerHTML = "";
 
-    if (!registerFormHTML) {
-        registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
+    if (!window.registerFormHTML) {
+        window.registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
     }
 
-    userContainer.insertAdjacentHTML('beforeend', registerFormHTML);
+    userContainer.insertAdjacentHTML('beforeend', window.registerFormHTML);
 
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {

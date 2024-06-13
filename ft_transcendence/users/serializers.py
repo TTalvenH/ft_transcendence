@@ -145,6 +145,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
         new_password = validated_data.pop('new_password', None)
         validated_data.pop('confirm_password', None)
         validated_data.pop('old_password', None)
+        print(validated_data)
+        print(new_password)
 
         instance = super().update(instance, validated_data)
 

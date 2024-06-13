@@ -128,11 +128,10 @@
 
 .inputBox.selectBox {
     padding: 0.625rem 1.25rem; /* Adjust padding to match button style */
-    background-color: rgba(233, 68, 225, 0.1); /* Match button background */
+    background: none; /* Match button background */
     color: #fff; /* Match button text color */
     cursor: pointer; /* Make it clickable like a button */
-    border: 2px solid #27defa;
-    border-radius: 0.625rem; /* Match button border radius */
+    border: none;
     outline: none; /* Remove focus outline */
     display: inline-block; /* Align with inline elements like buttons */
     position: relative; /* Needed for positioning the custom dropdown arrow */

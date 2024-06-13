@@ -21,8 +21,6 @@ urlpatterns = [
 	path('update-user-profile', views.updateUserProfile, name="update-user-profile"),
 	path('add-friend/<str:username>/', views.addFriend, name="add-friend"),
 	path('log-out-view', views.logOut, name="log-out"),
-	path('add-matchHistory/<int:match_id>/', views.add_matchHistory, name="add-matchHistory"),
-	path('get-matchHistory', views.get_matchHistory, name="get-matchHistory"),
 	path('token/refresh_token', TokenRefreshView.as_view(), name="refresh_token"),
 	path('get-user/<str:username>/', views.get_user, name="get-user"),
 ]

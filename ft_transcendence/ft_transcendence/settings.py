@@ -32,7 +32,7 @@ ALLOWED_HOSTS = []
 # not good for prodution 
 import os
 
-os.environ['SSL_CERT_FILE'] = '/usr/local/etc/openssl@3/cert.pem' 
+os.environ['SSL_CERT_FILE'] = '/opt/homebrew/etc/openssl@3/cert.pem'
 
 # Application definition
 

@@ -569,20 +569,41 @@ class Router {
 
 // // could remove this function or use it in everything
 
-// async function fetchHTML(url) {
+// async function handleLoginSubmit(event) {
+//     event.preventDefault();
+//     const loginForm = event.target;
+//     let formData = new FormData(loginForm);
 //     try {
-//         const response = await fetch(url);
-//         if (response.ok) {
-//             return response.text();
-//         } else {
-//             console.error(`Error fetching ${url}: ${response.statusText}`);
-//             alert(`Error loading form. Please try again later.`);
-//             return '';
-//         }
-//     } catch (error) {
-//         console.error('Fetch error:', error);
-//         alert('An error occurred while loading the form. Please try again later.');
-//         return '';
+//         let response = await fetch('/users/login-user', {
+//             method: 'POST',
+//             body: formData
+//         });
+// 		if (response.ok) {
+// 			loginData = await response.json();
+// 			currentUsername = formData.get('username');
+// 			console.log('stuff is:', loginData.two_factor_method, loginData.otp_verified, loginData.email_otp_verified);
+			
+// 			if ((loginData.two_factor_method === 'app' && loginData.otp_verified) || (loginData.two_factor_method === 'email' && loginData.email_otp_verified)) {
+// 				console.log("Condition 1 met");
+// 				loginForm.remove();
+// 				await loadOtpForm();
+// 			} else {
+// 				console.log("Else block executed");
+// 				showToast(loginSuccess, false);
+// 				currentUser.setUser(loginData);
+// 				history.pushState({}, "", "/");
+// 				router.init();
+// 			}
+// 		}
+// 		else {
+// 			// prints object object if wrong password
+// 			const errorData = await response.json()
+// 			showToast(errorData, true);
+// 		}
+// 		}
+// 	catch (error) {
+// 		console.log(error);
+//         showToast(somethingWentWrong, true);
 //     }
 // }
 
