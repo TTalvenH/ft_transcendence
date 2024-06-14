@@ -1,2 +1,0 @@
-
-rethink the match_history object
