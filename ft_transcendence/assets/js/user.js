@@ -31,7 +31,7 @@ class User {
 		let user = this.getUser();
 		if (user)
 		{
-			fetch(`http://127.0.0.1:8000/users/check_existance/${user.username}/`)
+			fetch(`/users/check_existance/${user.username}/`)
 			.then(res => {
 				if (res.status === 404) {
 					this.removeUser();
@@ -53,7 +53,7 @@ class User {
 				return;
 			}
 
-			fetch('http://127.0.0.1:8000/users/token/refresh_token', {
+			fetch('/users/token/refresh_token', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'

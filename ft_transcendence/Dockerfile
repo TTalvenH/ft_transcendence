@@ -1,7 +1,9 @@
+# Start from the Python 3.11.4 Alpine image
 FROM python:3.11.4-alpine
 
-# Install necessary system dependencies
+# Install necessary system dependencies including OpenSSL
 RUN apk update && apk add --no-cache \
+    openssl \
     postgresql-dev \
     postgresql-client \
     gcc \
@@ -30,4 +32,3 @@ EXPOSE 8000
 
 # Set the entrypoint
 ENTRYPOINT [ "sh", "entrypoint.sh" ]
-
