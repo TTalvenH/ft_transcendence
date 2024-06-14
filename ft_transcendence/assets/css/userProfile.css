@@ -1,0 +1,163 @@
+
+
+.userProfile {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	border: 2px solid #f141f1;
+	transform: translate(-50%, -50%);
+	height: 600px;
+	max-height: 600px;
+	max-width: 800px;
+	min-width: 800px;
+	min-height: 600px;
+	padding: 2.5rem;
+	box-sizing: border-box;
+	background: rgba(100, 18, 96, 0.453);
+	border-radius: 0.625rem;
+	box-shadow: 0 0 30px #f141f1;
+}
+
+/* .userProfile::before {
+    content: "";
+    position: absolute;
+    top: -2px; 
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: inherit;
+    z-index: -1;
+	border-radius: 0.625rem;
+
+    box-shadow: 0 0 30px #f141f1;
+
+
+    filter: blur(2px);
+} */
+
+.profilePicture {
+	text-align: center;
+	height: 150px;
+	width: 200px;
+}
+
+.profilePicture img{
+	border: #27defa 2px solid;
+	border-radius: 0.625rem;
+	position: relative;
+    width: 100%;
+    height: 100%;
+	object-fit: cover;
+}
+
+.profilePicture .file {
+    position: relative;
+    overflow: hidden;
+    margin-top: -20%;
+    width: 70%;
+    border: none;
+    border-radius: 0;
+    font-size: 15px;
+    background: #212529b8;
+}
+.profilePicture .file input {
+    position: absolute;
+    opacity: 0;
+    right: 0;
+    top: 0;
+}
+
+.profileInfo {
+    margin-top: 10%;
+}
+
+
+.editProfilePicture {
+	height: 150px;
+	width: 200px;
+	/* transform: translateX(35%); */
+	margin-bottom: 30px;
+}
+
+.editProfilePicture img {
+	width: 100%;
+	height: 100%;
+	position: relative;
+	border: #27defa 2px solid;
+	border-bottom: none;
+	border-top-left-radius: 0.625rem;
+	border-top-right-radius: 0.625rem;
+	object-fit: cover;
+}
+
+.editProfilePicture .butn {
+	width: 100%;
+	height: 25%;
+	border: #27defa 2px solid;
+	background: #27defa;
+	border-bottom-left-radius: 0.625rem;
+	border-bottom-right-radius: 0.625rem;
+	transition: 0.3s;
+}
+
+.editProfilePicture .butn:hover {
+	width: 100%;
+	border: #2790fa 2px solid;
+	background: #2790fa;
+	border-bottom-left-radius: 0.625rem;
+	border-bottom-right-radius: 0.625rem;
+}
+
+.editProfilePicture .butn label {
+	width: 100%;
+	height: 100%;
+	color: #ffffff;
+	cursor: pointer;
+}
+
+ .tableClass {
+	width: 100%;
+	height: 100%;
+	max-height: 100px;
+	color: white;
+ }
+
+ .tableClass thead tr {
+	background-color: #0000002f;
+	border-top-left-radius: 0.625rem;
+ }
+
+ .tableClass tbody tr {
+	background-color: #0000002f;
+	border: rgb(99, 99, 99) 0.1px solid;
+	border-left: none;
+	border-right: none;
+	border-top-left-radius: 0.625rem;
+	border-bottom-left-radius: 0.625rem;
+ }
+
+ .table-responsive {
+	border: rgb(99, 99, 99) 0.1px solid;
+	border-radius: 0.625rem;
+ }
+
+.table-responsive::-webkit-scrollbar {
+    width: 9px; /* Width of the scrollbar */
+}
+
+/* Track */
+.table-responsive::-webkit-scrollbar-track {
+    background: #585858; /* Color of the scrollbar track */
+	border-radius: 0.625rem;
+}
+
+/* Handle */
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #272727; /* Color of the scrollbar handle */
+    border-radius: 6px; /* Roundness of the scrollbar handle */
+}
+
+/* Handle on hover */
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #000000; /* Color of the scrollbar handle on hover */
+}

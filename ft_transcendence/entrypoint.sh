@@ -1,6 +1,9 @@
 #!/bin/sh
 
-python manage.py migrate --no-input
-python manage.py collectstatic --no-input
+ls
 
-gunicorn backend.wsgi:application --bind 0.0.0.0:8000
+python3 manage.py makemigrations --no-input
+python3 manage.py migrate --no-input
+python3 manage.py collectstatic --no-input
+
+python3 manage.py runserver 0.0.0.0:8000

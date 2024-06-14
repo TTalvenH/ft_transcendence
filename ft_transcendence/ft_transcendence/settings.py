@@ -24,15 +24,15 @@ SECRET_KEY = 'django-insecure-#u9(30^3ml&b5itimj%x-pa3))&nh8$kn*8p5(#*oih_@&j6j3
 # SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 # DEBUG =  os.getenv('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # not good for prodution 
 import os
 
-os.environ['SSL_CERT_FILE'] = '/usr/local/etc/openssl@3/cert.pem'
+os.environ['SSL_CERT_FILE'] = '/opt/homebrew/etc/openssl@3/cert.pem'
 
 # Application definition
 
@@ -102,6 +102,17 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+# 	'default': {
+# 		'ENGINE': 'django.db.backends.postgresql',
+# 		'NAME': 'postgres',
+# 		'USER': 'postgres',
+# 		'PASSWORD': 'postgres',
+# 		'HOST': 'postgres',
+# 		'PORT': 5432,
+# 	}
+# }
 
 
 # Password validation

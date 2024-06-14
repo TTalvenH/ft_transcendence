@@ -1,0 +1,14 @@
+@keyframes appearSmoothly {
+	from {
+		/* transform: translate(-100%, -50%); */
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+		/* transform: translate(-50, -50); */
+	}
+}
+
+.smoothAppear {
+	animation: appearSmoothly 1.5s;
+}

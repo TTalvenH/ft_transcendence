@@ -449,31 +449,6 @@ def addFriend(request, username):
 @authentication_classes([JWTAuthentication])
 @update_last_active
 @permission_classes([IsAuthenticated])
-def add_matchHistory(request, match_id):
-	# Retrieve user from the database
-	match = get_object_or_404(PongMatch, id=match_id)
-
-	# Add the user to the friend list
-	request.user.match_history.add(match)
-
-	# Return the serialized user data
-	return Response(MatchHistorySerializer(instance=match).data)
-
-@api_view(['GET'])
-@update_last_active
-def get_matchHistory(request):
-	# Retrieve user from the database
-	match = PongMatch.objects.all()
-
-	serializer = MatchHistorySerializer(instance=match, many=True)
-	# Return the serialized user data
-	return Response(serializer.data)
-
-
-@api_view(['POST'])
-@authentication_classes([JWTAuthentication])
-@update_last_active
-@permission_classes([IsAuthenticated])
 def logOut(request):
 	return Response(status=status.HTTP_200_OK)
 
@@ -483,5 +458,12 @@ def logOut(request):
 @permission_classes([IsAuthenticated])
 def get_user(request, username):
 	user = get_object_or_404(CustomUser, username=username)
-	print('dsadassadasdasd')
 	return Response({'username': user.username, 'id': user.id}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def check_existance(request, username):
+	print()
+	user = get_object_or_404(CustomUser, username=username)
+	print('llllllllll')
+	print(user)
+	return Response(status=status.HTTP_200_OK)
