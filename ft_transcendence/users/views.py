@@ -388,7 +388,7 @@ from rest_framework.parsers import MultiPartParser
 @parser_classes([MultiPartParser])
 def updateUserProfile(request):
 	user = get_object_or_404(CustomUser, id=request.user.id)
-	# print(request.data)
+	print('request = {}'.format(request.data))
 	profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True, context={'request': request})
 
 	if profile_serializer.is_valid():
@@ -423,10 +423,8 @@ def updateUserProfile(request):
 		detail = {'detail': profile_serializer.errors.get('email')}
 	elif profile_serializer.errors.get('password'):
 		detail = {'detail': 'Missing required fields.'}
+	print(profile_serializer.errors)
 	return Response(detail, status=400)
-
-
-
 
 
 @api_view(['POST'])
@@ -462,8 +460,5 @@ def get_user(request, username):
 
 @api_view(['GET'])
 def check_existance(request, username):
-	print()
 	user = get_object_or_404(CustomUser, username=username)
-	print('llllllllll')
-	print(user)
 	return Response(status=status.HTTP_200_OK)

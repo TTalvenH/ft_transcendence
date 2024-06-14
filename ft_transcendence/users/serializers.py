@@ -104,60 +104,64 @@ class FriendSerializer(serializers.ModelSerializer):
 		return last_active >= five_minutes_ago
 
 class UserProfileSerializer(serializers.ModelSerializer):
-    friends = FriendSerializer(many=True)
-    old_password = serializers.CharField(write_only=True, required=False)
-    new_password = serializers.CharField(write_only=True, required=False, validators=[validate_password])
-    confirm_password = serializers.CharField(write_only=True, required=False)
+	friends = FriendSerializer(many=True)
+	old_password = serializers.CharField(write_only=True, required=False)
+	new_password = serializers.CharField(write_only=True, required=False, validators=[validate_password])
+	confirm_password = serializers.CharField(write_only=True, required=False)
 
-    class Meta:
-        model = CustomUser
-        fields = [
-            'id', 'image', 'username', 'friends', 'last_active',
-            'old_password', 'new_password', 'confirm_password',
-            'email', 'two_factor_method'
-        ]
-        read_only_fields = ['id', 'friends', 'last_active']
-        extra_kwargs = {'username': {'required': False}}
+	class Meta:
+		model = CustomUser
+		fields = [
+			'id', 'image', 'username', 'friends', 'last_active',
+			'old_password', 'new_password', 'confirm_password',
+			'email', 'two_factor_method'
+		]
+		read_only_fields = ['id', 'friends', 'last_active']
+		extra_kwargs = {'username': {'required': False}}
 
-    def validate(self, attrs):
-        user = self.context['request'].user
-        if 'new_password' in attrs and 'confirm_password' in attrs and 'old_password' in attrs:
-            if not user.check_password(attrs.get('old_password', '')):
-                raise serializers.ValidationError({"old_password": "Wrong password."})
-            if attrs['new_password'] != attrs['confirm_password']:
-                raise serializers.ValidationError({"password": "Password fields didn't match."})
-            password = attrs['new_password']
-            if len(password) < 8:
-                raise serializers.ValidationError({"new_password": "Password must be at least 8 characters long."})
-            if not re.search(r'[A-Z]', password):
-                raise serializers.ValidationError({"new_password": "Password must contain at least one uppercase letter."})
-            if not re.search(r'[a-z]', password):
-                raise serializers.ValidationError({"new_password": "Password must contain at least one lowercase letter."})
-            if not re.search(r'\d', password):
-                raise serializers.ValidationError({"new_password": "Password must contain at least one number."})
-            if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
-                raise serializers.ValidationError({"new_password": "Password must contain at least one special character."})
-        elif 'new_password' in attrs or 'confirm_password' in attrs or 'old_password' in attrs:
-            raise serializers.ValidationError({"password": "Missing required field."})
-        return attrs
+	def validate(self, attrs):
+		user = self.context['request'].user
+		email = attrs.get('email', None)
+		if email and CustomUser.objects.filter(email=email).exclude(id=user.id).exists():
+			raise serializers.ValidationError({"email": "This email is already in use by another user."})
 
-    def update(self, instance, validated_data):
-        new_password = validated_data.pop('new_password', None)
-        validated_data.pop('confirm_password', None)
-        validated_data.pop('old_password', None)
-        print(validated_data)
-        print(new_password)
+		if 'new_password' in attrs and 'confirm_password' in attrs and 'old_password' in attrs:
+			if not user.check_password(attrs.get('old_password', '')):
+				raise serializers.ValidationError({"old_password": "Wrong password."})
+			if attrs['new_password'] != attrs['confirm_password']:
+				raise serializers.ValidationError({"password": "Password fields didn't match."})
+			password = attrs['new_password']
+			if len(password) < 8:
+				raise serializers.ValidationError({"new_password": "Password must be at least 8 characters long."})
+			if not re.search(r'[A-Z]', password):
+				raise serializers.ValidationError({"new_password": "Password must contain at least one uppercase letter."})
+			if not re.search(r'[a-z]', password):
+				raise serializers.ValidationError({"new_password": "Password must contain at least one lowercase letter."})
+			if not re.search(r'\d', password):
+				raise serializers.ValidationError({"new_password": "Password must contain at least one number."})
+			if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+				raise serializers.ValidationError({"new_password": "Password must contain at least one special character."})
+		elif 'new_password' in attrs or 'confirm_password' in attrs or 'old_password' in attrs:
+			raise serializers.ValidationError({"password": "Missing required field."})
+		return attrs
 
-        instance = super().update(instance, validated_data)
+	def update(self, instance, validated_data):
+		new_password = validated_data.pop('new_password', None)
+		validated_data.pop('confirm_password', None)
+		validated_data.pop('old_password', None)
+		print(validated_data)
+		print(new_password)
 
-        if new_password:
-            instance.set_password(new_password)
+		instance = super().update(instance, validated_data)
 
-        if not instance.two_factor_method:
-            instance.otp_verified = False
-            instance.email_otp_verified = False
-            instance.email_otp_code = None
-        
-        instance.save()
+		if new_password:
+			instance.set_password(new_password)
 
-        return instance
+		if not instance.two_factor_method:
+			instance.otp_verified = False
+			instance.email_otp_verified = False
+			instance.email_otp_code = None
+		
+		instance.save()
+
+		return instance

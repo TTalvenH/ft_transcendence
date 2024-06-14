@@ -3,6 +3,7 @@ FROM python:3.11.4-alpine
 # Install necessary system dependencies
 RUN apk update && apk add --no-cache \
     postgresql-dev \
+    postgresql-client \
     gcc \
     python3-dev \
     musl-dev \

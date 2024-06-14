@@ -323,7 +323,6 @@ async function fetchHTML(url) {
 	}
 }
 
-let loginData = null;
 let currentUsername = null;
 
 async function handleLoginSubmit(event) {
@@ -336,7 +335,7 @@ async function handleLoginSubmit(event) {
 			body: formData
 		});
 		if (response.ok) {
-			loginData = await response.json();
+			const loginData = await response.json();
 			currentUsername = formData.get('username');
 			console.log('stuff is:', loginData.two_factor_method, loginData.otp_verified, loginData.email_otp_verified);
 			

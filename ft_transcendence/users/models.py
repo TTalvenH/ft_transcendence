@@ -14,7 +14,7 @@ class CustomUser(AbstractUser):
 	two_factor_method = models.CharField(max_length=8, null=True, blank=True, choices=(
 		('app', 'Auth-app'),
 		('email', 'Email'),
-		('none', 'None'),
+		('None', 'None'),
 	), default='none')
 
 	otp_verified = models.BooleanField(default=False)
