@@ -30,3 +30,4 @@ EXPOSE 8000
 
 # Set the entrypoint
 ENTRYPOINT [ "sh", "entrypoint.sh" ]
+

@@ -165,7 +165,6 @@ function controlsHandler() {
 	if (!userData) {
 		return;
 	}
-
 	const userContainer = document.getElementById('userContainer');
 	userContainer.innerHTML = "";
 
@@ -234,7 +233,7 @@ async function tournamentHandler() {
 		const addPlayerButtons = document.querySelectorAll('.addUserButton');
 		for (let i = 0; i < addPlayerButtons.length; i++) {
 			addPlayerButtons[i].addEventListener('click', async () => {
-				await currentUser.refreshToken();
+				currentUser.refreshToken();
 				const input = addPlayerButtons[i].previousElementSibling;
 				if (!input) {
 					return ;

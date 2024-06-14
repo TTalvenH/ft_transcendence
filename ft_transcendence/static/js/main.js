@@ -30,4 +30,4 @@ window.onpopstate = () => router.handleLocation();
 
 router.handleLocation();
 
-export { router, pong  }
+export { pong  }

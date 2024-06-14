@@ -370,12 +370,12 @@ def otpSetupView(request):
                 fail_silently=False,
             )
 		response_data = {'username': user.username }
-	# else:
-	# 	user.two_factor_method = 'None'
-	# 	user.email_otp_verified = False
-	# 	user.otp_verified = False
-	# 	user.save()
-	# 	response_data = {'detail': 'No setup needed'}
+	else:
+		user.two_factor_method = 'None'
+		user.email_otp_verified = False
+		user.otp_verified = False
+		user.save()
+		response_data = {'detail': 'No setup needed'}
 
 	return Response(response_data, status=status.HTTP_201_CREATED)
 

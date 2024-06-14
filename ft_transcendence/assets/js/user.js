@@ -1,4 +1,4 @@
-import { router } from "./main.js"
+import { router } from "./router.js"
 import { circle_xmark, showToast } from "./utils.js"
 
 class User {
