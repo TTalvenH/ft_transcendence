@@ -175,7 +175,12 @@ def loginUser(request):
 	user = authenticate(request, username=request.data['username'], password=request.data['password'])
 	if not user:
 		return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
-
+	if user.two_factor_method == 'email' and not user.email_otp_verified:
+		user.two_factor_method = 'None'
+	elif user.two_factor_method == 'app' and not user.otp_verified:
+		user.two_factor_method = 'None'
+	user.save()
+  
 	if user.two_factor_method == 'email' and user.email_otp_verified:
 		otp_code = generate_email_otp()
 		user.email_otp_code = otp_code
@@ -190,8 +195,10 @@ def loginUser(request):
 	serializer = UserSerializer(instance=user)
 	response_data = {'two_factor_method': user.two_factor_method, 'otp_verified': user.otp_verified, 'email_otp_verified': user.email_otp_verified, 'user': serializer.data}
 	user.update_last_active()
-	token = create_jwt_pair_for_user(user)
-	response_data.update({'tokens': token, 'user': serializer.data})
+	if user.two_factor_method == 'None':
+		token = create_jwt_pair_for_user(user)
+		print('token created')
+		response_data.update({'tokens': token})
 	print(response_data)
 
 	return Response(response_data, status=status.HTTP_200_OK)
@@ -362,6 +369,7 @@ def otpSetupView(request):
 		otp_code = generate_email_otp()
 		user.email_otp_code = otp_code
 		user.save()
+		print('hello')
 		send_mail(
                 'Your OTP Code',
                 f'Your OTP code is {otp_code}',
@@ -376,7 +384,7 @@ def otpSetupView(request):
 		user.otp_verified = False
 		user.save()
 		response_data = {'detail': 'No setup needed'}
-
+		 
 	return Response(response_data, status=status.HTTP_201_CREATED)
 
 from rest_framework.parsers import MultiPartParser
