@@ -9,7 +9,8 @@ RUN apk update && apk add --no-cache \
     gcc \
     python3-dev \
     musl-dev \
-    libpq
+    libpq \
+	libffi-dev
 
 # Upgrade pip
 RUN pip install --upgrade pip

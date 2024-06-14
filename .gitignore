@@ -7,4 +7,3 @@ __pycache__/
 *.pyo
 *.pyd
 assets
-.env

@@ -42,6 +42,7 @@ def updateProfile(request):
 		'profile_image': user.image.url if user.image else 'static/images/plankton.jpg',
 		'email': user.email,
 		'display_name': user.display_name,
+		'two_factor_method': user.two_factor_method
 	}
 	return render(request, 'users/update_profile.html', context)
 
