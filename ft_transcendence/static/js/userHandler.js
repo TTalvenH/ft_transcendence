@@ -1,5 +1,5 @@
 import { showToast, circle_check, circle_xmark } from "./utils.js"
-import { router } from "./main.js"
+import { router } from "./router.js"
 import { currentUser } from "./user.js";
 
 async function editProfileHandler() {
@@ -321,7 +321,6 @@ async function fetchHTML(url) {
 	}
 }
 
-let loginData = null;
 let currentUsername = null;
 
 async function handleLoginSubmit(event) {
@@ -334,7 +333,7 @@ async function handleLoginSubmit(event) {
 			body: formData
 		});
 		if (response.ok) {
-			loginData = await response.json();
+			const loginData = await response.json();
 			currentUsername = formData.get('username');
 			console.log('stuff is:', loginData.two_factor_method, loginData.otp_verified, loginData.email_otp_verified);
 			
@@ -351,7 +350,10 @@ async function handleLoginSubmit(event) {
 			}
 		}
 		else {
-			showToast(circle_xmark + 'Login error', true);
+			let msg = 'Login error';
+			if (response.status === 404)
+				msg = 'User not found'
+			showToast(circle_xmark + msg, true);
 		}
 		}
 	catch (error) {

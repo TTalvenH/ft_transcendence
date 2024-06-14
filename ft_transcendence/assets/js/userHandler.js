@@ -1,5 +1,5 @@
 import { showToast, circle_check, circle_xmark } from "./utils.js"
-import { router } from "./main.js"
+import { router } from "./router.js"
 import { currentUser } from "./user.js";
 
 async function editProfileHandler() {
@@ -306,8 +306,6 @@ async function loginHandler() {
     }
 }
 
-// could remove this function or use it in everything
-
 async function fetchHTML(url) {
 	try {
 		const response = await fetch(url);
@@ -323,7 +321,6 @@ async function fetchHTML(url) {
 	}
 }
 
-let loginData = null;
 let currentUsername = null;
 
 async function handleLoginSubmit(event) {
@@ -336,7 +333,7 @@ async function handleLoginSubmit(event) {
 			body: formData
 		});
 		if (response.ok) {
-			loginData = await response.json();
+			const loginData = await response.json();
 			currentUsername = formData.get('username');
 			console.log('stuff is:', loginData.two_factor_method, loginData.otp_verified, loginData.email_otp_verified);
 			
@@ -353,7 +350,10 @@ async function handleLoginSubmit(event) {
 			}
 		}
 		else {
-			showToast(circle_xmark + 'Login error', true);
+			let msg = 'Login error';
+			if (response.status === 404)
+				msg = 'User not found'
+			showToast(circle_xmark + msg, true);
 		}
 		}
 	catch (error) {
@@ -393,8 +393,8 @@ async function handleOtpSubmit(event) {
             method: 'POST',
             body: otpFormData
         });
-		console.log('otpResponse: ');
-		console.log(otpResponse.data);
+		// console.log('otpResponse: ');
+		// console.log(otpResponse.data);
         if (otpResponse.ok) {
 			const otpData = await otpResponse.json();
 			showToast(circle_check + 'Login success', false);
@@ -408,7 +408,6 @@ async function handleOtpSubmit(event) {
 		showToast(circle_xmark + 'Something went wrong', true);
     }
 }
-
 
 async function registerHandler() {
     const userContainer = document.getElementById('userContainer');
@@ -433,18 +432,10 @@ async function handleRegisterSubmit(event) {
     
     const registerForm = event.target;
     const formData = new FormData(registerForm);
-
 	// Log the FormData to ensure it's correct
-	for (var pair of formData.entries()) {
-		console.log(pair[0]+ ': ' + pair[1]);
-	}
-    // const otpEnabled = formData.get('two_factor_method') === 'app';
-	// console.log(emailOtpEnabled);
-	// console.log(otpEnabled);
-    // if (otpEnabled && emailOtpEnabled) {
-    //     showToast(onlyOneMethod, true);
-    //     return;
-    // }
+	// for (var pair of formData.entries()) {
+	// 	console.log(pair[0]+ ': ' + pair[1]);
+	// }
     try {
         const response = await fetch('/users/create-user', {
             method: 'POST',
@@ -452,7 +443,7 @@ async function handleRegisterSubmit(event) {
         });
         if (response.ok) {
             const result = await response.json();
-			console.log(result);
+			// console.log(result);
             await handleRegistrationResponse(result);
         } else {
             const errorResult = await response.json();
@@ -470,7 +461,6 @@ async function handleRegistrationResponse(result) {
         return;
     }
 
-    console.log('Handling registration response:', result);
 	if (result.otp && (result.otp.email_otp || result.qr_html)) {
 		if (result.otp.email_otp) {
 			try {
@@ -488,7 +478,6 @@ async function handleRegistrationResponse(result) {
 			userContainer.insertAdjacentHTML('beforeend', result.qr_html);
 			console.log('Inserted QR HTML');
 		}
-	
 		const otpForm = document.getElementById('otpForm');
 		if (otpForm) {
 			otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmit(event, result.user.username));
@@ -496,7 +485,6 @@ async function handleRegistrationResponse(result) {
 		} else {
 			console.error('OTP form not found');
 		}
-
 	}
 	else {
 		showToast(circle_check + 'Registration successful', false);
@@ -517,8 +505,6 @@ async function handleOtpVerificationSubmit(event, username) {
             method: 'POST',
             body: otpFormData
         });
-        
-        const verifyResult = await verifyResponse.json();
         
         if (verifyResponse.ok) {
             const userContainer = document.getElementById('userContainer');

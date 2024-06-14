@@ -28,7 +28,7 @@ class Router {
 		handleSidePanel();
 		this.currentPath = window.location.pathname;
 		this.currenSearchParams = window.location.search;
-		await currentUser.refreshToken();
+		currentUser.refreshToken();
 		const route = this.routes.find(route => {
 			const regEx = new RegExp(`^${route.path}$`);
 			return this.currentPath.match(regEx);

@@ -1,4 +1,4 @@
-import { router } from "./main.js"
+import { router } from "./router.js"
 import { circle_xmark, showToast } from "./utils.js"
 
 class User {
@@ -24,25 +24,23 @@ class User {
 
 	removeUser() {
 		localStorage.removeItem('currentUser');
+		document.cookie = 'refresh=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
 	}
 
-	async refreshToken() {
+	refreshToken() {
 		let user = this.getUser();
 		if (user)
 		{
-			console.log('popopopo')
 			fetch(`http://127.0.0.1:8000/users/check_existance/${user.username}/`)
 			.then(res => {
-				console.log('popopopo2')
 				if (res.status === 404) {
-					console.log('popopopo3')
 					this.removeUser();
 					router.handleLocation();
 					return ;
 				}
 			})
 			.catch( () => {
-				showToast(circle_xmark + 'Something went wron', true);
+				showToast(circle_xmark + 'Something went wrong', true);
 			})
 		}
 		// check if latest refresh was more than 15 minutes ago

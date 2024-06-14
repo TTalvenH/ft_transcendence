@@ -1,5 +1,6 @@
-import { pong, router } from "./main.js"
+import { pong } from "./main.js";
 import { currentUser } from "./user.js";
+import { router } from "./router.js";
 
 const circle_xmark = '<i class="fa-regular fa-circle-xmark"></i>';
 const circle_check = '<i class="fa-regular fa-circle-check"></i>';

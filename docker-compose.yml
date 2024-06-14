@@ -1,29 +1,22 @@
-version: '3.8'
+version: '3.9'
 
 services:
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
   django:
+    build: ./ft_transcendence/.
     volumes:
-      - static:/static
-    env_file:
-      - .env
-    build:
-      context: ./django
-    expose:
-      - 8000
-  nginx:
-    volumes:
-      - static:/static
-    build:
-      context: ./nginx
+      - ./ft_transcendence:/ft_transcendence
     ports:
-      - "80:80"
+      - "8000:8000"
     depends_on:
-      - django
-
-volumes:
-  static:
-    driver: local
-    driver_opts:
-      type: none
-      device: /Users/ekoljone/Desktop/ft_transcendence/docker/django/backend/static
-      o: bind
+      - postgres
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=postgres
