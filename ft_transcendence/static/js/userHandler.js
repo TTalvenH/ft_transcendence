@@ -362,6 +362,7 @@ async function handleLoginSubmit(event) {
 	}
 }
 
+
 async function loadOtpForm() {
     if (!window.otpFormHTML) {
         window.otpFormHTML = await fetchHTML("/users/qr_prompt.html");
