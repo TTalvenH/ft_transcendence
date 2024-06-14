@@ -306,8 +306,6 @@ async function loginHandler() {
     }
 }
 
-// could remove this function or use it in everything
-
 async function fetchHTML(url) {
 	try {
 		const response = await fetch(url);
@@ -393,8 +391,8 @@ async function handleOtpSubmit(event) {
             method: 'POST',
             body: otpFormData
         });
-		console.log('otpResponse: ');
-		console.log(otpResponse.data);
+		// console.log('otpResponse: ');
+		// console.log(otpResponse.data);
         if (otpResponse.ok) {
 			const otpData = await otpResponse.json();
 			showToast(circle_check + 'Login success', false);
@@ -408,7 +406,6 @@ async function handleOtpSubmit(event) {
 		showToast(circle_xmark + 'Something went wrong', true);
     }
 }
-
 
 async function registerHandler() {
     const userContainer = document.getElementById('userContainer');
@@ -433,18 +430,10 @@ async function handleRegisterSubmit(event) {
     
     const registerForm = event.target;
     const formData = new FormData(registerForm);
-
 	// Log the FormData to ensure it's correct
-	for (var pair of formData.entries()) {
-		console.log(pair[0]+ ': ' + pair[1]);
-	}
-    // const otpEnabled = formData.get('two_factor_method') === 'app';
-	// console.log(emailOtpEnabled);
-	// console.log(otpEnabled);
-    // if (otpEnabled && emailOtpEnabled) {
-    //     showToast(onlyOneMethod, true);
-    //     return;
-    // }
+	// for (var pair of formData.entries()) {
+	// 	console.log(pair[0]+ ': ' + pair[1]);
+	// }
     try {
         const response = await fetch('/users/create-user', {
             method: 'POST',
@@ -452,7 +441,7 @@ async function handleRegisterSubmit(event) {
         });
         if (response.ok) {
             const result = await response.json();
-			console.log(result);
+			// console.log(result);
             await handleRegistrationResponse(result);
         } else {
             const errorResult = await response.json();
@@ -470,7 +459,6 @@ async function handleRegistrationResponse(result) {
         return;
     }
 
-    console.log('Handling registration response:', result);
 	if (result.otp && (result.otp.email_otp || result.qr_html)) {
 		if (result.otp.email_otp) {
 			try {
@@ -488,7 +476,6 @@ async function handleRegistrationResponse(result) {
 			userContainer.insertAdjacentHTML('beforeend', result.qr_html);
 			console.log('Inserted QR HTML');
 		}
-	
 		const otpForm = document.getElementById('otpForm');
 		if (otpForm) {
 			otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmit(event, result.user.username));
@@ -496,7 +483,6 @@ async function handleRegistrationResponse(result) {
 		} else {
 			console.error('OTP form not found');
 		}
-
 	}
 	else {
 		showToast(circle_check + 'Registration successful', false);
@@ -517,8 +503,6 @@ async function handleOtpVerificationSubmit(event, username) {
             method: 'POST',
             body: otpFormData
         });
-        
-        const verifyResult = await verifyResponse.json();
         
         if (verifyResponse.ok) {
             const userContainer = document.getElementById('userContainer');
