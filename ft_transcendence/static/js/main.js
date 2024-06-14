@@ -13,6 +13,8 @@ router.set('/match', gameHandler);
 router.set('/profile', profileHandler);
 router.set('/tournament', tournamentInfoHandler);
 
+
+
 window.route = (event) => {
     event.preventDefault();
 	const newPath = new URL(event.currentTarget.href).pathname;
