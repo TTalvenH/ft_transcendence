@@ -5,10 +5,10 @@ Content-Type: application/json
 
 ###
 
-POST http://127.0.0.1:8000/users/create-user
+POST https://127.0.0.1:8000/users/create-user
 Content-Type: application/json
 
-{ "username": "wmulleie", "email": "melledi@gemaild.com", "password": "Testisalis1234#", "confirm_password": "Testisalis1234#", "enable_otp": true}
+{ "username": "testi111", "email": "testi111@gemaild.com", "password": "Testisalis1234#", "confirm_password": "Testisalis1234#", "enable_otp": true}
 
 ###
 

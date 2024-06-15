@@ -1,6 +1,5 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from .forms import CreateUserForm, LoginForm
-from rest_framework import generics, status
+from django.shortcuts import render, get_object_or_404
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes, parser_classes
 from rest_framework.permissions import IsAuthenticated
@@ -10,12 +9,9 @@ from .tokens import create_jwt_pair_for_user
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from rest_framework.permissions import IsAuthenticated
 import qrcode
-import io
 import base64
-from django.conf import settings
 import pyotp
 from io import BytesIO
-from string import Template
 from .decorators import update_last_active
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import HttpRequest
@@ -23,6 +19,15 @@ from django.template.loader import render_to_string
 from django.contrib.auth import authenticate
 from django.middleware.csrf import get_token
 from pong.serializers import MatchSerializer, TournamentSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from django.http import HttpRequest
+from django.middleware.csrf import get_token
+from django.template.loader import render_to_string
+from random import randint
+from django.core.mail import send_mail
+from rest_framework.parsers import MultiPartParser
 
 @api_view(['GET'])
 def login_template(request):
@@ -35,7 +40,7 @@ def register(request):
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @update_last_active
-def updateProfile(request):
+def update_profile_template(request):
 	user = request.user
 	context = {
 		'username': user.username,
@@ -57,7 +62,6 @@ def userProfileTemplate(request, username):
 	match_history = sorted(match_history, key=lambda x: x['dateTime'], reverse=True)
 	tournament_history = TournamentSerializer(instance=user.tournament_set.all(), many=True).data
 	tournament_history = sorted(tournament_history, key=lambda x: x['dateTime'], reverse=True)
-	print(tournament_history)
 	context = {
 		'username': user.username,
 		'profile_image': user.image.url if user.image else 'static/images/plankton.jpg',
@@ -65,7 +69,6 @@ def userProfileTemplate(request, username):
 		'tournament_history': tournament_history,
 		'friends': FriendSerializer(instance=user.friends.all(), many=True).data,
 	}
-	print(context.get('match_history'))
 	return render(request, 'users/profile.html', context)
 
 @api_view(['GET'])
@@ -74,23 +77,14 @@ def qrPrompt(request):
 
 @api_view(['GET'])
 def renderQr(request):
-    return render(request, 'users/qr.html')
-
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from rest_framework import status
-from django.http import HttpRequest
-from django.middleware.csrf import get_token
-from django.template.loader import render_to_string
+	return render(request, 'users/qr.html')
 
 @api_view(['POST'])
 def createUser(request):
-	# print(request.POST)
 	serializer = RegisterUserSerializer(data=request.data)
 	if serializer.is_valid():
 		user = serializer.save()
 		two_factor_method = user.two_factor_method
-		print('method is', two_factor_method)
 		otp_data = {}
 		qr_html = None
 
@@ -140,13 +134,8 @@ def createUser(request):
 		detail = {'detail': 'Email taken'}
 	return Response(detail, status=status.HTTP_400_BAD_REQUEST)
 
-
-from random import randint
-from django.core.mail import send_mail
-
 def generate_email_otp():
-    return str(randint(100000, 999999))
-
+	return str(randint(100000, 999999))
 
 def setupOTP(user):
 	device, created = TOTPDevice.objects.get_or_create(user=user, name='default')
@@ -193,10 +182,8 @@ def loginUser(request):
 	user.update_last_active()
 	token = create_jwt_pair_for_user(user)
 	response_data.update({'tokens': token, 'user': serializer.data})
-	print(response_data)
 
 	return Response(response_data, status=status.HTTP_200_OK)
-
 
 @api_view(['POST'])
 def validateOtpAndLogin(request):
@@ -222,15 +209,12 @@ def validateOtpAndLogin(request):
 
 	return Response({'tokens': token, 'user': serializer.data}, status=status.HTTP_200_OK)
 
-
 @api_view(['POST'])
 def verifyOTP(request):
 	user = get_object_or_404(CustomUser, username=request.data.get('username'))
 	two_factor_method = user.two_factor_method
 	otp = request.data.get('otp')
-	print('method is', two_factor_method)
-	print('otp is', otp)
-	print('user code: ', user.email_otp_code)
+
 	if not two_factor_method:
 		return Response({'detail': 'OTP required.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -252,73 +236,14 @@ def verifyOTP(request):
 	else:
 		return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-
-# This function is an api_view that can be accessed with a GET request
-# It is decorated with @authentication_classes, which means that it will
-# attempt to authenticate the request using either SessionAuthentication or
-# TokenAuthentication.
-# The user is only allowed to access this view if they are authenticated,
-# which is specified in the @permission_classes decorator.
-# The function returns a Response with a dictionary containing the user's
-# email, which is taken from request.user.email. This is only accessible if
-# the user is authenticated, as specified by the IsAuthenticated permission.
-
-@api_view(['GET'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
-def testToken(request):
-	"""
-	This function is an api_view that can be accessed with a GET request.
-	It is decorated with @authentication_classes, which means that it will
-	attempt to authenticate the request using either SessionAuthentication or
-	TokenAuthentication.
-	The user is only allowed to access this view if they are authenticated,
-	which is specified in the @permission_classes decorator.
-	The function returns a Response with a dictionary containing the user's
-	email, which is taken from request.user.email. This is only accessible if
-	the user is authenticated, as specified by the IsAuthenticated permission.
-	"""
-	return Response({"passed for {}".format(request.user.email)})
-
-
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
-# @api_view(['GET'])
-# @authentication_classes([JWTAuthentication])
-# @update_last_active
-# @permission_classes([IsAuthenticated])
-# def getUser(request, user_id):
-#     # Extract user ID from the token
-#     token_user_id = request.user.id
-    
-#     # Ensure the token user matches the requested user ID
-#     if token_user_id != user_id:
-#         return Response({"error": "You are not authorized to access this user's data."}, status=403)
-    
-#     # Retrieve user from the database
-#     user = get_object_or_404(CustomUser, id=user_id)
-    
-#     # Serialize the user data
-#     serializer = UserSerializer(instance=user)
-    
-#     # Return the serialized user data
-#     return Response({'user': serializer.data})
-
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @update_last_active
 @permission_classes([IsAuthenticated])
 def getUserPorfile(request, username):
-    # Retrieve user from the database
     user = get_object_or_404(CustomUser, username=username)
-    
-    # Serialize the user data
     serializer = UserProfileSerializer(instance=user)
-    
-    # Return the serialized user data
     return Response(serializer.data)
-
-# otpSetupView is called when user sets up otp from profile
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
@@ -328,8 +253,6 @@ def otpSetupView(request):
 
 	enable_otp = request.data.get('enable_otp')
 	enable_email_otp = request.data.get('enable_email_otp')
-	print('enable_otp', enable_otp)
-	print('enable_email_otp', enable_email_otp)
 
 	if enable_otp:
 		user.otp_verified = False
@@ -364,12 +287,12 @@ def otpSetupView(request):
 		user.email_otp_code = otp_code
 		user.save()
 		send_mail(
-                'Your OTP Code',
-                f'Your OTP code is {otp_code}',
-                'customer.support.pong@example.com',
-                [user.email],
-                fail_silently=False,
-            )
+				'Your OTP Code',
+				f'Your OTP code is {otp_code}',
+				'customer.support.pong@example.com',
+				[user.email],
+				fail_silently=False,
+			)
 		response_data = {'username': user.username }
 	else:
 		user.two_factor_method = 'None'
@@ -380,8 +303,6 @@ def otpSetupView(request):
 
 	return Response(response_data, status=status.HTTP_201_CREATED)
 
-from rest_framework.parsers import MultiPartParser
-
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])
 @update_last_active
@@ -389,7 +310,6 @@ from rest_framework.parsers import MultiPartParser
 @parser_classes([MultiPartParser])
 def updateUserProfile(request):
 	user = get_object_or_404(CustomUser, id=request.user.id)
-	print('request = {}'.format(request.data))
 	profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True, context={'request': request})
 
 	if profile_serializer.is_valid():
@@ -398,10 +318,6 @@ def updateUserProfile(request):
 		email_otp_setup_needed = False
 		TwoFactorMethod = user.two_factor_method
 		user_serializer = UserSerializer(instance=user)
-		print('2fa :', TwoFactorMethod)
-		print(user.otp_verified)
-		print(user.email_otp_verified)
-		
 		
 		if TwoFactorMethod == 'app' and not user.otp_verified:
 			otp_setup_needed = True
@@ -424,24 +340,19 @@ def updateUserProfile(request):
 		detail = {'detail': profile_serializer.errors.get('email')}
 	elif profile_serializer.errors.get('password'):
 		detail = {'detail': 'Missing required fields.'}
-	print(profile_serializer.errors)
 	return Response(detail, status=400)
-
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @update_last_active
 @permission_classes([IsAuthenticated])
 def addFriend(request, username):
-	# Retrieve user from the database
 	if username == request.user.username or request.user.friends.filter(username=username).exists():
 		return Response(status=status.HTTP_400_BAD_REQUEST)
 	user = get_object_or_404(CustomUser, username=username)
-	# Add the user to the friend list
 	request.user.friends.add(user)
 	user.friends.add(request.user)
 
-	# Return the serialized user data
 	return Response(FriendSerializer(instance=user).data)
 
 @api_view(['POST'])

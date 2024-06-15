@@ -3,71 +3,71 @@ from .models import Match, Tournament
 from users.models import CustomUser
 
 class MatchSerializer(serializers.ModelSerializer):
-    player1_username = serializers.CharField(source='player1.username', read_only=True)
-    player2_username = serializers.SerializerMethodField()
-    date = serializers.SerializerMethodField()
+	player1_username = serializers.CharField(source='player1.username', read_only=True)
+	player2_username = serializers.SerializerMethodField()
+	date = serializers.SerializerMethodField()
 
-    class Meta:
-        model = Match
-        fields = [
-            'id',
-            'game',
-            'date',
-            'dateTime',
-            'player1',
-            'player1_username',
-            'player1Hp',
-            'player2',
-            'player2_username',
-            'player2Hp',
-            'timePlayed',
-        ]
-        read_only_fields = ['id', 'player1_username', 'player2_username']
+	class Meta:
+		model = Match
+		fields = [
+			'id',
+			'game',
+			'date',
+			'dateTime',
+			'player1',
+			'player1_username',
+			'player1Hp',
+			'player2',
+			'player2_username',
+			'player2Hp',
+			'timePlayed',
+		]
+		read_only_fields = ['id', 'player1_username', 'player2_username']
 
-    def get_player2_username(self, obj):
-        return obj.player2.username if obj.player2 else "Guest"
+	def get_player2_username(self, obj):
+		return obj.player2.username if obj.player2 else "Guest"
 
-    def get_date(self, obj):
-        return obj.dateTime.date().isoformat()
+	def get_date(self, obj):
+		return obj.dateTime.date().isoformat()
 
 
 class MatchCreateSerializer(serializers.ModelSerializer):
-    player1 = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
-    player2 = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), required=False, allow_null=True)
-    player1Hp = serializers.IntegerField()
-    player2Hp = serializers.IntegerField(required=False, allow_null=True)
-    timePlayed = serializers.CharField(max_length=20)
-    dateTime = serializers.DateTimeField()
+	player1 = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+	player2 = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all(), required=False, allow_null=True)
+	player1Hp = serializers.IntegerField()
+	player2Hp = serializers.IntegerField(required=False, allow_null=True)
+	timePlayed = serializers.CharField(max_length=20)
+	dateTime = serializers.DateTimeField()
 
-    class Meta:
-        model = Match
-        fields = [
-            'id',
-            'game',
-            'tournament_match',
-            'player1',
-            'player1Hp',
-            'player2',
-            'player2Hp',
-            'timePlayed',
-            'dateTime'
-        ]
-        read_only_fields = ['id']
+	class Meta:
+		model = Match
+		fields = [
+			'id',
+			'game',
+			'tournament_match',
+			'player1',
+			'player1Hp',
+			'player2',
+			'player2Hp',
+			'timePlayed',
+			'dateTime'
+		]
+		read_only_fields = ['id']
 
-    def validate(self, data):
-        """
-        Check that the same user is not both player1 and player2.
-        """
-        if data.get('player2') and data['player1'] == data['player2']:
-            raise serializers.ValidationError("A player cannot play against themselves.")
-        return data
+	def validate(self, data):
+		"""
+		Check that the same user is not both player1 and player2.
+		"""
+		if data.get('player2') and data['player1'] == data['player2']:
+			raise serializers.ValidationError("A player cannot play against themselves.")
+		return data
 
-    def create(self, validated_data):
-        # Ensure player2Hp is handled correctly if player2 is null
-        if validated_data.get('player2') is None:
-            validated_data['player2Hp'] = validated_data.get('player2Hp', 0)
-        match = Match.objects.create(**validated_data)
-        return match
+	def create(self, validated_data):
+		# Ensure player2Hp is handled correctly if player2 is null
+		if validated_data.get('player2') is None:
+			validated_data['player2Hp'] = validated_data.get('player2Hp', 0)
+		match = Match.objects.create(**validated_data)
+		return match
 
 	
 
