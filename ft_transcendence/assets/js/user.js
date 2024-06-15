@@ -45,7 +45,6 @@ class User {
 		}
 		// check if latest refresh was more than 15 minutes ago
 		if (user && user.latestRefresh < Date.now() - 15*60*1000) {
-			console.log('refreshing token, latestRefresh = ' + new Intl.DateTimeFormat('en-US', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date(user.latestRefresh)));
 			const cookie = document.cookie.split('; ').find(row => row.startsWith('refresh='));
 			const refreshToken = cookie ? cookie.split('=')[1] : null;
 			if (!refreshToken) {

@@ -2,6 +2,7 @@ import { pong } from "./main.js";
 import { cancelButtonClick, circle_xmark, showToast } from "./utils.js"
 import { currentUser } from "./user.js"
 import { router } from "./router.js"
+import { GameStates } from "./pong/pong.js";
 
 async function gameHandler() {
 	const userData = currentUser.getUser();
