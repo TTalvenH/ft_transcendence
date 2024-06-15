@@ -10,12 +10,10 @@ from .tokens import create_jwt_pair_for_user
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from rest_framework.permissions import IsAuthenticated
 import qrcode
-import io
 import base64
 from django.conf import settings
 import pyotp
 from io import BytesIO
-from string import Template
 from .decorators import update_last_active
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import HttpRequest
@@ -89,7 +87,7 @@ def createUser(request):
 	if serializer.is_valid():
 		user = serializer.save()
 		two_factor_method = user.two_factor_method
-		print('method is', two_factor_method)
+		# print('method is', two_factor_method)
 		otp_data = {}
 		qr_html = None
 
@@ -197,9 +195,9 @@ def loginUser(request):
 	user.update_last_active()
 	if user.two_factor_method == 'None':
 		token = create_jwt_pair_for_user(user)
-		print('token created')
+		# print('token created')
 		response_data.update({'tokens': token})
-	print(response_data)
+	# print(response_data)
 
 	return Response(response_data, status=status.HTTP_200_OK)
 
@@ -286,30 +284,6 @@ def testToken(request):
 	"""
 	return Response({"passed for {}".format(request.user.email)})
 
-
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
-# @api_view(['GET'])
-# @authentication_classes([JWTAuthentication])
-# @update_last_active
-# @permission_classes([IsAuthenticated])
-# def getUser(request, user_id):
-#     # Extract user ID from the token
-#     token_user_id = request.user.id
-    
-#     # Ensure the token user matches the requested user ID
-#     if token_user_id != user_id:
-#         return Response({"error": "You are not authorized to access this user's data."}, status=403)
-    
-#     # Retrieve user from the database
-#     user = get_object_or_404(CustomUser, id=user_id)
-    
-#     # Serialize the user data
-#     serializer = UserSerializer(instance=user)
-    
-#     # Return the serialized user data
-#     return Response({'user': serializer.data})
-
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @update_last_active
@@ -334,8 +308,8 @@ def otpSetupView(request):
 
 	enable_otp = request.data.get('enable_otp')
 	enable_email_otp = request.data.get('enable_email_otp')
-	print('enable_otp', enable_otp)
-	print('enable_email_otp', enable_email_otp)
+	# print('enable_otp', enable_otp)
+	# print('enable_email_otp', enable_email_otp)
 
 	if enable_otp:
 		user.otp_verified = False
@@ -350,10 +324,8 @@ def otpSetupView(request):
 		django_request.method = 'GET'
 		django_request.user = request.user
 		csrf_token = get_token(request)
-		context = {
-			**otp_data['context'],
-			'csrf_token': csrf_token,
-		}
+		context = otp_data.get('context', {})
+		context['csrf_token'] = csrf_token
 
 		qr_html = render_to_string('users/qr.html', context, request=django_request)
 		response_data = {
@@ -369,7 +341,7 @@ def otpSetupView(request):
 		otp_code = generate_email_otp()
 		user.email_otp_code = otp_code
 		user.save()
-		print('hello')
+		# print('hello')
 		send_mail(
                 'Your OTP Code',
                 f'Your OTP code is {otp_code}',
