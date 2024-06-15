@@ -1,0 +1,78 @@
+{% load static %}
+
+<div class="tournamentInfo smoothAppear">
+	<button id="cancel" class="cancelButton">X</button>
+	<div class="score playerOneScore">
+		{% if match_one.player1Hp > match_one.player2Hp %}
+			<h6 style="color: #70d170;" >{{ match_one.player1Hp }}</h6>
+		{% else %}
+			<h6 style="color: red;" >{{ match_one.player1Hp }}</h6>
+		{% endif %}
+	</div>
+	<div class="score playerTwoScore">
+		{% if match_one.player2Hp > match_one.player1Hp %}
+			<h6 style="color: #70d170;" >{{ match_one.player2Hp }}</h6>
+		{% else %}
+			<h6 style="color: red;" >{{ match_one.player2Hp }}</h6>
+		{% endif %}
+	</div>
+	<div class="score playerThreeScore">
+		{% if match_two.player1Hp > match_two.player2Hp %}
+			<h6 style="color: #70d170;" >{{ match_two.player1Hp }}</h6>
+		{% else %}
+			<h6 style="color: red;" >{{ match_two.player1Hp }}</h6>
+		{% endif %}
+	</div>
+	<div class="score playerFourScore">
+		{% if match_two.player2Hp > match_two.player1Hp %}
+			<h6 style="color: #70d170;" >{{ match_two.player2Hp }}</h6>
+		{% else %}
+			<h6 style="color: red;" >{{ match_two.player2Hp }}</h6>
+		{% endif %}
+	</div>
+	<div class="score playerFiveScore">
+		{% if match_final.player1Hp > match_final.player2Hp %}
+			<h6 style="color: #70d170;" >{{ match_final.player1Hp }}</h6>
+		{% else %}
+			<h6 style="color: red;" >{{ match_final.player1Hp }}</h6>
+		{% endif %}
+	</div>
+	<div class="score playerSixScore">
+		{% if match_final.player2Hp > match_final.player1Hp %}
+			<h6 style="color: #70d170;" >{{ match_final.player2Hp }}</h6>
+		{% else %}
+			<h6 style="color: red;" >{{ match_final.player2Hp }}</h6>
+		{% endif %}
+	</div>
+	<div class="score winnerText">
+		<h6>Winner</h6>
+	</div>
+	<div class="brackets">
+		<img src={% static 'images/brackets.png' %}>
+		<div id="matchOnePlayerOne" class="matchPlayerName matchOnePlayerOne">
+			<h6>{{ match_one.player1_username }}</h6>
+		</div>
+		<div id="matchOnePlayerTwo" class="matchPlayerName matchOnePlayerTwo">
+			<h6>{{ match_one.player2_username }}</h6>
+		</div>
+		<div id="matchTwoPlayerOne" class="matchPlayerName matchTwoPlayerOne">
+			<h6>{{ match_two.player1_username }}</h6>
+		</div>
+		<div id="matchTwoPlayerTwo" class="matchPlayerName matchTwoPlayerTwo">
+			<h6>{{ match_two.player2_username }}</h6>
+		</div>
+		<div id="matchThreePlayerOne" class="matchPlayerName matchThreePlayerOne">
+			<h6>{{ match_final.player1_username }}</h6>
+		</div>
+		<div id="matchThreePlayerTwo" class="matchPlayerName matchThreePlayerTwo">
+			<h6>{{ match_final.player2_username }}</h6>
+		</div>
+		<div id="winner" class="matchPlayerName winner">
+			{% if match_final.player1Hp >  match_final.player2Hp %}
+				<h6>{{ match_final.player1_username }}</h6>
+			{% else %}
+				<h6>{{ match_final.player2_username }}</h6>
+			{% endif %}
+		</div>
+	</div>
+</div>

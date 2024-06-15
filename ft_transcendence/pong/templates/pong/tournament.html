@@ -1,0 +1,41 @@
+<div class="tournamentBox">
+	<button id="cancel" class="cancelButton">X</button>
+	<div style="transform: translateX(-50%); left: 50%" class="menuHeader">
+		<h6>Tournament</h6>
+	</div>
+	<div id="players" class="players">
+		<h2 id="main_player">{{ username }}</h2>
+		<h2 id="player2" style="display: none;" id="player2">Player 2</h2>
+		<h2 id="player1" style="display: none;" id="player3">Player 3</h2>
+		<h2 id="player0" style="display: none;" id="player4">Player 4</h2>
+	</div>
+	<div class="inputs">
+		<div id="player0_input" class="inputBox">
+			<input type="text"
+				required onkeyup="this.setAttribute('value', this.value);"
+				value=""
+				autocomplete="one-time-code"
+				placeholder="Add Player">
+			<button id="addPlayerButton0" class="addUserButton">+</button>
+		</div>
+		<div id="player1_input" class="inputBox">
+			<input type="text"
+				required onkeyup="this.setAttribute('value', this.value);"
+				value=""
+				autocomplete="one-time-code"
+				placeholder="Add Player">
+			<button id="addPlayerButton1" class="addUserButton">+</button>
+		</div>
+		<div id="player2_input" class="inputBox">
+			<input type="text"
+				required onkeyup="this.setAttribute('value', this.value);"
+				value=""
+				autocomplete="one-time-code"
+				placeholder="Add Player">
+			<button id="addPlayerButton2" class="addUserButton">+</button>
+		</div>
+	</div>
+	<div id="startButtonDiv" class="startButton">
+		<button id="startTournament" class="button">START</button>
+	</div>
+</div>

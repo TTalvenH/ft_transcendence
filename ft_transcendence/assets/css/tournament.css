@@ -1,0 +1,271 @@
+.tournamentBox {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	border: 2px solid #f141f1;
+	transform: translate(-50%, -50%);
+	background: rgba(100, 18, 96, 0.453);
+	border-radius: 0.625rem;
+	box-shadow: 0 0 30px #f141f1;
+	min-width: 400px;
+	min-height: 500px;
+}
+
+.players {
+	position: absolute;
+	width: 200px;
+	height: 200px;
+	top: 36%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.players h2 {
+	text-align: center;
+	color: #fff;
+	margin: 40px
+}
+
+.startButton {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	bottom: 30px;
+	/* display: none; */
+}
+
+.inputs {
+    width: 200px;
+    height: 200px;
+    position: absolute;
+    top: 60%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.inputs h2 {
+	color: #fff;
+	text-align: center;
+	margin: 20px
+}
+
+.addUserButton {
+	position: absolute;
+	border: none;
+	background: none;
+	color: #fff;
+	top: 10px;
+	transition: 0.3s;
+}
+
+.addUserButton:hover {
+	transform: scale(1.5);
+	color: #1ffa39;
+}
+
+.tournamentMatches {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 400px;
+	height: 300px;
+	background: rgba(100, 18, 96, 0.453);
+	border-radius: 0.625rem;
+	border: 2px solid #f141f1;
+	box-shadow: 0 0 30px #f141f1;
+}
+
+.matchHeader {
+	position: absolute;
+	top: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+.matchHeader h2 {
+	color: #fff;
+	text-align: center;
+}
+
+.playerOne {
+	width: 130px;
+	position: absolute;
+	top: 50%;
+	left: 30px;
+	transform: translateY(-50%);
+}
+
+.playerOne h3 {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: #fff;
+	text-align: right;
+
+}
+
+.playerTwo {
+	width: 130px;
+	position: absolute;
+	top: 50%;
+	right: 30px;
+	transform: translateY(-50%);
+}
+
+.playerTwo h3 {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: #fff;
+	text-align: left;
+
+}
+
+.versus {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.versus h3 {
+	color: #fff;
+	text-align: center;
+}
+
+.tournamentInfo {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	border: 2px solid #f141f1;
+	transform: translate(-50%, -50%);
+	background: rgba(100, 18, 96, 0.453);
+	border-radius: 0.625rem;
+	box-shadow: 0 0 30px #f141f1;
+	min-width: 550px;
+	min-height: 550px;
+}
+
+.brackets {
+	position: absolute;
+	top: 60px;
+	left: 20px;
+	min-width: 500px;
+	min-height: 400px;
+	background: none;
+}
+
+.brackets img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.matchPlayerName {
+	width: 100px;
+	height: 50px;
+	position: absolute;
+	justify-content: center;
+	align-items: center;
+}
+
+.matchPlayerName h6 {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: #fff;
+	text-align: center;
+}
+
+.matchOnePlayerOne {
+	top: 20px;
+	left: 15px;
+}
+
+.matchOnePlayerTwo {
+	top: 145px;
+	left: 15px;
+}
+
+.matchTwoPlayerOne {
+	bottom: 120px;
+	left: 15px;
+}
+
+.matchTwoPlayerTwo {
+	top: 400px;
+	left: 15px;
+}
+
+.matchThreePlayerOne {
+	top: 85px;
+	right: 200px;
+}
+
+.matchThreePlayerTwo {
+	bottom: 55px;
+	right: 200px;
+}
+
+.winner {
+	bottom: 185px;
+	right: 15px;
+}
+
+.score {
+	width: 100px;
+	height: 50px;
+	position: absolute;
+	justify-content: center;
+	align-items: center;
+}
+
+.score h6 {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: #fff;
+	text-align: center;
+}
+
+.playerOneScore {
+	top: 40px;
+	left: 30px;
+}
+
+.playerTwoScore {
+	top: 165px;
+	left: 30px;
+}
+
+.playerThreeScore {
+	top: 290px;
+	left: 30px;
+}
+
+.playerFourScore {
+	top: 415px;
+	left: 30px;
+}
+
+.playerFiveScore {
+	top: 100px;
+	left: 220px;
+}
+
+.playerSixScore {
+	bottom: 140px;
+	left: 220px;
+}
+
+.winnerText {
+	bottom: 270px;
+	right: 40px;
+}
+
+.winnerText h6 {
+	color: #70d170;
+}

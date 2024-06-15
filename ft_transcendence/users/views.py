@@ -1,27 +1,33 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from .forms import CreateUserForm, LoginForm
-from rest_framework import generics, status
+from django.shortcuts import render, get_object_or_404
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, authentication_classes, permission_classes, parser_classes
 from rest_framework.permissions import IsAuthenticated
-from .models import CustomUser, PongMatch
-from .serializers import UserSerializer, RegisterUserSerializer, UserProfileSerializer, MatchHistorySerializer, FriendSerializer
+from .models import CustomUser
+from .serializers import UserSerializer, RegisterUserSerializer, UserProfileSerializer, FriendSerializer
 from .tokens import create_jwt_pair_for_user
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from rest_framework.permissions import IsAuthenticated
 import qrcode
-import io
 import base64
-from django.conf import settings
 import pyotp
 from io import BytesIO
-from string import Template
 from .decorators import update_last_active
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.contrib.auth import authenticate
 from django.middleware.csrf import get_token
+from pong.serializers import MatchSerializer, TournamentSerializer
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from django.http import HttpRequest
+from django.middleware.csrf import get_token
+from django.template.loader import render_to_string
+from random import randint
+from django.core.mail import send_mail
+from rest_framework.parsers import MultiPartParser
 
 @api_view(['GET'])
 def login_template(request):
@@ -34,13 +40,14 @@ def register(request):
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @update_last_active
-def updateProfile(request):
+def update_profile_template(request):
 	user = request.user
 	context = {
 		'username': user.username,
 		'profile_image': user.image.url if user.image else 'static/images/plankton.jpg',
 		'email': user.email,
-		'display_name': user.display_name
+		'display_name': user.display_name,
+		'two_factor_method': user.two_factor_method
 	}
 	return render(request, 'users/update_profile.html', context)
 
@@ -49,11 +56,18 @@ def updateProfile(request):
 @update_last_active
 def userProfileTemplate(request, username):
 	user = get_object_or_404(CustomUser, username=username)
+	player1_matches = user.player1_matches.all().filter(tournament_match=False)
+	player2_matches = user.player2_matches.all().filter(tournament_match=False)
+	match_history = MatchSerializer(instance=player1_matches, many=True).data + MatchSerializer(instance=player2_matches, many=True).data
+	match_history = sorted(match_history, key=lambda x: x['dateTime'], reverse=True)
+	tournament_history = TournamentSerializer(instance=user.tournament_set.all(), many=True).data
+	tournament_history = sorted(tournament_history, key=lambda x: x['dateTime'], reverse=True)
 	context = {
 		'username': user.username,
 		'profile_image': user.image.url if user.image else 'static/images/plankton.jpg',
+		'match_history': match_history,
+		'tournament_history': tournament_history,
 		'friends': FriendSerializer(instance=user.friends.all(), many=True).data,
-		'match_history': MatchHistorySerializer(instance=user.match_history.all(), many=True).data
 	}
 	return render(request, 'users/profile.html', context)
 
@@ -63,71 +77,73 @@ def qrPrompt(request):
 
 @api_view(['GET'])
 def renderQr(request):
-    return render(request, 'users/qr.html')
+	return render(request, 'users/qr.html')
 
 @api_view(['POST'])
 def createUser(request):
-    serializer = RegisterUserSerializer(data=request.data)
-    if serializer.is_valid():
-        user = serializer.save()
+	serializer = RegisterUserSerializer(data=request.data)
+	if serializer.is_valid():
+		user = serializer.save()
+		two_factor_method = user.two_factor_method
+		otp_data = {}
+		qr_html = None
 
-        # If OTP is enabled, set up OTP for the user
-        enable_otp = request.data.get('enable_otp')
-        otp_data = {}
-        if enable_otp == 'true':
-            otp_data = setup_otp(user)
-            if not otp_data['created']:
-                return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+		if two_factor_method == 'app': 
+			otp_data = setupOTP(user)
+			if not otp_data['created']:
+				return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Construct the response data
-        response_data = {
-            'user': serializer.data,
-            'otp': otp_data
-        }
+			django_request = HttpRequest()
+			django_request.method = 'GET'
+			django_request.user = request.user
+			csrf_token = get_token(request)
+			context = otp_data.get('context', {})
+			context['csrf_token'] = csrf_token
+			qr_html = render_to_string('users/qr.html', context, request=django_request)
+			response_data = { 
+				'user': serializer.data,
+				'otp': otp_data,
+				'qr_html': qr_html
+			}
 
- 		 # Convert DRF request to Django HttpRequest
-        django_request = HttpRequest()
-        django_request.method = 'GET'
-        django_request.user = request.user
+		elif two_factor_method == 'email':
+			otp_code = generate_email_otp()
+			user.email_otp_code = otp_code
+			user.save()
+			send_mail(
+				'Your OTP Code',
+				f'Your OTP code is {otp_code}',
+				'customer.support.pong@example.com',
+				[user.email],
+				fail_silently=False,
+			)
+			otp_data['email_otp'] = 'Email OTP enabled. Check your email for the OTP code.'
+			response_data = { 
+				'user': serializer.data,
+				'otp': otp_data,
+			}
+		else:
+			response_data = { 'user': serializer.data }
 
-        # Manually include CSRF token in the context
-        csrf_token = get_token(request)
-        context = {
-            **otp_data['context'],
-            'csrf_token': csrf_token,
-        }
+		return Response(response_data, status=status.HTTP_201_CREATED)
 
-        # Render the QR code HTML with CSRF token
-        qr_html = render_to_string('users/qr.html', context, request=django_request)
+	detail = {'detail': 'Invalid data'}
+	if serializer.errors.get('username'):
+		detail = {'detail': 'Username taken'}
+	elif serializer.errors.get('email'):
+		detail = {'detail': 'Email taken'}
+	return Response(detail, status=status.HTTP_400_BAD_REQUEST)
 
-        # Construct the response data
-        response_data = {
-            'user': serializer.data,
-            'otp': otp_data,
-            'qr_html': qr_html  # Include the rendered HTML in the response
-        }
+def generate_email_otp():
+	return str(randint(100000, 999999))
 
-        return Response(response_data, status=status.HTTP_201_CREATED)
-
-    detail = {'detail': 'Invalid data'}
-    if serializer.errors.get('username'):
-        detail = {'detail': 'Username taken'}
-    elif serializer.errors.get('email'):
-        detail = {'detail': 'Email taken'}
-    return Response(detail, status=status.HTTP_400_BAD_REQUEST)
-
-def setup_otp(user):
+def setupOTP(user):
 	device, created = TOTPDevice.objects.get_or_create(user=user, name='default')
-
 	key = pyotp.random_base32()
 	device.key = key
 	device.save()
 
-	user.otp_enabled = True
-	user.save()
-
 	uri = pyotp.totp.TOTP(key).provisioning_uri(name=user.username, issuer_name="pong")
-
 	qr = qrcode.make(uri)
 	buffered = BytesIO()
 	qr.save(buffered, format="PNG")
@@ -137,7 +153,6 @@ def setup_otp(user):
 		'qr_code_url': img_str,
 	}
 
-	user.otp_verified = True
 	return {
 		'detail': 'OTP device created successfully.',
 		'created': True,
@@ -151,16 +166,22 @@ def loginUser(request):
 	if not user:
 		return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-	otp_verified = user.otp_verified
+	if user.two_factor_method == 'email' and user.email_otp_verified:
+		otp_code = generate_email_otp()
+		user.email_otp_code = otp_code
+		user.save()
+		send_mail(
+			'Your OTP Code',
+			f'Your OTP code is {otp_code}',
+			'customer.support.pong@example.com',
+			[user.email],
+			fail_silently=False,
+		)
 	serializer = UserSerializer(instance=user)
-	response_data = {'otp_required': user.otp_enabled, 'otp_verified': user.otp_verified, 'user': serializer.data}
-
-	if user.otp_enabled and user.otp_verified:
-		return Response(response_data, status=status.HTTP_200_OK)
-
+	response_data = {'two_factor_method': user.two_factor_method, 'otp_verified': user.otp_verified, 'email_otp_verified': user.email_otp_verified, 'user': serializer.data}
 	user.update_last_active()
 	token = create_jwt_pair_for_user(user)
-	response_data.update({'tokens': token, 'user': serializer.data, 'otp_verified': otp_verified})
+	response_data.update({'tokens': token, 'user': serializer.data})
 
 	return Response(response_data, status=status.HTTP_200_OK)
 
@@ -168,15 +189,20 @@ def loginUser(request):
 def validateOtpAndLogin(request):
 	user = get_object_or_404(CustomUser, username=request.data['username'])
 	otp = request.data.get('otp')
-	if not otp:
+
+	if user.two_factor_method and not otp:
 		return Response({'detail': 'OTP required.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-	device = TOTPDevice.objects.get(user=user, name='default')
-	totp = pyotp.TOTP(device.key)
+	if user.two_factor_method == 'app':
+		device = TOTPDevice.objects.get(user=user, name='default')
+		totp = pyotp.TOTP(device.key)
+		if not totp.verify(otp):
+			return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-	if not totp.verify(otp):
-		return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
-	
+	if user.two_factor_method == 'email':
+		if otp != user.email_otp_code:
+			return Response({'detail': 'Invalid Email OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
+
 	user.update_last_active()
 	token = create_jwt_pair_for_user(user)
 	serializer = UserSerializer(instance=user)
@@ -184,93 +210,98 @@ def validateOtpAndLogin(request):
 	return Response({'tokens': token, 'user': serializer.data}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
-def verify_otp(request):
+def verifyOTP(request):
 	user = get_object_or_404(CustomUser, username=request.data.get('username'))
-
+	two_factor_method = user.two_factor_method
 	otp = request.data.get('otp')
-	if not otp:
+
+	if not two_factor_method:
 		return Response({'detail': 'OTP required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-	try:
-		device = TOTPDevice.objects.get(user=user, name='default')
-		totp = pyotp.TOTP(device.key)
+	if two_factor_method == 'app':
+		try:
+			device = TOTPDevice.objects.get(user=user, name='default')
+			totp = pyotp.TOTP(device.key)
+			if totp.verify(otp):
+				user.otp_verified = True
+				user.save()
+				return Response({'detail': 'OTP verified successfully.'}, status=status.HTTP_200_OK)
+		except TOTPDevice.DoesNotExist:
+			return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-		if not totp.verify(otp):
-			return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
-	except TOTPDevice.DoesNotExist:
-		return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
-	user.otp_verified = True
-	user.save()
-	return Response({'detail': 'OTP verified successfully.'}, status=status.HTTP_200_OK)
-
-
-
-# This function is an api_view that can be accessed with a GET request
-# It is decorated with @authentication_classes, which means that it will
-# attempt to authenticate the request using either SessionAuthentication or
-# TokenAuthentication.
-# The user is only allowed to access this view if they are authenticated,
-# which is specified in the @permission_classes decorator.
-# The function returns a Response with a dictionary containing the user's
-# email, which is taken from request.user.email. This is only accessible if
-# the user is authenticated, as specified by the IsAuthenticated permission.
-
-@api_view(['GET'])
-@authentication_classes([JWTAuthentication])
-@permission_classes([IsAuthenticated])
-def testToken(request):
-	"""
-	This function is an api_view that can be accessed with a GET request.
-	It is decorated with @authentication_classes, which means that it will
-	attempt to authenticate the request using either SessionAuthentication or
-	TokenAuthentication.
-	The user is only allowed to access this view if they are authenticated,
-	which is specified in the @permission_classes decorator.
-	The function returns a Response with a dictionary containing the user's
-	email, which is taken from request.user.email. This is only accessible if
-	the user is authenticated, as specified by the IsAuthenticated permission.
-	"""
-	return Response({"passed for {}".format(request.user.email)})
-
-
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
-@api_view(['GET'])
-@authentication_classes([JWTAuthentication])
-@update_last_active
-@permission_classes([IsAuthenticated])
-def getUser(request, user_id):
-    # Extract user ID from the token
-    token_user_id = request.user.id
-    
-    # Ensure the token user matches the requested user ID
-    if token_user_id != user_id:
-        return Response({"error": "You are not authorized to access this user's data."}, status=403)
-    
-    # Retrieve user from the database
-    user = get_object_or_404(CustomUser, id=user_id)
-    
-    # Serialize the user data
-    serializer = UserSerializer(instance=user)
-    
-    # Return the serialized user data
-    return Response({'user': serializer.data})
+	if user.two_factor_method == 'email' and otp == user.email_otp_code:
+		user.email_otp_verified = True
+		user.save()
+		return Response({'detail': 'Email OTP verified successfully.'}, status=status.HTTP_200_OK)
+	else:
+		return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
 
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @update_last_active
 @permission_classes([IsAuthenticated])
 def getUserPorfile(request, username):
-    # Retrieve user from the database
     user = get_object_or_404(CustomUser, username=username)
-    
-    # Serialize the user data
     serializer = UserProfileSerializer(instance=user)
-    
-    # Return the serialized user data
     return Response(serializer.data)
 
-from rest_framework.parsers import MultiPartParser
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def otpSetupView(request):
+	user = get_object_or_404(CustomUser, id=request.user.id)
+
+	enable_otp = request.data.get('enable_otp')
+	enable_email_otp = request.data.get('enable_email_otp')
+
+	if enable_otp:
+		user.otp_verified = False
+		user.email_otp_verified = False
+		user.two_factor_method = 'app'
+		user.save()
+		otp_data = setupOTP(user)
+		if not otp_data['created']:
+			return Response({'detail': 'OTP device already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
+		django_request = HttpRequest()
+		django_request.method = 'GET'
+		django_request.user = request.user
+		csrf_token = get_token(request)
+		context = {
+			**otp_data['context'],
+			'csrf_token': csrf_token,
+		}
+
+		qr_html = render_to_string('users/qr.html', context, request=django_request)
+		response_data = {
+			'otp': otp_data,
+			'qr_html': qr_html,
+			'username': user.username
+		}
+
+	elif enable_email_otp:
+		user.email_otp_verified = False
+		user.otp_verified = False
+		user.two_factor_method = 'email'
+		otp_code = generate_email_otp()
+		user.email_otp_code = otp_code
+		user.save()
+		send_mail(
+				'Your OTP Code',
+				f'Your OTP code is {otp_code}',
+				'customer.support.pong@example.com',
+				[user.email],
+				fail_silently=False,
+			)
+		response_data = {'username': user.username }
+	else:
+		user.two_factor_method = 'None'
+		user.email_otp_verified = False
+		user.otp_verified = False
+		user.save()
+		response_data = {'detail': 'No setup needed'}
+
+	return Response(response_data, status=status.HTTP_201_CREATED)
 
 @api_view(['PUT'])
 @authentication_classes([JWTAuthentication])
@@ -278,16 +309,30 @@ from rest_framework.parsers import MultiPartParser
 @permission_classes([IsAuthenticated])
 @parser_classes([MultiPartParser])
 def updateUserProfile(request):
-	# Retrieve user from the database
 	user = get_object_or_404(CustomUser, id=request.user.id)
-
-	# Serialize the user data
 	profile_serializer = UserProfileSerializer(instance=user, data=request.data, partial=True, context={'request': request})
+
 	if profile_serializer.is_valid():
 		profile_serializer.save()
+		otp_setup_needed = False
+		email_otp_setup_needed = False
+		TwoFactorMethod = user.two_factor_method
 		user_serializer = UserSerializer(instance=user)
-		jwt_token = create_jwt_pair_for_user(user)
-		return Response({'user': user_serializer.data, 'tokens': jwt_token})
+		
+		if TwoFactorMethod == 'app' and not user.otp_verified:
+			otp_setup_needed = True
+		elif TwoFactorMethod == 'email' and not user.email_otp_verified:
+			email_otp_setup_needed = True
+		else:
+			user.two_factor_method = 'None'
+			user.save()
+
+		return Response({
+			'user': user_serializer.data, 
+			'otp_setup_needed': otp_setup_needed, 
+			'email_otp_setup_needed': email_otp_setup_needed
+		})
+
 	detail = {'detail': 'Invalid data'}
 	if profile_serializer.errors.get('username'):
 		detail = {'detail': 'Username taken.'}
@@ -302,45 +347,30 @@ def updateUserProfile(request):
 @update_last_active
 @permission_classes([IsAuthenticated])
 def addFriend(request, username):
-	# Retrieve user from the database
 	if username == request.user.username or request.user.friends.filter(username=username).exists():
 		return Response(status=status.HTTP_400_BAD_REQUEST)
 	user = get_object_or_404(CustomUser, username=username)
-	# Add the user to the friend list
 	request.user.friends.add(user)
 	user.friends.add(request.user)
 
-	# Return the serialized user data
 	return Response(FriendSerializer(instance=user).data)
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @update_last_active
 @permission_classes([IsAuthenticated])
-def add_matchHistory(request, match_id):
-	# Retrieve user from the database
-	match = get_object_or_404(PongMatch, id=match_id)
-
-	# Add the user to the friend list
-	request.user.match_history.add(match)
-
-	# Return the serialized user data
-	return Response(MatchHistorySerializer(instance=match).data)
-
-@api_view(['GET'])
-@update_last_active
-def get_matchHistory(request):
-	# Retrieve user from the database
-	match = PongMatch.objects.all()
-
-	serializer = MatchHistorySerializer(instance=match, many=True)
-	# Return the serialized user data
-	return Response(serializer.data)
-
+def logOut(request):
+	return Response(status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
 @update_last_active
 @permission_classes([IsAuthenticated])
-def logOut(request):
+def get_user(request, username):
+	user = get_object_or_404(CustomUser, username=username)
+	return Response({'username': user.username, 'id': user.id}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def check_existance(request, username):
+	user = get_object_or_404(CustomUser, username=username)
 	return Response(status=status.HTTP_200_OK)

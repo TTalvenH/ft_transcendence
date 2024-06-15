@@ -5,10 +5,10 @@ Content-Type: application/json
 
 ###
 
-POST http://127.0.0.1:8000/users/create-user
+POST https://127.0.0.1:8000/users/create-user
 Content-Type: application/json
 
-{ "username": "wmulleie", "email": "melledi@gemaild.com", "password": "Testisalis1234#", "confirm_password": "Testisalis1234#", "enable_otp": true}
+{ "username": "testi111", "email": "testi111@gemaild.com", "password": "Testisalis1234#", "confirm_password": "Testisalis1234#", "enable_otp": true}
 
 ###
 
@@ -16,7 +16,7 @@ Content-Type: application/json
 POST http://127.0.0.1:8000/users/login-user
 Content-Type: application/json
 
-{ "username": "asd", "password": "Testisalis123#"}
+{ "username": "mulli", "password": "Testisalis123#"}
 
 ###
 
@@ -111,4 +111,47 @@ Uusisalis123#
 POST http://127.0.0.1:8000/users/token/refresh_token
 Content-Type: application/json
 
-{ "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcxNjYzNjQ5NSwiaWF0IjoxNzE2NTUwMDk1LCJqdGkiOiI2ZmY2N2NlZDViZWE0NDBjYmVjNDVmYTI0N2ZhNmUxNiIsInVzZXJfaWQiOjQ0fQ.Lpw_-CMyfPt-wFh7XTwdgKlCvClJL8Ae1pBjADE5A_M"}
+{ "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTcxNzQwNzIwNCwiaWF0IjoxNzE2OTc1MjA0LCJqdGkiOiI0Mzc3MjEzOWI3MmU0MDQzYWRiMmYyNzg0NDExNWMyMCIsInVzZXJfaWQiOjQ0fQ.Wgkz6ELoRp6LzCd5jfhsQuJHjd5oDYWImWRI67KZw2s"}
+
+###
+
+POST http://127.0.0.1:8000/pong/create-match
+Content-Type: application/json
+
+{
+    "game": "Pong",
+    "tournament_match": false,
+    "player1": 44,
+    "player1Hp": 2,
+    "player2": null,
+    "player2Hp": 0,
+    "timePlayed": "12.18s",
+    "dateTime": "2024-06-07T09:05:46.139Z"
+}
+
+###
+
+POST http://127.0.0.1:8000/pong/create-tournament
+Content-Type: application/json
+
+{
+	"game": "Pong",
+	"match_one": 1,
+	"match_two": 2,
+	"match_final": 3
+}
+
+###
+
+GET http://127.0.0.1:8000/pong/tournament_match.html
+Content-Type: application/json
+
+{ "haloo": "Haloo"}
+
+
+###
+
+GET http://127.0.0.1:8000/pong/get_tournament_info/1/
+Content-Type: application/json
+
+{ "haloo": "Haloo"}
