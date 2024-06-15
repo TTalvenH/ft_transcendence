@@ -14,9 +14,8 @@ router.set('/profile', profileHandler);
 router.set('/tournament', tournamentInfoHandler);
 
 window.route = (event) => {
-    event.preventDefault();
+	event.preventDefault();
 	const newPath = new URL(event.currentTarget.href).pathname;
-	console.log('haloooo');
 	if (router.currentPath === newPath && router.currenSearchParams === event.currentTarget.search) {
 		return ;
 	}
