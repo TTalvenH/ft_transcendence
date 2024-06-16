@@ -327,14 +327,10 @@ def updateUserProfile(request):
 		TwoFactorMethod = user.two_factor_method
 		user_serializer = UserSerializer(instance=user)
 		
-		print(TwoFactorMethod)
 		if TwoFactorMethod == 'app' and not user.otp_verified:
 			otp_setup_needed = True
 		elif TwoFactorMethod == 'email' and not user.email_otp_verified:
 			email_otp_setup_needed = True
-		else:
-			user.two_factor_method = 'None'
-			user.save()
 
 		return Response({
 			'user': user_serializer.data, 
