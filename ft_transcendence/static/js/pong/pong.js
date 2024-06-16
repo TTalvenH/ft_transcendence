@@ -170,7 +170,6 @@ export class Pong
 		const user1Name = this.entities['User1Name']
 		const user2Name = this.entities['User2Name']
 		
-		console.log('startgamedata game = ' + this.gameData.game);
 		user1Name.setText(data.player1.username);
 		user2Name.setText(data.player2.username);
 		user1Name.text = data.player1.username;
@@ -293,11 +292,9 @@ export class Pong
 		let winner = {};
 
 		if (player1.hitPoints <= 0) {
-			console.log("Player2 WINS!");
 			winner = userName2.text;
 			this.winnerText = "Winner is " + userName2.text + " !";
 		} else if (player2.hitPoints <= 0) {
-			console.log("Player1 WINS!");
 			winner = userName1.text;
 			this.winnerText = "Winner is " + userName1.text + " !";
 		} else {
@@ -315,7 +312,6 @@ export class Pong
 			timePlayed: this.matchTime.getElapsedTime().toFixed(2) + "s",
 			dateTime: this.matchDate,
 		};
-		console.log('game = ' + gameOverData.game)
 		goal1.material.emissiveIntensity = 1;
 		goal2.material.emissiveIntensity = 1;
 		this.winnerLoop();

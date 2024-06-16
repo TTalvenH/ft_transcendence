@@ -1,4 +1,4 @@
-import { showToast, circle_check, circle_xmark } from "./utils.js"
+import { createFriendRow, showToast, circle_check, circle_xmark, cancelButtonClick } from "./utils.js"
 import { router } from "./router.js"
 import { currentUser } from "./user.js";
 
@@ -41,31 +41,31 @@ async function editProfileHandler() {
 			}
 		});
 		const updateProfileForm = document.getElementById('updateProfileForm');
-		const flexSwitch2FA = document.getElementById('flexSwitch2FA');
-		const flexSwitchEmailOtp = document.getElementById('flexSwitchEmailOtp');
-		const twoFactorMethodInput = document.getElementById('2FA');
-	
+		// const flexSwitch2FA = document.getElementById('flexSwitch2FA');
+		// const flexSwitchEmailOtp = document.getElementById('flexSwitchEmailOtp');
+		// const twoFactorMethodInput = document.getElementById('2FA');
+		const twoFactorSelect = document.getElementById('two_factor_method');
 		// Function to handle checkbox changes
-		function updateTwoFactorMethod() {
-			let method = '';
-			if (flexSwitch2FA.checked) {
-				method = 'app';
-			} else if (flexSwitchEmailOtp.checked) {
-				method = 'email';
-			}
-			twoFactorMethodInput.value = method;
-		}
+		// function updateTwoFactorMethod() {
+		// 	let method = '';
+		// 	if (flexSwitch2FA.checked) {
+		// 		method = 'app';
+		// 	} else if (flexSwitchEmailOtp.checked) {
+		// 		method = 'email';
+		// 	}
+		// 	twoFactorMethodInput.value = method;
+		// }
 		
 		// Attach event listeners to the checkboxes
-		flexSwitch2FA.addEventListener('change', updateTwoFactorMethod);
-		flexSwitchEmailOtp.addEventListener('change', updateTwoFactorMethod);
+		// flexSwitch2FA.addEventListener('change', updateTwoFactorMethod);
+		// flexSwitchEmailOtp.addEventListener('change', updateTwoFactorMethod);
 		
 		updateProfileForm.addEventListener('submit', async (event) => {
 			event.preventDefault();
-			if (flexSwitch2FA.checked && flexSwitchEmailOtp.checked) {
-				showToast(circle_xmark + 'Choose only one method', true);
-				return;
-			}
+			// if (flexSwitch2FA.checked && flexSwitchEmailOtp.checked) {
+			// 	showToast(circle_xmark + 'Choose only one method', true);
+			// 	return;
+			// }
 			try {
 				const userData = JSON.parse(localStorage.getItem('currentUser'));
 				const formData = new FormData(updateProfileForm);
@@ -103,7 +103,6 @@ async function editProfileHandler() {
 
 						if (otpResponse.ok) {
 							const otpResult = await otpResponse.json();
-							console.log(otpResult);
 							await handleOtpVerification(otpResult);
 						} else {
 							const otpError = await otpResponse.json();
@@ -124,7 +123,6 @@ async function editProfileHandler() {
 					}
 				}
 			} catch (error) {
-				console.error('Error during profile update:', error);
 				showToast(circle_xmark + 'Something went wrong', true);
 			}
 		});
@@ -147,33 +145,25 @@ async function editProfileHandler() {
 			}
 		});
 	} catch (error) {
-		console.error('Error during profile HTML fetch:', error);
 		showToast(circle_xmark + 'Something went wrong', true);
 	}
 }
 
 async function handleOtpVerification(data) {
-    const userContainer = document.getElementById('userContainer');
-    userContainer.innerHTML = '';
-	console.log('hi mom');
-    if (data.qr_html)
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = '';
+	if (data.qr_html)
 		userContainer.insertAdjacentHTML('beforeend', data.qr_html);
 	else {
 		if (!window.otpFormHTML) {
 			window.otpFormHTML = await fetchHTML("/users/qr_prompt.html");
 		}
 		userContainer.insertAdjacentHTML('beforeend', window.otpFormHTML);
-		console.log('Inserted OTP form HTML');
 	}
 
 	const otpForm = document.getElementById('otpForm');
-	if (otpForm) {
-		console.log('OTP form found');
-		console.log(data.username);
+	if (otpForm)
 		otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmitFromProfile(event, data.username));
-	} else {
-		console.error('OTP form not found');
-	}
 }
 
 async function handleOtpVerificationSubmitFromProfile(event, username) {
@@ -199,7 +189,6 @@ async function handleOtpVerificationSubmitFromProfile(event, username) {
 			showToast(circle_xmark + 'Verification failed', true);
 		}
 	} catch (error) {
-		console.log(error);
 		showToast(circle_xmark + 'Something went wrong', true);
 	}
 }
@@ -259,7 +248,6 @@ async function profileHandler() {
 				});
 			if (response.ok) {
 				const data = await response.json();
-				console.log(data);
 				createFriendRow(data);
 				showToast(circle_check + 'Friend added successfully', false);
 			} else {
@@ -274,9 +262,7 @@ async function profileHandler() {
 
 	const switchTable = document.getElementById('switchButton');
 	switchTable.addEventListener('click', () => {
-		console.log('click');
 		const match_history_table = document.getElementById('match_history');
-		console.log(match_history_table.style.display);
 		const tournament_history_table = document.getElementById('tournament_history');
 		const tableHeader = document.getElementById('tableHeader');
 		if (match_history_table.style.display === 'none') {
@@ -292,18 +278,18 @@ async function profileHandler() {
 }
 
 async function loginHandler() {
-    if (!window.loginFormHTML) {
-        window.loginFormHTML = await fetchHTML("/users/login.html");
-    }
-    const userContainer = document.getElementById('userContainer');
-    userContainer.innerHTML = '';
-    userContainer.insertAdjacentHTML('beforeend', window.loginFormHTML);
+	if (!window.loginFormHTML) {
+		window.loginFormHTML = await fetchHTML("/users/login.html");
+	}
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = '';
+	userContainer.insertAdjacentHTML('beforeend', window.loginFormHTML);
 
-    // Add event listener to the login form
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', handleLoginSubmit);
-    }
+	// Add event listener to the login form
+	const loginForm = document.getElementById('loginForm');
+	if (loginForm) {
+		loginForm.addEventListener('submit', handleLoginSubmit);
+	}
 }
 
 async function fetchHTML(url) {
@@ -335,14 +321,11 @@ async function handleLoginSubmit(event) {
 		if (response.ok) {
 			const loginData = await response.json();
 			currentUsername = formData.get('username');
-			console.log('stuff is:', loginData.two_factor_method, loginData.otp_verified, loginData.email_otp_verified);
 			
 			if ((loginData.two_factor_method === 'app' && loginData.otp_verified) || (loginData.two_factor_method === 'email' && loginData.email_otp_verified)) {
-				console.log("Condition 1 met");
 				loginForm.remove();
 				await loadOtpForm();
 			} else {
-				console.log("Else block executed");
 				showToast(circle_check + 'Login success', false);
 				currentUser.setUser(loginData);
 				history.pushState({}, "", "/");
@@ -357,110 +340,97 @@ async function handleLoginSubmit(event) {
 		}
 		}
 	catch (error) {
-		console.log(error);
 		showToast(circle_xmark + 'Something went wrong', true);
 	}
 }
 
+
+
 async function loadOtpForm() {
-    if (!window.otpFormHTML) {
-        window.otpFormHTML = await fetchHTML("/users/qr_prompt.html");
-    }
-    
-    const userContainer = document.getElementById('userContainer');
-    userContainer.innerHTML = ''; // Clear the Usercontainer
-    userContainer.insertAdjacentHTML('beforeend', window.otpFormHTML);
-	console.log('hello');
-    const otpForm = document.getElementById('otpForm');
-    if (otpForm) {
-		console.log('otpForm: ', otpForm);
+	if (!window.otpFormHTML) {
+		window.otpFormHTML = await fetchHTML("/users/qr_prompt.html");
+	}
+
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = ''; // Clear the Usercontainer
+	userContainer.insertAdjacentHTML('beforeend', window.otpFormHTML);
+	const otpForm = document.getElementById('otpForm');
+	if (otpForm) {
 		otpForm.addEventListener('submit', handleOtpSubmit);
-    }
+	}
 }
 
 async function handleOtpSubmit(event) {
 	event.preventDefault();
-	
-    const otpForm = event.target;
-    let otpFormData = new FormData(otpForm);
 
-    if (currentUsername) {
+	const otpForm = event.target;
+	let otpFormData = new FormData(otpForm);
+
+	if (currentUsername) {
 		otpFormData.append('username', currentUsername);
 	}
 
-    try {
-        let otpResponse = await fetch('/users/validate-otp', {
-            method: 'POST',
-            body: otpFormData
-        });
-		// console.log('otpResponse: ');
-		// console.log(otpResponse.data);
-        if (otpResponse.ok) {
+	try {
+		let otpResponse = await fetch('/users/validate-otp', {
+			method: 'POST',
+			body: otpFormData
+		});
+		if (otpResponse.ok) {
 			const otpData = await otpResponse.json();
 			showToast(circle_check + 'Login success', false);
 			currentUser.setUser(otpData);
 			history.pushState({}, "", "/");
 			router.handleLocation()
-        } else {
+		} else {
 			showToast(circle_xmark + 'Verification failed', true);
-        }
-    } catch (error) {
+		}
+	} catch (error) {
 		showToast(circle_xmark + 'Something went wrong', true);
-    }
+	}
 }
 
 async function registerHandler() {
-    const userContainer = document.getElementById('userContainer');
-    userContainer.innerHTML = "";
+	const userContainer = document.getElementById('userContainer');
+	userContainer.innerHTML = "";
 
-    if (!window.registerFormHTML) {
-        window.registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
-    }
+	if (!window.registerFormHTML) {
+		window.registerFormHTML = await fetch("/users/register.html").then((data) => data.text());
+	}
 
-    userContainer.insertAdjacentHTML('beforeend', window.registerFormHTML);
+	userContainer.insertAdjacentHTML('beforeend', window.registerFormHTML);
 
-    const registerForm = document.getElementById('registerForm');
-    if (registerForm) {
-        registerForm.addEventListener('submit', handleRegisterSubmit);
-    } else {
-        console.error('Registration form not found');
-    }
+	const registerForm = document.getElementById('registerForm');
+	if (registerForm)
+		registerForm.addEventListener('submit', handleRegisterSubmit);
 }
 
 async function handleRegisterSubmit(event) {
-    event.preventDefault();
-    
-    const registerForm = event.target;
-    const formData = new FormData(registerForm);
-	// Log the FormData to ensure it's correct
-	// for (var pair of formData.entries()) {
-	// 	console.log(pair[0]+ ': ' + pair[1]);
-	// }
-    try {
-        const response = await fetch('/users/create-user', {
-            method: 'POST',
-            body: formData
-        });
-        if (response.ok) {
-            const result = await response.json();
-			// console.log(result);
-            await handleRegistrationResponse(result);
-        } else {
-            const errorResult = await response.json();
-            showToast(circle_xmark + `${errorResult.detail || 'Something went wrong'}`, true);
-        }
-    } catch (error) {
-        showToast('Something went wrong', true);
-    }
+	event.preventDefault();
+
+	const registerForm = event.target;
+	const formData = new FormData(registerForm);
+	try {
+		const response = await fetch('/users/create-user', {
+			method: 'POST',
+			body: formData
+		});
+		if (response.ok) {
+			const result = await response.json();
+			await handleRegistrationResponse(result);
+		} else {
+			const errorResult = await response.json();
+			showToast(circle_xmark + `${errorResult.detail || 'Something went wrong'}`, true);
+		}
+	} catch (error) {
+		showToast('Something went wrong', true);
+	}
 }
 
 async function handleRegistrationResponse(result) {
-    const userContainer = document.getElementById('userContainer');
-    if (!userContainer) {
-        console.error('User container not found');
-        return;
-    }
-
+	const userContainer = document.getElementById('userContainer');
+	if (!userContainer) {
+		return;
+	}
 	if (result.otp && (result.otp.email_otp || result.qr_html)) {
 		if (result.otp.email_otp) {
 			try {
@@ -469,22 +439,16 @@ async function handleRegistrationResponse(result) {
 				}
 				userContainer.innerHTML = '';
 				userContainer.insertAdjacentHTML('beforeend', window.verifyHTML);
-				console.log('Inserted verify HTML');
 			} catch (error) {
-				console.error('Error fetching verify HTML:', error);
+				showToast(circle_xmark + 'Something went wrong', true);
 			}
 		} else if (result.qr_html) {
 			userContainer.innerHTML = '';
 			userContainer.insertAdjacentHTML('beforeend', result.qr_html);
-			console.log('Inserted QR HTML');
 		}
 		const otpForm = document.getElementById('otpForm');
-		if (otpForm) {
+		if (otpForm)
 			otpForm.addEventListener('submit', (event) => handleOtpVerificationSubmit(event, result.user.username));
-			console.log('OTP form found and event listener added');
-		} else {
-			console.error('OTP form not found');
-		}
 	}
 	else {
 		showToast(circle_check + 'Registration successful', false);
@@ -494,34 +458,32 @@ async function handleRegistrationResponse(result) {
 }
 
 async function handleOtpVerificationSubmit(event, username) {
-    event.preventDefault();
-    
-    const otpForm = event.target;
-    const otpFormData = new FormData(otpForm);
-    otpFormData.append('username', username);
-	// console.log('hi there2');
-    try {
-        const verifyResponse = await fetch('/users/verify-otp', {
-            method: 'POST',
-            body: otpFormData
-        });
-        
-        if (verifyResponse.ok) {
-            const userContainer = document.getElementById('userContainer');
-            userContainer.innerHTML = '';
-            showToast('Registration successful', false);
-            history.pushState({}, "", "/");
+	event.preventDefault();
+
+	const otpForm = event.target;
+	const otpFormData = new FormData(otpForm);
+	otpFormData.append('username', username);
+	try {
+		const verifyResponse = await fetch('/users/verify-otp', {
+			method: 'POST',
+			body: otpFormData
+		});
+		
+		if (verifyResponse.ok) {
+			const userContainer = document.getElementById('userContainer');
+			userContainer.innerHTML = '';
+			showToast('Registration successful', false);
+			history.pushState({}, "", "/");
 			router.handleLocation();
-        } else {
-            showToast(circle_xmark + 'Verification failed', true);
-        }
-    } catch (error) {
-        showToast('Something went wrong', true);
-    }
+		} else {
+			showToast(circle_xmark + 'Verification failed', true);
+		}
+	} catch (error) {
+		showToast('Something went wrong', true);
+	}
 }
 
 async function tournamentInfoHandler() {
-	console.log('tournamentInfoHandler');
 	const userData = currentUser.getUser();
 	const urlParams = new URLSearchParams(window.location.search);
 	let id = urlParams.get('id');
@@ -545,11 +507,7 @@ async function tournamentInfoHandler() {
 	userContainer.innerHTML = "";
 	userContainer.insertAdjacentHTML('beforeend', data);
 
-	const cancelButton = document.getElementById('cancel');
-	cancelButton.addEventListener('click', () => {
-		history.pushState({}, "", "/profile");
-		router.handleLocation();
-	});
+	document.getElementById('cancel').addEventListener('click', () => cancelButtonClick("/profile"));
 }
 
 async function homeHandler() {

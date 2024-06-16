@@ -12,8 +12,10 @@ class UserSerializer(serializers.ModelSerializer):
 		model = CustomUser
 		fields = ['id', 'username', 'last_active']
 
+
 from django.contrib.auth.password_validation import password_validators_help_texts, validate_password
 from rest_framework.validators import UniqueValidator
+
 class RegisterUserSerializer(serializers.ModelSerializer):
 	"""
 	Serializer for registering a new user.
@@ -43,7 +45,6 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
 		It specifies the model to use, which is the CustomUser model, and the fields to include in the serializer.
 		"""
-
 		model = CustomUser
 		fields = ['username', 'email', 'password', 'confirm_password', 'two_factor_method']
 
@@ -53,7 +54,6 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
 		Raise a serializers.ValidationError if not.
 		"""
-
 		if attrs['password'] != attrs['confirm_password']:
 			raise serializers.ValidationError(
 				{"password": "Password fields didn't match."}
@@ -77,7 +77,6 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
 		Return the created user.
 		"""
-
 		user = CustomUser.objects.create(
 			username=validated_data['username'],
 			email=validated_data['email'],
@@ -85,7 +84,6 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 		)
 
 		user.set_password(validated_data['password'])
-
 		user.save()
 
 		return user
@@ -93,15 +91,18 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 
 class FriendSerializer(serializers.ModelSerializer):
 	is_active = serializers.SerializerMethodField()
+
 	class Meta:
 		model = CustomUser
 		fields = ['id', 'username', 'is_active']
+
 	def get_is_active(self, obj):
 		# Check if the user has been active in the last 5 minutes
 		last_active = obj.last_active
 		now = timezone.now()
 		five_minutes_ago = now - timezone.timedelta(minutes=1)
 		return last_active >= five_minutes_ago
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
 	friends = FriendSerializer(many=True)
@@ -149,8 +150,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
 		new_password = validated_data.pop('new_password', None)
 		validated_data.pop('confirm_password', None)
 		validated_data.pop('old_password', None)
-		print(validated_data)
-		print(new_password)
 
 		instance = super().update(instance, validated_data)
 
@@ -161,7 +160,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 			instance.otp_verified = False
 			instance.email_otp_verified = False
 			instance.email_otp_code = None
-		
+
 		instance.save()
 
 		return instance

@@ -23,8 +23,6 @@ class Router {
 	}
 
 	async handleLocation() {
-		console.log('test')
-		console.log(currentUser);
 		handleSidePanel();
 		this.currentPath = window.location.pathname;
 		this.currenSearchParams = window.location.search;
@@ -39,7 +37,7 @@ class Router {
 		} else {
 			history.pushState({}, "", "/");
 		}
-    }
+	}
 }
 
 export const router = new Router();

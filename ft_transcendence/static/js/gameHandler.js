@@ -2,6 +2,7 @@ import { pong } from "./main.js";
 import { cancelButtonClick, circle_xmark, showToast } from "./utils.js"
 import { currentUser } from "./user.js"
 import { router } from "./router.js"
+import { GameStates } from "./pong/pong.js";
 
 async function gameHandler() {
 	const userData = currentUser.getUser();
@@ -33,8 +34,6 @@ async function gameHandler() {
 }
 
 function guestButtonClick() {
-	console.log('mulli');
-
 	const startGameButton = document.getElementById('startGame');
 	const buttons = document.getElementById('buttons');
 	const guestHeader = document.getElementById('guestHeader');
@@ -45,8 +44,6 @@ function guestButtonClick() {
 }
 
 function userButtonClick() {
-	console.log('mulli1');
-
 	const startGameButton = document.getElementById('startGame');
 	const buttons = document.getElementById('buttons');
 	buttons.remove();
@@ -57,7 +54,6 @@ function userButtonClick() {
 }
 
 function one_v_oneStartButtonClick(mode) {
-	console.log(mode);
 	const userData = currentUser.getUser();
 	currentUser.refreshToken();
 	if (mode === "guest") {
@@ -85,7 +81,6 @@ function one_v_oneStartButtonClick(mode) {
 			showToast(circle_xmark + 'Please enter a username', true);
 			return;
 		}
-		console.log(username);
 		fetch(`/users/get-user/${username}/`, {
 			method: "POST",
 			headers: {
@@ -99,7 +94,6 @@ function one_v_oneStartButtonClick(mode) {
 			return response.json();
 		})
 		.then(player2Data => {
-			console.log(player2Data);
 			const ui = document.getElementById('ui');
 			userContainer.innerHTML = "";
 			ui.style.display = 'none';
@@ -155,7 +149,6 @@ function one_v_oneHandler() {
 		document.getElementById('startGame').addEventListener('click', () => one_v_oneStartButtonClick(mode));
 	})
 	.catch(error => {
-		console.log(error);
 		showToast(circle_xmark + 'Something went wrong', true);
 	});
 }
@@ -182,15 +175,9 @@ function controlsHandler() {
 	})
 	.then(html => {
 		userContainer.insertAdjacentHTML('beforeend', html);
-
-		const cancelButton = document.getElementById('cancel');
-		cancelButton.addEventListener('click', () => {
-			history.pushState({}, "", "/match");
-			router.handleLocation();
-		});
+		document.getElementById('cancel').addEventListener('click', () => cancelButtonClick("/match"));
 	})
 	.catch(error => {
-		console.error(error);
 		showToast(circle_xmark + 'Something went wrong', true);
 	});
 }
@@ -223,11 +210,7 @@ async function tournamentHandler() {
 		const html = await response.text();
 		userContainer.insertAdjacentHTML('beforeend', html);
 
-		const cancelButton = document.getElementById('cancel');
-		cancelButton.addEventListener('click', () => {
-			history.pushState({}, "", "/match");
-			router.handleLocation();
-		})
+		document.getElementById('cancel').addEventListener('click', () => cancelButtonClick("/match"));
 
 		let players = [{username: userData.username, id: userData.id}];
 		const addPlayerButtons = document.querySelectorAll('.addUserButton');
@@ -276,7 +259,6 @@ async function tournamentHandler() {
 		
 		const startTournament = document.getElementById('startTournament');
 		startTournament.addEventListener('click', async () => {
-			console.log('gamestate is = ' + pong.gameGlobals.gameState);
 			if (players.length < 4) {
 				showToast(circle_xmark + 'Please add at least 3 players', true);
 				return ;
@@ -285,9 +267,7 @@ async function tournamentHandler() {
 				showToast(circle_xmark + 'Game loading', true);
 				return ;
 			}
-			console.log(players);
 			shuffleArray(players);
-			console.log(players);
 			tournamentData = [
 				{
 					tournament_match: true,
@@ -359,7 +339,6 @@ let matchIds = [];
 async function handleTournamentData(data, gameData) {
 	const userData = JSON.parse(localStorage.getItem('currentUser'));
 	matchIds.push(data.id);
-	console.log(matchIds);
 	const winner = gameData.player1Hp > gameData.player2Hp ? {username: gameData.player1Name, id: gameData.player1} : {username: gameData.player2Name, id: gameData.player2};
 	if (!tournamentData[2].player1) {
 		tournamentData[2].player1 = winner;
@@ -395,7 +374,6 @@ async function handleTournamentData(data, gameData) {
 
 async function handleMatchEnd(gameData) {
 	const userData = JSON.parse(localStorage.getItem('currentUser'));
-	console.log("handleMatchEnd called");
 	if (gameData) {
 		const response = await fetch('/pong/create-match', {
 			method: 'POST',

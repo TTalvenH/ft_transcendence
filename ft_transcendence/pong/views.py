@@ -1,44 +1,12 @@
 import json
 from django.shortcuts import render
 from rest_framework.response import Response
-from rest_framework import generics, status
+from rest_framework import status
 from rest_framework.decorators import api_view, authentication_classes
-from django.contrib.auth.models import User
-from .models import Match, Tournament
-from .serializers import MatchSerializer, MatchCreateSerializer, TournamentSerializer, TournamentCreateSerializer
+from .models import Tournament
+from .serializers import MatchCreateSerializer, TournamentSerializer, TournamentCreateSerializer
 from users.decorators import update_last_active
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
-
-# Create your views here.
-@api_view(['GET'])
-def startMatch(request):
-	#get data from database
-	# users = User.objects.filter(is_authenticated=True)
-	# data = []
-	# for user in users:
-	# 	data.append(user.username)
-	# return Response(data)
-	return Response(
-		{'users': ['Tuomo', 'Nikki']}
-	)
-
-@api_view(['POST'])
-def endMatch(request):
-	print(request.body)
-	json_data = json.loads(request.body)
-	match = models.PongMatch.objects.create(
-		player1Name=json_data['player1']['name'],
-		player1Hp=json_data['player1']['hitpoints'],
-		player2Name=json_data['player2']['name'],
-		player2Hp=json_data['player2']['hitpoints'],
-		winner=json_data['winner'],
-		timePlayed=json_data['matchTimeLength'],
-		dateTime=json_data['dateTime']
-	)
-	print(match)
-	return Response(status=200)
-
 
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
@@ -51,8 +19,6 @@ def game_menu_template(request):
 @update_last_active
 def get_tournament_info(request, tournament_id):
 	tournament_serializer = TournamentSerializer(instance=Tournament.objects.get(id=tournament_id), many=False)
-	print(tournament_serializer.data)
-	print(tournament_id)
 	return render(request, 'pong/tournament_info.html', tournament_serializer.data)
 
 @api_view(['GET'])
@@ -86,12 +52,12 @@ def tournament_match_template(request):
 @authentication_classes([JWTAuthentication])
 @update_last_active
 def create_match(request):
-    match_serializer = MatchCreateSerializer(data=request.data, partial=True)
+	match_serializer = MatchCreateSerializer(data=request.data, partial=True)
 
-    if match_serializer.is_valid():
-        match_serializer.save()
-        return Response(match_serializer.data, status=status.HTTP_201_CREATED)
-    return Response(match_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+	if match_serializer.is_valid():
+		match_serializer.save()
+		return Response(match_serializer.data, status=status.HTTP_201_CREATED)
+	return Response(match_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
@@ -101,6 +67,5 @@ def create_tournament(request):
 
 	if tournament_serializer.is_valid():
 		tournament_serializer.save()
-		print('tournament data = {}'.format(tournament_serializer.data))
 		return Response(tournament_serializer.data, status=status.HTTP_201_CREATED)
 	return Response(tournament_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

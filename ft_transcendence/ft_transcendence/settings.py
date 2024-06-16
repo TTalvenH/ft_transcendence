@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,19 +21,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-#u9(30^3ml&b5itimj%x-pa3))&nh8$kn*8p5(#*oih_@&j6j3'
-# SECRET_KEY = os.getenv('SECRET_KEY')
+# SECRET_KEY = 'django-insecure-#u9(30^3ml&b5itimj%x-pa3))&nh8$kn*8p5(#*oih_@&j6j3'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-# DEBUG =  os.getenv('DEBUG')
+# DEBUG = False
+DEBUG =  os.getenv('DEBUG')
 
 ALLOWED_HOSTS = ['*']
 
-# not good for prodution 
-import os
-
-os.environ['SSL_CERT_FILE'] = '/etc/ssl/certs/ca-certificates.crt'
+os.environ['SSL_CERT_FILE'] = '/etc/ssl/certs/ft_transcendence.crt'
 
 # Application definition
 
@@ -51,7 +49,8 @@ INSTALLED_APPS = [
     'django_otp',
     'django_otp.plugins.otp_totp',
     'django_otp.plugins.otp_static',
-	'corsheaders'
+	'corsheaders',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -63,7 +62,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-	# 'users.middleware.userMiddleware'
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -220,4 +218,10 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'customer.service.pong@gmail.com' #put to env
 EMAIL_HOST_PASSWORD = 'fqih dkpd wtxa jgby' #put to env
+
+# for ssl
+
+SECURE_SSL_REDIRECT = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 

@@ -50,18 +50,15 @@
                         autocomplete="one-time-code">
                     <label>Confirm Password</label>
                 </div>
-                <div class="form-check form-switch" style="color: white; margin-bottom: 20px;">
-                    <input class="form-check-input" type="checkbox" id="flexSwitch2FA" {% if user.otp_verified and user.two_factor_method == 'app' %}checked{% endif %}>
-                    <label class="form-check-label" for="flexSwitch2FA">Two-Factor Authentication App</label>
-                </div>
-                <!-- Hidden input for 2FA status -->
-                <input type="hidden" name="two_factor_method" id="2FA" value="{{ user.two_factor_method }}">
-
-                <div class="form-check form-switch" style="color: white; margin-bottom: 20px;">
-                    <input class="form-check-input" type="checkbox" id="flexSwitchEmailOtp" {% if user.email_otp_verified and user.two_factor_method == 'email' %}checked{% endif %}>
-                    <label class="form-check-label" for="flexSwitchEmailOtp">Two-Factor Email Authentication</label>
-                </div>
-
+				<div class="actionRow">
+					<div class="inputBox selectBox">
+						<select name="two_factor_method" id="two_factor_method">
+							<option value="" {% if user.two_factor_method == "" %}selected{% endif %}>Select 2FA Method</option>
+							<option value="app" {% if user.two_factor_method == "app" %}selected{% endif %}>Authenticator App</option>
+							<option value="email" {% if user.two_factor_method == "email" %}selected{% endif %}>Email</option>
+						</select>						
+					</div>
+				</div>
 				<button type="submit" class="saveButton">✓</button>
 				<a href="/profile" onclick="route(event)">
 					<button class="cancelButton">X</button>

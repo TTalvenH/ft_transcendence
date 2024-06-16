@@ -1,5 +1,4 @@
 Django==5.0
-gunicorn==20.0.4
 django-cors-headers
 djangorestframework
 djangorestframework-simplejwt
@@ -8,3 +7,6 @@ pyotp
 django_otp
 qrcode
 psycopg2-binary==2.9.9
+werkzeug
+django-extensions
+pyOpenSSL
