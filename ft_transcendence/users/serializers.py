@@ -80,7 +80,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
 		user = CustomUser.objects.create(
 			username=validated_data['username'],
 			email=validated_data['email'],
-			two_factor_method=validated_data.get('two_factor_method', 'none')
+            two_factor_method=validated_data.get('two_factor_method', 'None')
 		)
 
 		user.set_password(validated_data['password'])
