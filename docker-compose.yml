@@ -4,7 +4,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: ./postgres/postgres-data
+      device: ./postgres-data
       o: bind
   django-data:
     driver: local
@@ -20,14 +20,15 @@ services:
     env_file: ./ft_transcendence/.env
     volumes: 
       - postgres-data:/var/lib/postgresql/data
-  postgres_setup:
-    image: postgres
-    user: root
-    volumes:
-        - postgres-data:/var/lib/postgresql/data
-    entrypoint: [ "bash", "-c", "chmod 755 -R /var/lib/postgresql/data && chmod 755 -R /etc/postgresql && chmod 755 -R /var/lib/postgresql/"] 
-    depends_on:
-        - postgres
+    user: "${UID}:${GID}"
+  # postgres_setup:
+  #   image: postgres
+  #   user: root
+  #   volumes:
+  #       - postgres-data:/var/lib/postgresql/data
+  #   entrypoint: [ "bash", "-c", "chmod 755 -R /var/lib/postgresql/data && chmod 755 -R /etc/postgresql && chmod 755 -R /var/lib/postgresql/"] 
+  #   depends_on:
+  #       - postgres
   django:
     build: ./ft_transcendence/.
     volumes:
