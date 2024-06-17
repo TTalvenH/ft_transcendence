@@ -1,9 +1,10 @@
 
 <div class="box smoothAppear" id="otpBox">
     <form id="otpForm">
+        {% csrf_token %}
         <div class="inputBox">
             <input type="text" name="otp" required placeholder="Enter OTP Code">
         </div>
-        <button class="button" type="submit">Verify</button>
+        <button class="button" type="submit">Verifyy</button>
     </form>
 </div>

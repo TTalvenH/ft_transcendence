@@ -30,8 +30,6 @@ DEBUG =  os.getenv('DEBUG')
 
 ALLOWED_HOSTS = ['*']
 
-# not good for prodution 
-
 os.environ['SSL_CERT_FILE'] = '/etc/ssl/certs/ft_transcendence.crt'
 
 # Application definition
@@ -113,18 +111,6 @@ DATABASES = {
 		'PORT': 5432,
 	}
 }
-
-# DATABASES = {
-# 	'default': {
-# 		'ENGINE': 'django.db.backends.postgresql',
-# 		'NAME': 'postgres',
-# 		'USER': 'postgres',
-# 		'PASSWORD': 'postgres',
-# 		'HOST': 'postgres',
-# 		'PORT': 5432,
-# 	}
-# }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -230,8 +216,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'customer.service.pong@gmail.com' #put to env
-EMAIL_HOST_PASSWORD = 'fqih dkpd wtxa jgby' #put to env
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 
 # for ssl
 
