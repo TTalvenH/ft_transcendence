@@ -118,11 +118,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
 			'email', 'two_factor_method'
 		]
 		read_only_fields = ['id', 'friends', 'last_active']
-		extra_kwargs = {'username': {'required': False}}
+		extra_kwargs = {'username': {'required': True},
+				  		'email': {'required': True}}
 
 	def validate(self, attrs):
 		user = self.context['request'].user
 		email = attrs.get('email', None)
+		if not email:
+			raise serializers.ValidationError({"email": "Email cannot be empty"})
 		if email and CustomUser.objects.filter(email=email).exclude(id=user.id).exists():
 			raise serializers.ValidationError({"email": "This email is already in use by another user."})
 
@@ -157,6 +160,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 			instance.set_password(new_password)
 
 		if not instance.two_factor_method:
+			print('im here boy')
 			instance.otp_verified = False
 			instance.email_otp_verified = False
 			instance.email_otp_code = None
