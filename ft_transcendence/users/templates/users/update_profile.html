@@ -53,9 +53,9 @@
 				<div class="actionRow">
 					<div class="inputBox selectBox">
 						<select name="two_factor_method" id="two_factor_method">
-							<option value="" {% if user.two_factor_method == "" %}selected{% endif %}>Select 2FA Method</option>
-							<option value="app" {% if user.two_factor_method == "app" %}selected{% endif %}>Authenticator App</option>
-							<option value="email" {% if user.two_factor_method == "email" %}selected{% endif %}>Email</option>
+							<option value="" {% if two_factor_method == "" %}selected{% endif %}>Select 2FA Method</option>
+							<option value="app" {% if two_factor_method == "app" and opt_verified %}selected{% endif %}>Authenticator App</option>
+							<option value="email" {% if two_factor_method == "email" and email_verified %}selected{% endif %}>Email</option>
 						</select>						
 					</div>
 				</div>

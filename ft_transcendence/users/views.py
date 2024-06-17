@@ -47,7 +47,9 @@ def update_profile_template(request):
 		'profile_image': user.image.url if user.image else 'static/images/plankton.jpg',
 		'email': user.email,
 		'display_name': user.display_name,
-		'two_factor_method': user.two_factor_method
+		'two_factor_method': user.two_factor_method,
+		'email_verified': user.email_otp_verified,
+		'opt_verified': user.otp_verified
 	}
 	return render(request, 'users/update_profile.html', context)
 
@@ -323,10 +325,6 @@ def updateUserProfile(request):
 			otp_setup_needed = True
 		elif TwoFactorMethod == 'email' and not user.email_otp_verified:
 			email_otp_setup_needed = True
-		else:
-			user.two_factor_method = 'None'
-			user.save()
-
 		return Response({
 			'user': user_serializer.data, 
 			'otp_setup_needed': otp_setup_needed, 

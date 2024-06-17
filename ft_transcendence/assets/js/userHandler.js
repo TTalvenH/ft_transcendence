@@ -335,7 +335,7 @@ async function handleLoginSubmit(event) {
 		else {
 			let msg = 'Login error';
 			if (response.status === 404)
-				msg = 'User not found'
+				msg = 'User not found / Password not correct'
 			showToast(circle_xmark + msg, true);
 		}
 		}
@@ -511,6 +511,9 @@ async function tournamentInfoHandler() {
 }
 
 async function homeHandler() {
+	const sidePanel = document.getElementById('sidePanelDiv');
+	if (sidePanel)
+		sidePanel.style.display = 'block';
 	const userContainer = document.getElementById('userContainer');
 	userContainer.innerHTML = "";
 }

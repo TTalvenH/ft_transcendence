@@ -91,8 +91,8 @@ export class Pong
 		this.knockoffEntities['Floor'] = new PlaneEntity(new THREE.Vector3(0, 0, -0.25), COLORS.INDIGO, 0.01, 10, 6);
 
 		// Entities
-		this.entities['User1Name'] = new TextEntity("Guest1", new THREE.Vector3(6, 7.7, 0), this.font, COLORS.INDIGO);
-		this.entities['User2Name'] = new TextEntity("Guest2", new THREE.Vector3(-6, 7.7, 0), this.font, COLORS.INDIGO);
+		this.entities['User1Name'] = new TextEntity("Player1", new THREE.Vector3(6, 7.7, 0), this.font, COLORS.INDIGO);
+		this.entities['User2Name'] = new TextEntity("Player2", new THREE.Vector3(-6, 7.7, 0), this.font, COLORS.INDIGO);
 		this.entities['Countdown'] = new TextEntity("", new THREE.Vector3(0, 0, 3), this.font, COLORS.INDIGO, this.camera);
 		this.entities['WinnerName'] = new TextEntity("", new THREE.Vector3(0, 0, 3), this.font, COLORS.INDIGO, this.camera);
 		this.entities['Player1Health'] = new HealthBarEntity(new THREE.Vector3(5, 5.5, 0), this.pongEntities["Player1"]);
@@ -243,6 +243,10 @@ export class Pong
 		knockoffPlayer2.mesh2.material.opacity = 1;
 		knockoffPlayer2.mesh3.material.opacity = 1;
 		knockoffPlayer2.pointLight.intensity = 1;
+		knockoffPlayer1.isFalling = false;
+		knockoffPlayer2.isFalling = false;
+		this.entities['User1Name'].setText("Player1");
+		this.entities['User2Name'].setText("Player2");
 		
 		this.entities['PowerUp1'].object.scale.set(0, 0, 0);
 		this.entities['PowerUp1'].pointLight.intensity = 0;
