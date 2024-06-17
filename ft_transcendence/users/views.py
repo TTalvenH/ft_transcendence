@@ -109,7 +109,8 @@ def createUser(request):
 
 		elif two_factor_method == 'email':
 			otp_code = generate_email_otp()
-			user.email_otp_code = otp_code
+			hashed_otp = hash_otp_code(otp_code)
+			user.email_otp_code = hashed_otp
 			user.save()
 			send_mail(
 				'Your OTP Code',
@@ -174,7 +175,8 @@ def loginUser(request):
   
 	if user.two_factor_method == 'email' and user.email_otp_verified:
 		otp_code = generate_email_otp()
-		user.email_otp_code = otp_code
+		hashed_otp = hash_otp_code(otp_code)
+		user.email_otp_code = hashed_otp
 		user.save()
 		send_mail(
 			'Your OTP Code',
@@ -208,8 +210,9 @@ def validateOtpAndLogin(request):
 		if not totp.verify(otp):
 			return Response({'detail': 'Invalid OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
 
+	hashed_otp = hash_otp_code(otp)
 	if user.two_factor_method == 'email':
-		if otp != user.email_otp_code:
+		if hashed_otp != user.email_otp_code:
 			return Response({'detail': 'Invalid Email OTP.'}, status=status.HTTP_401_UNAUTHORIZED)
 
 	user.update_last_active()
@@ -238,7 +241,8 @@ def verifyOTP(request):
 		except TOTPDevice.DoesNotExist:
 			return Response({'detail': 'OTP device not found.'}, status=status.HTTP_404_NOT_FOUND)
 
-	if user.two_factor_method == 'email' and otp == user.email_otp_code:
+	hashed_otp = hash_otp_code(otp)
+	if user.two_factor_method == 'email' and hashed_otp == user.email_otp_code:
 		user.email_otp_verified = True
 		user.save()
 		return Response({'detail': 'Email OTP verified successfully.'}, status=status.HTTP_200_OK)
@@ -253,6 +257,12 @@ def getUserPorfile(request, username):
     user = get_object_or_404(CustomUser, username=username)
     serializer = UserProfileSerializer(instance=user)
     return Response(serializer.data)
+
+import hashlib
+
+def hash_otp_code(otp_code):
+    hashed_otp = hashlib.sha256(otp_code.encode()).hexdigest()
+    return hashed_otp
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
@@ -291,7 +301,8 @@ def otpSetupView(request):
 		user.otp_verified = False
 		user.two_factor_method = 'email'
 		otp_code = generate_email_otp()
-		user.email_otp_code = otp_code
+		hashed_otp_code = hash_otp_code(otp_code)
+		user.email_otp_code = hashed_otp_code
 		user.save()
 		# print('hello')
 		send_mail(
