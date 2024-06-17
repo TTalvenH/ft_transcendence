@@ -1,18 +1,4 @@
-
-volumes:
-  postgres-data:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./postgres-data
-      o: bind
-  django-data:
-    driver: local
-    driver_opts:
-      type: none
-      device: ./ft_transcendence
-      o: bind
-  
+version: '3.8'
 
 services:
   postgres:
@@ -20,12 +6,16 @@ services:
     env_file: ./ft_transcendence/.env
     volumes: 
       - postgres-data:/var/lib/postgresql/data
+
   django:
-    build: ./ft_transcendence/.
+    build: ./ft_transcendence/ 
     volumes:
-      - django-data:/ft_transcendence
+      - ./ft_transcendence:/ft_transcendence
     ports:
       - "8000:8000"
     depends_on:
       - postgres
     env_file: ./ft_transcendence/.env
+
+volumes:
+  postgres-data:
