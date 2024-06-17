@@ -41,31 +41,8 @@ async function editProfileHandler() {
 			}
 		});
 		const updateProfileForm = document.getElementById('updateProfileForm');
-		// const flexSwitch2FA = document.getElementById('flexSwitch2FA');
-		// const flexSwitchEmailOtp = document.getElementById('flexSwitchEmailOtp');
-		// const twoFactorMethodInput = document.getElementById('2FA');
-		const twoFactorSelect = document.getElementById('two_factor_method');
-		// Function to handle checkbox changes
-		// function updateTwoFactorMethod() {
-		// 	let method = '';
-		// 	if (flexSwitch2FA.checked) {
-		// 		method = 'app';
-		// 	} else if (flexSwitchEmailOtp.checked) {
-		// 		method = 'email';
-		// 	}
-		// 	twoFactorMethodInput.value = method;
-		// }
-		
-		// Attach event listeners to the checkboxes
-		// flexSwitch2FA.addEventListener('change', updateTwoFactorMethod);
-		// flexSwitchEmailOtp.addEventListener('change', updateTwoFactorMethod);
-		
 		updateProfileForm.addEventListener('submit', async (event) => {
 			event.preventDefault();
-			// if (flexSwitch2FA.checked && flexSwitchEmailOtp.checked) {
-			// 	showToast(circle_xmark + 'Choose only one method', true);
-			// 	return;
-			// }
 			try {
 				const userData = JSON.parse(localStorage.getItem('currentUser'));
 				const formData = new FormData(updateProfileForm);
@@ -126,7 +103,6 @@ async function editProfileHandler() {
 				showToast(circle_xmark + 'Something went wrong', true);
 			}
 		});
-
 		const checkBox = document.getElementById('flexSwitchCheckDefault');
 		checkBox.addEventListener('change', (event) => {
 			const passwordFields = document.querySelectorAll('.passwordField');
@@ -335,7 +311,7 @@ async function handleLoginSubmit(event) {
 		else {
 			let msg = 'Login error';
 			if (response.status === 404)
-				msg = 'User not found / Password not correct'
+				msg = 'Invalid user data'
 			showToast(circle_xmark + msg, true);
 		}
 		}
