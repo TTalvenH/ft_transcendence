@@ -87,7 +87,6 @@ def createUser(request):
 	if serializer.is_valid():
 		user = serializer.save()
 		two_factor_method = user.two_factor_method
-		# print('method is', two_factor_method)
 		otp_data = {}
 		qr_html = None
 
@@ -192,9 +191,7 @@ def loginUser(request):
 	user.update_last_active()
 	if user.two_factor_method == 'None':
 		token = create_jwt_pair_for_user(user)
-		# print('token created')
 		response_data.update({'tokens': token})
-	# print(response_data)
 
 	return Response(response_data, status=status.HTTP_200_OK)
 
@@ -306,7 +303,6 @@ def otpSetupView(request):
 		hashed_otp_code = hash_otp_code(otp_code)
 		user.email_otp_code = hashed_otp_code
 		user.save()
-		# print('hello')
 		send_mail(
 				'Your OTP Code',
 				f'Your OTP code is {otp_code}',
