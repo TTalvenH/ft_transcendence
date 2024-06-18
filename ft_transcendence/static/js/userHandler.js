@@ -448,7 +448,7 @@ async function handleOtpVerificationSubmit(event, username) {
 		if (verifyResponse.ok) {
 			const userContainer = document.getElementById('userContainer');
 			userContainer.innerHTML = '';
-			showToast('Registration successful', false);
+			showToast(circle_check + 'Registration successful', false);
 			history.pushState({}, "", "/");
 			router.handleLocation();
 		} else {
