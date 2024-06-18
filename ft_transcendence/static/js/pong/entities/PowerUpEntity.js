@@ -27,6 +27,7 @@ export class PowerUpEntity {
 		this.object.scale.set(0, 0, 0);
 		this.pointLight.intensity = 0;
 		this.spawnTime = 300;
+		this.powerUpIsOn = true;
 
 		this.object.updateMatrixWorld();
 		this.material.needsUpdate = true;
@@ -39,6 +40,10 @@ export class PowerUpEntity {
 	}	
 
 	update(deltaTime) {
+		if (!this.powerUpIsOn){
+			this.isVisible = false;
+			return;
+		}
 		this.object.rotation.y += 0.03 * deltaTime;
 		if ( !this.isVisible && this.spawnTime <= 0) {
 			this.spawnTime = 400;

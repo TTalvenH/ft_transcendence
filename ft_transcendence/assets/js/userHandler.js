@@ -41,7 +41,6 @@ async function editProfileHandler() {
 			}
 		});
 		const updateProfileForm = document.getElementById('updateProfileForm');
-		
 		updateProfileForm.addEventListener('submit', async (event) => {
 			event.preventDefault();
 			try {
@@ -104,7 +103,6 @@ async function editProfileHandler() {
 				showToast(circle_xmark + 'Something went wrong', true);
 			}
 		});
-
 		const checkBox = document.getElementById('flexSwitchCheckDefault');
 		checkBox.addEventListener('change', (event) => {
 			const passwordFields = document.querySelectorAll('.passwordField');
@@ -173,14 +171,14 @@ async function handleOtpVerificationSubmitFromProfile(event, username) {
 
 async function profileHandler() {
 	const userData = currentUser.getUser();
+	if (userData === null) {
+		history.pushState({}, "", "/");
+		router.handleLocation();
+		return;
+	}
 	const urlParams = new URLSearchParams(window.location.search);
 	let username = urlParams.get('username');
 	if (!username) {
-		if (!userData) {
-			history.pushState({}, "", "/");
-			router.handleLocation();
-			return;
-		}
 		username = userData.username;
 	} else if (username === userData.username) {
 		history.pushState({}, "", "/profile");

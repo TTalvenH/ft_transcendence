@@ -1,6 +1,5 @@
 import * as THREE from 'three'
 import { initEventListener } from './Init/initEventListener.js'
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { PlayerEntity } from './entities/PlayerEntity.js';
 import { PlaneEntity } from './entities/PlaneEntity.js';
 import { NeonBoxEntity } from './entities/NeonBoxEntity.js';

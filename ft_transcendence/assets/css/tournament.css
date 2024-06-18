@@ -21,6 +21,9 @@
 }
 
 .players h2 {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 	text-align: center;
 	color: #fff;
 	margin: 40px

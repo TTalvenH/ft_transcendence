@@ -4,11 +4,18 @@ from django.utils import timezone
 from django.dispatch import receiver
 from django.db.models.signals import pre_save, post_delete
 from django.core.files.storage import default_storage
+from django.core.validators import MinLengthValidator, MaxLengthValidator
 
 # Creating our own user class
 class CustomUser(AbstractUser):
-	display_name = models.CharField(max_length=50, blank=True)
-	# match_history = models.ManyToManyField('PongMatch', blank=True)
+	username = models.CharField(
+        max_length=15,
+        validators=[MinLengthValidator(2), MaxLengthValidator(15)],
+        unique=True,
+        error_messages={
+            'unique': "A user with that username already exists.",
+        },
+    )
 	friends = models.ManyToManyField('CustomUser', blank=True)
 	image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
 	two_factor_method = models.CharField(max_length=8, null=True, blank=True, choices=(

@@ -46,7 +46,6 @@ def update_profile_template(request):
 		'username': user.username,
 		'profile_image': user.image.url if user.image else 'static/images/plankton.jpg',
 		'email': user.email,
-		'display_name': user.display_name,
 		'two_factor_method': user.two_factor_method,
 		'email_verified': user.email_otp_verified,
 		'opt_verified': user.otp_verified
@@ -132,9 +131,9 @@ def createUser(request):
 
 	detail = {'detail': 'Invalid data'}
 	if serializer.errors.get('username'):
-		detail = {'detail': 'Username taken'}
+		detail = {'detail': 'Username taken or invalid username'}
 	elif serializer.errors.get('email'):
-		detail = {'detail': 'Email taken'}
+		detail = {'detail': 'Email taken or invalid email'}
 	return Response(detail, status=status.HTTP_400_BAD_REQUEST)
 
 def generate_email_otp():
