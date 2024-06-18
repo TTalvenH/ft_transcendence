@@ -171,14 +171,14 @@ async function handleOtpVerificationSubmitFromProfile(event, username) {
 
 async function profileHandler() {
 	const userData = currentUser.getUser();
+	if (userData === null) {
+		history.pushState({}, "", "/");
+		router.handleLocation();
+		return;
+	}
 	const urlParams = new URLSearchParams(window.location.search);
 	let username = urlParams.get('username');
 	if (!username) {
-		if (!userData) {
-			history.pushState({}, "", "/");
-			router.handleLocation();
-			return;
-		}
 		username = userData.username;
 	} else if (username === userData.username) {
 		history.pushState({}, "", "/profile");

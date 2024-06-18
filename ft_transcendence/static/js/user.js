@@ -19,6 +19,8 @@ class User {
 	}
 
 	getUser() {
+		if (!localStorage.getItem('currentUser'))
+			return null;
 		return JSON.parse(localStorage.getItem('currentUser'));
 	}
 

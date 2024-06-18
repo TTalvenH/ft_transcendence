@@ -55,6 +55,11 @@ function userButtonClick() {
 
 function one_v_oneStartButtonClick(mode) {
 	const userData = currentUser.getUser();
+	if (!userData) {
+		history.pushState({}, "", "/");
+		router.handleLocation();
+		return ;
+	}
 	currentUser.refreshToken();
 	if (mode === "guest") {
 		const ui = document.getElementById('ui');
@@ -118,6 +123,11 @@ function one_v_oneStartButtonClick(mode) {
 
 function one_v_oneHandler() {
 	const userData = currentUser.getUser();
+	if (!userData) {
+		history.pushState({}, "", "/");
+		router.handleLocation();
+		return ;
+	}
 	fetch("/pong/1v1.html", {
 		method: "GET",
 		headers: {
@@ -156,11 +166,14 @@ function one_v_oneHandler() {
 function controlsHandler() {
 	const userData = currentUser.getUser();
 	if (!userData) {
-		return;
+		history.pushState({}, "", "/");
+		router.handleLocation();
+		return ;
 	}
 	const userContainer = document.getElementById('userContainer');
 	userContainer.innerHTML = "";
 
+	
 	fetch("/pong/controls.html", {
 		method: "GET",
 		headers: {
@@ -176,6 +189,15 @@ function controlsHandler() {
 	.then(html => {
 		userContainer.insertAdjacentHTML('beforeend', html);
 		document.getElementById('cancel').addEventListener('click', () => cancelButtonClick("/match"));
+		const enable_powerup = document.getElementById('enable_powerup');
+		if (pong.entities['PowerUp1'].powerUpIsOn) {
+			enable_powerup.checked = true;
+		} else {
+			enable_powerup.checked = false;
+		}
+		enable_powerup.addEventListener('change', (event) => {
+			pong.entities['PowerUp1'].powerUpIsOn = event.target.checked;
+		});
 	})
 	.catch(error => {
 		showToast(circle_xmark + 'Something went wrong', true);
