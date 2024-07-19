@@ -71,7 +71,7 @@ docker-compose down
 ## Videos
 
 ### Registration and Login System
-[![Watch the video](https://img.youtube.com/vi/dWnPV6us0lA/0.jpg)](https://www.youtube.com/watch?v=dWnPV6us0lA&ab_channel=EetuKoljonen)
+[![Watch the video](https://img.youtube.com/vi/pwQD8CNfQL8/0.jpg)](https://www.youtube.com/watch?v=pwQD8CNfQL8&ab_channel=EetuKoljonen)
 ### Pong game
 [![Watch the video](https://img.youtube.com/vi/bScU6FsHiWQ/0.jpg)](https://www.youtube.com/watch?v=bScU6FsHiWQ&ab_channel=EetuKoljonen)
 ### Knockoff game
